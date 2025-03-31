@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from backend.chore_tracker.models import Group
+from chore_tracker.models import Group
 
 
 class RegisterUser(APIView):
