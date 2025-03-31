@@ -47,6 +47,7 @@ export default function LoginForm() {
       }
       catch (error){
         setErrorMessage("An error occurred, please try again")
+        console.log(error)
       }
   }
 
