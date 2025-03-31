@@ -5,6 +5,8 @@ from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from backend.chore_tracker.models import Group
+
 
 class RegisterUser(APIView):
     """ User Registration """
@@ -63,3 +65,30 @@ class LoginView(APIView):
             return response
         else:
             return Response({'error': 'Invalid credentials'}, status=401)
+
+
+class CreateGroup(APIView):
+    """ Create a Group """
+
+    def post(self, request):
+        name = request.data.get('name')
+        status = request.data.get('status')
+        expiration = request.data.get('expiration')
+        timezone = request.data.get('timezone')
+        creator = request.user
+
+        try:
+            group = Group.objects.create(
+                name=name,
+                status=status,
+                expiration=expiration,
+                timezone=timezone,
+                creator=creator
+            )
+
+            group.members.add(creator)
+            return Response({'message': 'Group created successfully'}, status=201)
+        except ValidationError as e:
+            return Response({'error': str(e)}, status=400)
+        except Exception as e:
+            return Response({'error': 'Failed to create group: ' + str(e)}, status=500)

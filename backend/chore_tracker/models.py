@@ -5,7 +5,7 @@ class User(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=40)
     username = models.CharField(max_length=40)
-    password = models.CharField(max_length=162)  # Consider using Django's auth system
+    password = models.CharField(max_length=162)
     email = models.EmailField(max_length=60)
     photo_url = models.CharField(max_length=60, default="None")
 
@@ -21,9 +21,7 @@ class Group(models.Model):
     timezone = models.CharField(max_length=30)
 
     # Relationships
-    creator = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="owned_groups"
-    )
+    creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name="owned_groups")
     members = models.ManyToManyField(User, related_name="joined_groups")
 
     def __str__(self):
