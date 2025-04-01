@@ -9,6 +9,13 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from chore_tracker.models import Group
 
 
+class IndexView(APIView):
+    """ Index View """
+
+    def get(self, request):
+        return JsonResponse({'message': 'Welcome to Chore Tracker'})
+
+
 class RegisterUser(APIView):
     """ User Registration """
 
