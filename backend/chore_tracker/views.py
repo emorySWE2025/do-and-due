@@ -5,7 +5,6 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
-
 from chore_tracker.models import Group
 
 
@@ -101,3 +100,28 @@ class CreateGroup(APIView):
             return JsonResponse({'error': str(e)}, status=400)
         except Exception as e:
             return JsonResponse({'error': 'Failed to create group: ' + str(e)}, status=500)
+
+
+class InviteUserToGroup(APIView):
+    """ Invite a User to a Group """
+
+    def post(self, request):
+        group_id = request.data.get('group_id')
+        username = request.data.get('username')
+
+        try:
+            group = Group.objects.get(id=group_id)
+            user = User.objects.get(username=username)
+
+            if user in group.members.all():
+                return JsonResponse({'error': 'User is already a member of the group'}, status=400)
+
+            group.members.add(user)
+
+            return JsonResponse({'message': 'User invited successfully'}, status=200)
+        except Group.DoesNotExist:
+            return JsonResponse({'error': 'Group not found'}, status=404)
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': 'Failed to invite user: ' + str(e)}, status=500)
