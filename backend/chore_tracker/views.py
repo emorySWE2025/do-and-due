@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.contrib.auth import login
+from django.http import JsonResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
@@ -87,8 +88,9 @@ class CreateGroup(APIView):
             )
 
             group.members.add(creator)
-            return Response({'message': 'Group created successfully'}, status=201)
+
+            return JsonResponse({'message': 'Group created successfully'}, status=201)
         except ValidationError as e:
-            return Response({'error': str(e)}, status=400)
+            return JsonResponse({'error': str(e)}, status=400)
         except Exception as e:
-            return Response({'error': 'Failed to create group: ' + str(e)}, status=500)
+            return JsonResponse({'error': 'Failed to create group: ' + str(e)}, status=500)
