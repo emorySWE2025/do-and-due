@@ -6,11 +6,23 @@ import { GroupDisplayData, UserDisplayData } from "@/schema";
 import dayjs, { Dayjs } from "dayjs";
 import GroupSelector from "@/components/GroupSelector";
 import { useState } from "react";
+import { AnimatePresence } from "motion/react";
+import Form from "next/form";
+import CreateGroupFrame from "./CreateGroupFrame";
 
 export default function HomeFrame({ userData }: { userData: UserDisplayData }) {
+	// this group object will be used to indicate when the user wants to create a new group
+	const createNewGroupPlaceholder: GroupDisplayData = {
+		id: -1,
+		name: "new group",
+		events: [],
+	};
+
 	// defaults to null if the user is not in any groups, otherwise defaults to the first
-	const [currentGroup, setCurrentGroup] = useState<GroupDisplayData | null>(
-		userData.groups.length > 0 ? userData.groups[0] : null,
+	const [currentGroup, setCurrentGroup] = useState<GroupDisplayData>(
+		userData.groups.length > 0
+			? userData.groups[0]
+			: createNewGroupPlaceholder,
 	);
 	// current date
 	const currentDate: Dayjs = dayjs();
@@ -21,23 +33,17 @@ export default function HomeFrame({ userData }: { userData: UserDisplayData }) {
 	// date targeted on the calendar and shown on the todo list
 	const [targetDate, setTargetDate] = useState<Dayjs>(currentDate);
 
-	const groupArray: GroupDisplayData[] = [
-		{
-			id: -1,
-			name: "new group",
-			events: [],
-		},
-	];
-
 	const homeContents =
-		currentGroup !== null ? (
+		currentGroup.id !== -1 ? (
 			<div className="flex h-full w-full flex-row flex-nowrap gap-12 p-10">
 				<ToDoFrame
+					key={`${currentGroup.id}-todos`}
 					groupData={currentGroup}
 					targetDate={targetDate}
 					setTargetDate={setTargetDate}
 				/>
 				<CalendarFrame
+					key={`${currentGroup.id}-calendar`}
 					groupData={currentGroup}
 					currentDate={currentDate}
 					displayDate={displayDate}
@@ -47,17 +53,17 @@ export default function HomeFrame({ userData }: { userData: UserDisplayData }) {
 				/>
 			</div>
 		) : (
-			<div className="">Please select a group</div>
+			<CreateGroupFrame key="create-group-frame" />
 		);
 
 	return (
 		<div className="m-auto h-max w-full max-w-5xl">
 			<GroupSelector
-				groups={groupArray.concat(userData.groups)}
+				groups={[createNewGroupPlaceholder].concat(userData.groups)}
 				setGroupCallback={setCurrentGroup}
 				currentGroupId={currentGroup?.id}
 			/>
-			{homeContents}
+			<AnimatePresence>{homeContents}</AnimatePresence>
 		</div>
 	);
 }
