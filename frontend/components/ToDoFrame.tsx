@@ -2,7 +2,7 @@
 
 import { EventDisplayData, GroupDisplayData } from "@/schema";
 import dayjs, { Dayjs } from "dayjs";
-import { useState } from "react";
+import { JSX, useState } from "react";
 
 interface ToDo {
 	label: string;
@@ -54,6 +54,16 @@ export default function ToDoFrame({
 		groupData.events,
 		targetDate,
 	);
+	const eventDisplay: JSX.Element | JSX.Element[] =
+		relevantEvents.length === 0 ? (
+			<div className="text-center text-sm text-gray-400">
+				nothing scheduled!
+			</div>
+		) : (
+			relevantEvents.map((event: EventDisplayData, idx: number) => (
+				<EventItem key={idx} event={event} />
+			))
+		);
 
 	return (
 		<div className="h-max w-1/2 rounded-lg border-[1px] border-gray-300 p-4 shadow-sm">
@@ -103,10 +113,9 @@ export default function ToDoFrame({
 					</svg>
 				</button>
 			</div>
+
 			<div className="flex flex-col flex-nowrap gap-2 p-6">
-				{relevantEvents.map((event: EventDisplayData, idx: number) => (
-					<EventItem key={idx} event={event} />
-				))}
+				{eventDisplay}
 			</div>
 		</div>
 	);
