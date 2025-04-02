@@ -77,7 +77,7 @@ function GroupSelectorButton({
 	if (isSelected) {
 		return (
 			<div
-				className="cursor-pointer rounded bg-purple-100 p-2 text-sm hover:bg-purple-200"
+				className="cursor-pointer rounded bg-purple-100 pt-2 pr-4 pb-2 pl-4 text-sm hover:bg-purple-200"
 				onClick={handleClick}
 			>
 				{group.name}
@@ -86,7 +86,7 @@ function GroupSelectorButton({
 	} else {
 		return (
 			<div
-				className="cursor-pointer rounded p-2 text-sm hover:bg-gray-50"
+				className="cursor-pointer rounded pt-2 pr-4 pb-2 pl-4 text-sm hover:bg-gray-50"
 				onClick={handleClick}
 			>
 				{group.name}
