@@ -21,6 +21,14 @@ export default function HomeFrame({ userData }: { userData: UserDisplayData }) {
 	// date targeted on the calendar and shown on the todo list
 	const [targetDate, setTargetDate] = useState<Dayjs>(currentDate);
 
+	const groupArray: GroupDisplayData[] = [
+		{
+			id: -1,
+			name: "new group",
+			events: [],
+		},
+	];
+
 	const homeContents =
 		currentGroup !== null ? (
 			<div className="flex h-full w-full flex-row flex-nowrap gap-12 p-10">
@@ -45,7 +53,7 @@ export default function HomeFrame({ userData }: { userData: UserDisplayData }) {
 	return (
 		<div className="m-auto h-max w-full max-w-5xl">
 			<GroupSelector
-				groups={userData.groups}
+				groups={groupArray.concat(userData.groups)}
 				setGroupCallback={setCurrentGroup}
 				currentGroupId={currentGroup?.id}
 			/>

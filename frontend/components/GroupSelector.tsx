@@ -18,8 +18,6 @@ function GroupButton({
 	snapIndex: number;
 	snapCallback: CallableFunction;
 	children: JSX.Element[] | JSX.Element | null | string;
-	// goToSnapItem: CallableFunction;
-	// lastSnapItem: React.RefObject<HTMLDivElement | null>;
 }) {
 	const handleClick = () => {
 		snapCallback(snapIndex);
@@ -47,12 +45,6 @@ export default function GroupSelector({
 	currentGroupId: number | undefined;
 	setGroupCallback: CallableFunction;
 }) {
-	const newGroupObject: GroupDisplayData = {
-		id: -1,
-		name: "new group",
-		events: [],
-	};
-
 	const snapList = useRef<HTMLDivElement>(null);
 	const lastSnapItem = useRef<HTMLDivElement>(null);
 	const goToSnapItem = useScroll({ ref: snapList });
@@ -78,47 +70,54 @@ export default function GroupSelector({
 				disableScroll={true}
 				className="snap-container flex flex-row items-center bg-clip-border"
 			>
-				<SnapItem className="snap-item" snapAlign="center" key={0}>
-					<GroupButton
-						group={newGroupObject}
-						currentGroupId={currentGroupId}
-						setGroupCallback={setGroupCallback}
-						snapIndex={0}
-						snapCallback={snapToIndex}
-					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							strokeWidth="2"
-							strokeLinecap="round"
-							strokeLinejoin="round"
-							className="h-6 w-6 stroke-gray-500"
+				{groups.map((group, index) =>
+					group.id === -1 ? (
+						<SnapItem
+							className="snap-item"
+							snapAlign="center"
+							key={0}
 						>
-							<path d="M5 12h14" />
-							<path d="M12 5v14" />
-						</svg>
-						<div>Create group</div>
-					</GroupButton>
-				</SnapItem>
-				{groups.map((group, index) => (
-					<SnapItem
-						className="snap-item"
-						snapAlign="center"
-						key={index + 1}
-					>
-						<GroupButton
-							group={group}
-							currentGroupId={currentGroupId}
-							setGroupCallback={setGroupCallback}
-							snapIndex={index + 1}
-							snapCallback={snapToIndex}
+							<GroupButton
+								group={group}
+								currentGroupId={currentGroupId}
+								setGroupCallback={setGroupCallback}
+								snapIndex={0}
+								snapCallback={snapToIndex}
+							>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									strokeWidth="2"
+									strokeLinecap="round"
+									strokeLinejoin="round"
+									className="h-6 w-6 stroke-gray-500"
+								>
+									<path d="M5 12h14" />
+									<path d="M12 5v14" />
+								</svg>
+								<div>Create group</div>
+							</GroupButton>
+						</SnapItem>
+					) : (
+						<SnapItem
+							className="snap-item"
+							snapAlign="center"
+							key={index}
 						>
-							{group.name}
-						</GroupButton>
-					</SnapItem>
-				))}
+							<GroupButton
+								group={group}
+								currentGroupId={currentGroupId}
+								setGroupCallback={setGroupCallback}
+								snapIndex={index}
+								snapCallback={snapToIndex}
+							>
+								{group.name}
+							</GroupButton>
+						</SnapItem>
+					),
+				)}
 			</SnapList>
 		</div>
 	);
