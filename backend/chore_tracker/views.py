@@ -102,6 +102,33 @@ class CreateGroup(APIView):
             return JsonResponse({'error': 'Failed to create group: ' + str(e)}, status=500)
 
 
+class ViewGroup(APIView):
+    """ View a Group """
+
+    def get(self, request):
+        group_id = request.query_params.get('group_id')
+
+        try:
+            group = Group.objects.get(id=group_id)
+            members = group.members.all()
+
+            return JsonResponse({
+                'group': {
+                    'id': group.id,
+                    'name': group.name,
+                    'status': group.status,
+                    'expiration': group.expiration,
+                    'timezone': group.timezone,
+                    'creator': group.creator.username,
+                    'members': [member.username for member in members]
+                }
+            }, status=200)
+        except Group.DoesNotExist:
+            return JsonResponse({'error': 'Group not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': 'Failed to view group: ' + str(e)}, status=500)
+
+
 class InviteUserToGroup(APIView):
     """ Invite a User to a Group """
 

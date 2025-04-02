@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import RegisterUser, LoginView, CreateGroup, IndexView, InviteUserToGroup
+from .views import RegisterUser, LoginView, CreateGroup, IndexView, InviteUserToGroup, ViewGroup
 
 urlpatterns = [
     path('', IndexView.as_view(), name='index'),
@@ -7,4 +7,6 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('group/create/', CreateGroup.as_view(), name='create_group'),
     path('group/invite/', InviteUserToGroup.as_view(), name='invite_group'),
+    path('group/view/', ViewGroup.as_view(), name='view_group'),
+
 ]
