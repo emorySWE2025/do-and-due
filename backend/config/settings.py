@@ -47,7 +47,6 @@ REST_FRAMEWORK = {
     ),
 }
 
-]
 
 
 MIDDLEWARE = [

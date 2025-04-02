@@ -10,8 +10,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 import datetime
 import json
 from json import JSONDecodeError
-from .models import Event
-from backend.chore_tracker.models import Group
+from chore_tracker.models import Group, Event
 
 
 class RegisterUser(APIView):
