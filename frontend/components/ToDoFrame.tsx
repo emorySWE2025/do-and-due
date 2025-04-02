@@ -117,6 +117,31 @@ export default function ToDoFrame({
 			<div className="flex flex-col flex-nowrap gap-2 p-6">
 				{eventDisplay}
 			</div>
+			<NewItemButton />
+		</div>
+	);
+}
+
+function NewItemButton() {
+	const plusIcon: JSX.Element = (
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="inherit"
+			strokeWidth="2"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			className="h-6 w-6"
+		>
+			<path d="M5 12h14" />
+			<path d="M12 5v14" />
+		</svg>
+	);
+	return (
+		<div className="hover-text-purple-600 m-auto flex h-max w-max flex-row flex-nowrap items-center gap-2 rounded-lg border-[1px] border-gray-200 stroke-gray-500 pt-2 pr-4 pb-2 pl-4 text-sm text-gray-600 hover:bg-gray-50 hover:stroke-purple-400 hover:text-purple-500">
+			{plusIcon}
+			<div>Add event</div>
 		</div>
 	);
 }
