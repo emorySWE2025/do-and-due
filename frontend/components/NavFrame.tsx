@@ -36,7 +36,7 @@ function NavSearchFrame() {
 
 function NavSettingsFrame() {
 	return (
-		<Link href={"/profile/settings"}>
+		<Link href={"/user/profile/settings"}>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				width="24"
@@ -106,7 +106,7 @@ function NavNotificationsFrame({
 
 function NavProfileFrame() {
 	return (
-		<Link href={"/profile"}>
+		<Link href={"/user/profile"}>
 			<Image
 				src="/profile-placeholder.png"
 				alt="Profile"
