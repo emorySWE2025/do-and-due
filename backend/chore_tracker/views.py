@@ -1,11 +1,18 @@
 from django.contrib.auth.models import User
 from django.contrib.auth import login
+from django.http import JsonResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
-
 from chore_tracker.models import Group
+
+
+class IndexView(APIView):
+    """ Index View """
+
+    def get(self, request):
+        return JsonResponse({'message': 'Welcome to Chore Tracker'})
 
 
 class RegisterUser(APIView):
@@ -87,8 +94,61 @@ class CreateGroup(APIView):
             )
 
             group.members.add(creator)
-            return Response({'message': 'Group created successfully'}, status=201)
+
+            return JsonResponse({'message': 'Group created successfully'}, status=201)
         except ValidationError as e:
-            return Response({'error': str(e)}, status=400)
+            return JsonResponse({'error': str(e)}, status=400)
         except Exception as e:
-            return Response({'error': 'Failed to create group: ' + str(e)}, status=500)
+            return JsonResponse({'error': 'Failed to create group: ' + str(e)}, status=500)
+
+
+class ViewGroup(APIView):
+    """ View a Group """
+
+    def get(self, request):
+        group_id = request.query_params.get('group_id')
+
+        try:
+            group = Group.objects.get(id=group_id)
+            members = group.members.all()
+
+            return JsonResponse({
+                'group': {
+                    'id': group.id,
+                    'name': group.name,
+                    'status': group.status,
+                    'expiration': group.expiration,
+                    'timezone': group.timezone,
+                    'creator': group.creator.username,
+                    'members': [member.username for member in members]
+                }
+            }, status=200)
+        except Group.DoesNotExist:
+            return JsonResponse({'error': 'Group not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': 'Failed to view group: ' + str(e)}, status=500)
+
+
+class InviteUserToGroup(APIView):
+    """ Invite a User to a Group """
+
+    def post(self, request):
+        group_id = request.data.get('group_id')
+        username = request.data.get('username')
+
+        try:
+            group = Group.objects.get(id=group_id)
+            user = User.objects.get(username=username)
+
+            if user in group.members.all():
+                return JsonResponse({'error': 'User is already a member of the group'}, status=400)
+
+            group.members.add(user)
+
+            return JsonResponse({'message': 'User invited successfully'}, status=200)
+        except Group.DoesNotExist:
+            return JsonResponse({'error': 'Group not found'}, status=404)
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': 'Failed to invite user: ' + str(e)}, status=500)
