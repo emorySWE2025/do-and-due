@@ -19,7 +19,7 @@ export default function SignupFrame() {
 			<SignupForm />
 			<div className="text-center">
 				<Link
-					href="/login"
+					href="/user/login"
 					className="font-medium text-purple-600 hover:text-purple-500"
 				>
 					Already have an account? Log in
@@ -124,8 +124,8 @@ function SignupForm() {
 
 	return (
 		<form onSubmit={handleSubmit} className="space-y-6">
-			{errorMessage && (<Error message={errorMessage} onClose={dismissError} />
-				
+			{errorMessage && (
+				<Error message={errorMessage} onClose={dismissError} />
 			)}
 
 			<Input
