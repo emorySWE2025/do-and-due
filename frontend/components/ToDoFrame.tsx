@@ -1,8 +1,8 @@
 "use client";
 
-import { EventDisplayData, GroupDisplayData } from "@/schema";
+import { EventDisplayData, GroupDisplayData, DateStateData } from "@/schema";
 import dayjs, { Dayjs } from "dayjs";
-import { JSX, useState } from "react";
+import { JSX } from "react";
 
 interface ToDo {
 	label: string;
@@ -35,24 +35,32 @@ function filterEventsByDate(events: EventDisplayData[], targetDate: Dayjs) {
 
 export default function ToDoFrame({
 	groupData,
-	targetDate,
-	setTargetDate,
+	dateState,
+	dateCallback,
 }: {
 	groupData: GroupDisplayData;
-	targetDate: Dayjs;
-	setTargetDate: CallableFunction;
+	dateState: DateStateData;
+	dateCallback: CallableFunction;
 }) {
 	const handlePrevDay = () => {
-		setTargetDate(targetDate.subtract(1, "day"));
+		dateCallback({
+			current: dateState.current,
+			display: dateState.display,
+			target: dateState.target.subtract(1, "day"),
+		});
 	};
 
 	const handleNextDay = () => {
-		setTargetDate(targetDate.add(1, "day"));
+		dateCallback({
+			current: dateState.current,
+			display: dateState.display,
+			target: dateState.target.add(1, "day"),
+		});
 	};
 
 	const relevantEvents: EventDisplayData[] = filterEventsByDate(
 		groupData.events,
-		targetDate,
+		dateState.target,
 	);
 	const eventDisplay: JSX.Element | JSX.Element[] =
 		relevantEvents.length === 0 ? (
@@ -91,7 +99,7 @@ export default function ToDoFrame({
 					</svg>
 				</button>
 				<div className="w-full text-center text-sm leading-6 text-gray-600">
-					{targetDate.format("MMMM D, YYYY")}
+					{dateState.target.format("MMMM D, YYYY")}
 				</div>
 				<button
 					onClick={handleNextDay}

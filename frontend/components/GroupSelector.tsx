@@ -1,29 +1,26 @@
 "use client";
 
-import { GroupDisplayData } from "@/schema";
-import { JSX, useEffect, useRef } from "react";
+import { GroupDisplayData, DateStateData, GroupStateData } from "@/schema";
+import { JSX, useLayoutEffect, useRef } from "react";
 import { SnapList, SnapItem, useScroll } from "react-snaplist-carousel";
 
 function GroupButton({
 	group,
-	currentGroupId,
-	setGroupCallback,
+	currentGroupState,
+	groupUpdateHandler,
 	snapIndex,
-	snapCallback,
 	children,
 }: {
 	group: GroupDisplayData;
-	currentGroupId: number | undefined;
-	setGroupCallback: CallableFunction;
+	currentGroupState: GroupStateData;
+	groupUpdateHandler: CallableFunction;
 	snapIndex: number;
-	snapCallback: CallableFunction;
 	children: JSX.Element[] | JSX.Element | null | string;
 }) {
 	const handleClick = () => {
-		snapCallback(snapIndex);
-		setGroupCallback(group);
+		groupUpdateHandler(snapIndex, group);
 	};
-	const isSelected: boolean = group.id === currentGroupId;
+	const isSelected: boolean = group.id === currentGroupState.group.id;
 	return (
 		<div
 			className={`flex h-max w-max cursor-pointer flex-row flex-nowrap items-center gap-2 rounded pt-2 pr-4 pb-2 pl-4 text-sm hover:bg-gray-50 ${
@@ -38,25 +35,37 @@ function GroupButton({
 
 export default function GroupSelector({
 	groups,
-	currentGroupId,
-	setGroupCallback,
+	groupState,
+	groupCallback,
 }: {
 	groups: GroupDisplayData[];
-	currentGroupId: number | undefined;
-	setGroupCallback: CallableFunction;
+	groupState: GroupStateData;
+	groupCallback: CallableFunction;
 }) {
 	const snapList = useRef<HTMLDivElement>(null);
 	const lastSnapItem = useRef<HTMLDivElement>(null);
 	const goToSnapItem = useScroll({ ref: snapList });
 
-	const snapToIndex = (index: number) => {
-		goToSnapItem(index);
+	const groupUpdateHandler = (
+		newIndex: number,
+		newGroup: GroupDisplayData,
+	) => {
+		groupCallback({
+			direction: newIndex > groupState.index ? 1 : -1,
+			index: newIndex,
+			group: newGroup,
+		});
+
+		goToSnapItem(newIndex);
 		lastSnapItem.current?.focus();
 	};
 
-	useEffect(() => {
-		if (groups.length > 0) {
-			snapToIndex(1);
+	useLayoutEffect(() => {
+		const container = snapList.current;
+		if (container) {
+			// center the scroll position initially
+			container.scrollLeft =
+				(container.scrollWidth - container.clientWidth) / 2;
 		}
 	}, []);
 
@@ -75,14 +84,13 @@ export default function GroupSelector({
 						<SnapItem
 							className="snap-item"
 							snapAlign="center"
-							key={0}
+							key={index}
 						>
 							<GroupButton
 								group={group}
-								currentGroupId={currentGroupId}
-								setGroupCallback={setGroupCallback}
-								snapIndex={0}
-								snapCallback={snapToIndex}
+								currentGroupState={groupState}
+								groupUpdateHandler={groupUpdateHandler}
+								snapIndex={index}
 							>
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
@@ -108,10 +116,9 @@ export default function GroupSelector({
 						>
 							<GroupButton
 								group={group}
-								currentGroupId={currentGroupId}
-								setGroupCallback={setGroupCallback}
+								currentGroupState={groupState}
+								groupUpdateHandler={groupUpdateHandler}
 								snapIndex={index}
-								snapCallback={snapToIndex}
 							>
 								{group.name}
 							</GroupButton>

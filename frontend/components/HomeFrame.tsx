@@ -2,15 +2,73 @@
 
 import CalendarFrame from "@/components/CalendarFrame";
 import ToDoFrame from "@/components/ToDoFrame";
-import { GroupDisplayData, UserDisplayData } from "@/schema";
-import dayjs, { Dayjs } from "dayjs";
 import GroupSelector from "@/components/GroupSelector";
+import CreateGroupFrame from "@/components/CreateGroupFrame";
+import {
+	DateStateData,
+	GroupDisplayData,
+	GroupStateData,
+	UserDisplayData,
+} from "@/schema";
+import dayjs, { Dayjs } from "dayjs";
 import { useState } from "react";
-import { AnimatePresence } from "motion/react";
-import Form from "next/form";
-import CreateGroupFrame from "./CreateGroupFrame";
+import { AnimatePresence, motion } from "motion/react";
+
+const animationVariants = {
+	enter: (direction: number) => {
+		return {
+			zIndex: 0,
+			opacity: 0.0,
+			x: 150 * direction,
+		};
+	},
+	center: {
+		zIndex: 1,
+		opacity: 1,
+		x: 0,
+	},
+	exit: (direction: number) => {
+		return {
+			zIndex: 0,
+			opacity: 0.0,
+			x: -150 * direction,
+		};
+	},
+};
+
+function HomeFrameContents({
+	groupData,
+	dateState,
+	dateCallback,
+}: {
+	groupData: GroupDisplayData;
+	dateState: DateStateData;
+	dateCallback: CallableFunction;
+}) {
+	if (groupData.id === -1) {
+		return <CreateGroupFrame />;
+	} else {
+		return (
+			<div className="flex h-max w-full flex-row flex-nowrap gap-8 pt-8">
+				<ToDoFrame
+					groupData={groupData}
+					dateState={dateState}
+					dateCallback={dateCallback}
+				/>
+				<CalendarFrame
+					groupData={groupData}
+					dateState={dateState}
+					dateCallback={dateCallback}
+				/>
+			</div>
+		);
+	}
+}
 
 export default function HomeFrame({ userData }: { userData: UserDisplayData }) {
+	// query current date
+	const currentDate: Dayjs = dayjs();
+
 	// this group object will be used to indicate when the user wants to create a new group
 	const createNewGroupPlaceholder: GroupDisplayData = {
 		id: -1,
@@ -18,52 +76,55 @@ export default function HomeFrame({ userData }: { userData: UserDisplayData }) {
 		events: [],
 	};
 
-	// defaults to null if the user is not in any groups, otherwise defaults to the first
-	const [currentGroup, setCurrentGroup] = useState<GroupDisplayData>(
-		userData.groups.length > 0
-			? userData.groups[0]
-			: createNewGroupPlaceholder,
-	);
-	// current date
-	const currentDate: Dayjs = dayjs();
+	// define state objects
+	const [groupState, updateGroupState] = useState<GroupStateData>({
+		direction: 1,
+		index: 0,
+		group:
+			userData.groups.length > 0
+				? userData.groups[0]
+				: createNewGroupPlaceholder,
+	});
 
-	// date displayed on the calendar
-	const [displayDate, setDisplayDate] = useState<Dayjs>(currentDate);
-
-	// date targeted on the calendar and shown on the todo list
-	const [targetDate, setTargetDate] = useState<Dayjs>(currentDate);
-
-	const homeContents =
-		currentGroup.id !== -1 ? (
-			<div className="flex h-full w-full flex-row flex-nowrap gap-12 p-10">
-				<ToDoFrame
-					key={`${currentGroup.id}-todos`}
-					groupData={currentGroup}
-					targetDate={targetDate}
-					setTargetDate={setTargetDate}
-				/>
-				<CalendarFrame
-					key={`${currentGroup.id}-calendar`}
-					groupData={currentGroup}
-					currentDate={currentDate}
-					displayDate={displayDate}
-					setDisplayDate={setDisplayDate}
-					targetDate={targetDate}
-					setTargetDate={setTargetDate}
-				/>
-			</div>
-		) : (
-			<CreateGroupFrame key="create-group-frame" />
-		);
+	const [dateState, updateDateState] = useState<DateStateData>({
+		current: currentDate,
+		display: currentDate,
+		target: currentDate,
+	});
 
 	return (
 		<div className="m-auto h-max w-full max-w-5xl">
 			<GroupSelector
 				groups={[createNewGroupPlaceholder].concat(userData.groups)}
-				setGroupCallback={setCurrentGroup}
-				currentGroupId={currentGroup?.id}
+				groupState={groupState}
+				groupCallback={updateGroupState}
 			/>
-			<AnimatePresence>{homeContents}</AnimatePresence>
+			<AnimatePresence
+				initial={false}
+				custom={groupState.direction}
+				mode="wait"
+			>
+				<motion.div
+					custom={groupState.direction}
+					variants={animationVariants}
+					initial="enter"
+					animate="center"
+					exit="exit"
+					transition={{
+						x: {
+							duration: 0.2,
+						},
+						opacity: { duration: 0.15 },
+					}}
+					key={groupState.index}
+				>
+					<HomeFrameContents
+						groupData={groupState.group}
+						dateState={dateState}
+						dateCallback={updateDateState}
+					/>
+				</motion.div>
+			</AnimatePresence>
 		</div>
 	);
 }
