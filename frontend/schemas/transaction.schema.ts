@@ -1,30 +1,50 @@
 import { User, Group, Event } from "./db.schema";
 
-export interface AddUserRequest {
+// register user ------------------------------------------------------------------------
+export interface RegisterUserRequest {
+	username: string;
+	email: string;
+	password: string;
+}
+
+export interface RegisterUserResponse {
+	ok: boolean;
+	message: string;
+}
+// --------------------------------------------------------------------------------------
+
+// login user ---------------------------------------------------------------------------
+export interface LoginUserRequest {
+	username: string;
+	password: string;
+}
+export interface LoginUserResponse {
+	ok: boolean;
+	message: string;
+}
+// --------------------------------------------------------------------------------------
+
+// create group -------------------------------------------------------------------------
+export interface CreateGroupRequest {
 	// fe > be
-	// params necessary to add a user in the backend
+	// params necessary to create a group in the backend
+	groupName: string;
+	groupStatus: string;
+	groupExpiration: string | null;
+	groupTimezone: string;
+	// groupCreator: User; // not sure if we should send an actual object here or just a username/id?
+	groupCreatorId: number;
 }
 
-export interface AddUserResponse {
+export interface CreateGroupResponse {
 	// be > fe
-	// params we can expect to receive from the backend when trying to add a user
+	// params we can expect to receive from the backend when trying to create a group
 	message: string;
+	status: number;
 }
+// --------------------------------------------------------------------------------------
 
-export interface AddEventRequest {
-	name: string;
-	date: string; // Format: "%Y-%m-%d %H:%M:%S" Lmk if you want to change this -Lance
-
-	memberIds: number[];
-
-	groupId: number;
-}
-
-export interface AddEventResponse {
-	success: boolean;
-	message: string;
-}
-
+// view detailed group data -------------------------------------------------------------
 export interface ViewGroupRequest {
 	// fe > be
 	// params necessary to view a group in the backend
@@ -46,25 +66,10 @@ export interface ViewGroupResponse {
 	groupEvents: Event[]; // [Array of Event items (eventId, eventName)]
 	// groupCosts: Cost[]; // [Array of Cost items (costId, costName, costAmount)]
 }
+// --------------------------------------------------------------------------------------
 
-export interface CreateGroupRequest {
-	// fe > be
-	// params necessary to create a group in the backend
-	groupName: string;
-	groupStatus: string;
-	groupExpiration: string | null;
-	groupTimezone: string;
-	// groupCreator: User; // not sure if we should send an actual object here or just a username/id?
-	groupCreatorId: number;
-}
-
-export interface CreateGroupResponse {
-	// be > fe
-	// params we can expect to receive from the backend when trying to create a group
-	message: string;
-	status: number;
-}
-
+// bea: maybe we can replace the transaction below with just an edit/update group call so we can use it for more?
+// add user to group --------------------------------------------------------------------
 export interface AddUsersToGroupRequest {
 	// fe > be
 	// params necessary to add users to a group in the backend
@@ -81,3 +86,20 @@ export interface AddUsersToGroupResponse {
 	// bea: we can define it like this and pass usernames as arrays of strings
 	status: number;
 }
+// --------------------------------------------------------------------------------------
+
+// create event -------------------------------------------------------------------------
+export interface AddEventRequest {
+	name: string;
+	date: string; // Format: "%Y-%m-%d %H:%M:%S" Lmk if you want to change this -Lance
+
+	memberIds: number[];
+
+	groupId: number;
+}
+
+export interface AddEventResponse {
+	success: boolean;
+	message: string;
+}
+// --------------------------------------------------------------------------------------

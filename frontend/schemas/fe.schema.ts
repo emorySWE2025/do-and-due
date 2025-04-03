@@ -1,5 +1,6 @@
 import { Dayjs } from "dayjs";
 
+// page state interfaces ----------------------------------------------------------------
 // interface used to handle date state data in the home page
 export interface DateStateData {
 	current: Dayjs;
@@ -13,7 +14,9 @@ export interface GroupStateData {
 	index: number;
 	group: GroupDisplayData;
 }
+// --------------------------------------------------------------------------------------
 
+// display interfaces -------------------------------------------------------------------
 // expected format for general event display data passed to frontend pages
 export interface EventDisplayData {
 	name: string;
@@ -35,3 +38,21 @@ export interface UserDisplayData {
 	photoPath: string;
 	groups: GroupDisplayData[];
 }
+// --------------------------------------------------------------------------------------
+
+// form data interfaces -----------------------------------------------------------------
+export interface RegisterUserFormData {
+	username: string;
+	email: string;
+	password: string;
+	confirmPassword: string;
+}
+
+export interface LoginUserFormData {
+	username: string;
+	email: string;
+	password: string;
+	confirmPassword: string;
+}
+
+// --------------------------------------------------------------------------------------

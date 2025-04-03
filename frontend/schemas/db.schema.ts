@@ -11,9 +11,6 @@ export interface User {
 	joinedGroups: Group[];
 
 	events: Event[];
-
-	// costs: Cost[];
-	// receipts: Cost[];
 }
 
 export interface Group {
