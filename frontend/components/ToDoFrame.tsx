@@ -1,8 +1,8 @@
 "use client";
 
-import { EventDisplayData, GroupDisplayData } from "@/schema";
+import { EventDisplayData, GroupDisplayData, DateStateData } from "@/schema";
 import dayjs, { Dayjs } from "dayjs";
-import { useState } from "react";
+import { JSX } from "react";
 
 interface ToDo {
 	label: string;
@@ -35,25 +35,43 @@ function filterEventsByDate(events: EventDisplayData[], targetDate: Dayjs) {
 
 export default function ToDoFrame({
 	groupData,
-	targetDate,
-	setTargetDate,
+	dateState,
+	dateCallback,
 }: {
 	groupData: GroupDisplayData;
-	targetDate: Dayjs;
-	setTargetDate: CallableFunction;
+	dateState: DateStateData;
+	dateCallback: CallableFunction;
 }) {
 	const handlePrevDay = () => {
-		setTargetDate(targetDate.subtract(1, "day"));
+		dateCallback({
+			current: dateState.current,
+			display: dateState.display,
+			target: dateState.target.subtract(1, "day"),
+		});
 	};
 
 	const handleNextDay = () => {
-		setTargetDate(targetDate.add(1, "day"));
+		dateCallback({
+			current: dateState.current,
+			display: dateState.display,
+			target: dateState.target.add(1, "day"),
+		});
 	};
 
 	const relevantEvents: EventDisplayData[] = filterEventsByDate(
 		groupData.events,
-		targetDate,
+		dateState.target,
 	);
+	const eventDisplay: JSX.Element | JSX.Element[] =
+		relevantEvents.length === 0 ? (
+			<div className="text-center text-sm text-gray-400">
+				nothing scheduled!
+			</div>
+		) : (
+			relevantEvents.map((event: EventDisplayData, idx: number) => (
+				<EventItem key={idx} event={event} />
+			))
+		);
 
 	return (
 		<div className="h-max w-1/2 rounded-lg border-[1px] border-gray-300 p-4 shadow-sm">
@@ -81,7 +99,7 @@ export default function ToDoFrame({
 					</svg>
 				</button>
 				<div className="w-full text-center text-sm leading-6 text-gray-600">
-					{targetDate.format("MMMM D, YYYY")}
+					{dateState.target.format("MMMM D, YYYY")}
 				</div>
 				<button
 					onClick={handleNextDay}
@@ -103,11 +121,35 @@ export default function ToDoFrame({
 					</svg>
 				</button>
 			</div>
+
 			<div className="flex flex-col flex-nowrap gap-2 p-6">
-				{relevantEvents.map((event: EventDisplayData, idx: number) => (
-					<EventItem key={idx} event={event} />
-				))}
+				{eventDisplay}
 			</div>
+			<NewItemButton />
+		</div>
+	);
+}
+
+function NewItemButton() {
+	const plusIcon: JSX.Element = (
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="inherit"
+			strokeWidth="2"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			className="h-6 w-6"
+		>
+			<path d="M5 12h14" />
+			<path d="M12 5v14" />
+		</svg>
+	);
+	return (
+		<div className="hover-text-purple-600 m-auto flex h-max w-max flex-row flex-nowrap items-center gap-2 rounded-lg border-[1px] border-gray-200 stroke-gray-500 pt-2 pr-4 pb-2 pl-4 text-sm text-gray-600 hover:bg-gray-50 hover:stroke-purple-400 hover:text-purple-500">
+			{plusIcon}
+			<div>Add event</div>
 		</div>
 	);
 }

@@ -19,6 +19,19 @@
 	}
 } */
 
+.snap-container .snap-item {
+	margin-left: 1rem;
+	margin-right: 1rem;
+}
+
+.snap-container .snap-item:first-child {
+	margin-left: 50%;
+}
+
+.snap-container .snap-item:last-child {
+	margin-right: 50%;
+}
+
 body {
 	background: var(--background);
 	color: var(--foreground);
