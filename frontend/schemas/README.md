@@ -1,4 +1,10 @@
-# System Transaction/Schema Planning Notes
+# Schemas
+
+- `db.schema.ts`: This file contains interfaces for the database models themselves
+- `fe.schema.ts`: This file contains interfaces only used to display/track data on the frontend
+- `transaction.schema.ts`: This file contains interfaces describing the FE/BE expectations for transactions
+
+## System Transaction/Schema Planning Notes
 
 ```
 // api routes
