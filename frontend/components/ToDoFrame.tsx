@@ -1,6 +1,10 @@
 "use client";
 
-import { EventDisplayData, GroupDisplayData, DateStateData } from "@/schema";
+import {
+	EventDisplayData,
+	GroupDisplayData,
+	DateStateData,
+} from "@/schemas/schema";
 import dayjs, { Dayjs } from "dayjs";
 import { JSX } from "react";
 

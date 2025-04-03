@@ -1,6 +1,10 @@
 "use client";
 
-import { GroupDisplayData, DateStateData, GroupStateData } from "@/schema";
+import {
+	GroupDisplayData,
+	DateStateData,
+	GroupStateData,
+} from "@/schemas/schema";
 import { JSX, useLayoutEffect, useRef } from "react";
 import { SnapList, SnapItem, useScroll } from "react-snaplist-carousel";
 

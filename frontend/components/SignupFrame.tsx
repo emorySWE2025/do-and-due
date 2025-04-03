@@ -4,14 +4,12 @@ import Input from "@/components/Input";
 import Button from "@/components/Button";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import {
-	registerUserAction,
-	RegisterUserResponse,
-} from "@/actions/users.server";
+import { registerUserAction } from "@/actions/users.server";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerUserSchema } from "@/actions/zod";
 import ErrorText from "@/components/ErrorText";
+import { RegisterUserResponse } from "@/schemas/transaction.schema";
 
 export default function SignupFrame() {
 	return (

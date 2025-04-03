@@ -1,5 +1,5 @@
 import { createGroupAction } from "@/actions/groups.server";
-import { PageState } from "@/schema";
+import { PageState } from "@/schemas/schema";
 import Form from "next/form";
 import { useActionState } from "react";
 import Input from "@/components/Input";

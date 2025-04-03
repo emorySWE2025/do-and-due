@@ -1,24 +1,16 @@
 "use server";
 
-import { PageState } from "@/schema";
 import { SafeParseReturnType } from "zod";
 
 import { cookies } from "next/headers";
 import { cache } from "react";
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { registerUserSchema } from "@/actions/zod";
-
-interface RegisterUserFormData {
-	username: string;
-	email: string;
-	password: string;
-	confirmPassword: string;
-}
-
-export interface RegisterUserResponse {
-	ok: boolean;
-	message: string;
-}
+import { RegisterUserFormData, LoginUserFormData } from "@/schemas/fe.schema";
+import {
+	RegisterUserResponse,
+	LoginUserResponse,
+} from "@/schemas/transaction.schema";
 
 export async function registerUserAction(
 	formData: RegisterUserFormData,
@@ -54,18 +46,6 @@ export async function registerUserAction(
 			message: "A frontend error occurred during registration!",
 		};
 	}
-}
-
-interface LoginUserFormData {
-	username: string;
-	email: string;
-	password: string;
-	confirmPassword: string;
-}
-
-export interface LoginUserResponse {
-	ok: boolean;
-	message: string;
 }
 
 export async function loginUserAction(

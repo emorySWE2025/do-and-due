@@ -7,8 +7,9 @@ import { redirect } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import ErrorText from "@/components/ErrorText";
-import { loginUserAction, LoginUserResponse } from "@/actions/users.server";
+import { loginUserAction } from "@/actions/users.server";
 import { loginUserSchema } from "@/actions/zod";
+import { LoginUserResponse } from "@/schemas/transaction.schema";
 
 export default function LoginFrame() {
 	return (
