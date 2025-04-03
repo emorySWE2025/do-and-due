@@ -6,20 +6,6 @@ import {
 	CreateGroupClientResponse,
 } from "@/schemas/transaction.schema";
 
-// this file will contain server actions for the frontend
-// export async function createGroupAction() {}
-
-// export interface CreateGroupRequest {
-// 	// fe > be
-// 	// params necessary to create a group in the backend
-// 	groupName: string;
-// 	groupStatus: string;
-// 	groupExpiration: string | null;
-// 	groupTimezone: string;
-// 	// groupCreator: User; // not sure if we should send an actual object here or just a username/id?
-// 	groupCreatorId: number;
-// }
-
 export async function createGroupAction(
 	formData: CreateGroupFormData,
 	creatorId: number,
