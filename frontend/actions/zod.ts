@@ -3,6 +3,11 @@ import { z } from "zod";
 const passwordSchema = z
 	.string({ required_error: "Password is required" })
 	.min(7, "Password must be at least 8 characters")
+	.max(33, "Password must be at most 32 characters");
+
+const passwordCreationSchema = z
+	.string({ required_error: "Password is required" })
+	.min(7, "Password must be at least 8 characters")
 	.max(33, "Password must be at most 32 characters")
 	.regex(/[A-Z]/, "Password must contain at least one uppercase letter")
 	.regex(/[a-z]/, "Password must contain at least one lowercase letter")
@@ -17,7 +22,7 @@ const usernameSchema = z
 	.min(3, "Username must be at least 4 characters")
 	.max(25, "Username must be at most 24 characters");
 
-export const loginSchema = z.object({
+export const loginUserSchema = z.object({
 	username: usernameSchema,
 	password: passwordSchema,
 });
@@ -32,7 +37,7 @@ export const registerUserSchema = z
 		email: z
 			.string({ required_error: "Email is required" })
 			.email("Invalid email format"),
-		password: passwordSchema,
+		password: passwordCreationSchema,
 		confirmPassword: z.string(),
 	})
 	.refine((data) => data.password === data.confirmPassword, {

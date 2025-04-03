@@ -56,6 +56,54 @@ export async function registerUserAction(
 	}
 }
 
+interface LoginUserFormData {
+	username: string;
+	email: string;
+	password: string;
+	confirmPassword: string;
+}
+
+export interface LoginUserResponse {
+	ok: boolean;
+	message: string;
+}
+
+export async function loginUserAction(
+	formData: LoginUserFormData,
+): Promise<LoginUserResponse> {
+	try {
+		const res = await fetch("http://127.0.0.1:8000/api/login/", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				username: formData.username,
+				password: formData.password,
+			}),
+			credentials: "include",
+		});
+
+		if (res.ok) {
+			console.log("login ok");
+			return { ok: true, message: "" };
+		} else {
+			console.log("login backend error");
+			// if an error occurred on the backend
+			return {
+				ok: false,
+				message: "A backend error occurred during login!",
+			};
+		}
+		// if an error occurred on the frontend
+	} catch (error) {
+		// if an error occurred on the backend
+		console.log("login frontend error");
+		return {
+			ok: false,
+			message: "A frontend error occurred during login!",
+		};
+	}
+}
+
 // export const getCurrentSession = cache(
 // 	// cache the results of the session cookie retrieval so we don't need to
 // 	// repeatedly query the database
