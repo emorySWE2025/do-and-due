@@ -114,6 +114,8 @@ class ViewGroup(APIView):
         try:
             group = Group.objects.get(id=group_id)
             members = group.members.all()
+            events = group.events.all()
+            costs = group.costs.all()
 
             return JsonResponse({
                 'group': {
@@ -123,7 +125,9 @@ class ViewGroup(APIView):
                     'expiration': group.expiration,
                     'timezone': group.timezone,
                     'creator': group.creator.username,
-                    'members': [member.username for member in members]
+                    'members': [member.username for member in members],
+                    'events': [{'id': event.id, 'name': event.name} for event in events],
+                    'costs': [{'id': cost.id, 'name': cost.name, 'amount': cost.amount} for cost in costs],
                 }
             }, status=200)
         except Group.DoesNotExist:
