@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Input from "@/components/Input";
 import Button from "@/components/Button";
+import Error from "@/components/Error";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -23,7 +24,7 @@ export default function LoginFrame() {
 					href="/signup"
 					className="font-medium text-purple-600 hover:text-purple-500"
 				>
-					Don't have an account? Sign up
+					Do not have an account? Sign up
 				</Link>
 			</div>
 		</div>
@@ -36,8 +37,10 @@ function LoginForm() {
 		password: "",
 		rememberMe: false,
 	});
-	const [, setErrorMessage] = useState<string | null>(null);
+	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const router = useRouter();
+
+	const dismissError = () => setErrorMessage("");
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, type, value, checked } = e.target;
 		setFormData((prev) => ({
@@ -61,22 +64,24 @@ function LoginForm() {
 				credentials: "include",
 			});
 			if (response.ok) {
+				console.log("Login successful");
 				router.push("/");
-				console.log("Login submitted", formData);
 			} else {
 				const errorData = await response.json();
 				setErrorMessage(
 					errorData.error || "Login failed. Please try again.",
 				);
-				alert("Login failed. Please try again.");
 			}
 		} catch (error) {
-			setErrorMessage("An error occurred, please try again");
+			console.error("Error logging in:", error);
 		}
 	};
 
 	return (
 		<form onSubmit={handleSubmit} className="space-y-6">
+			{errorMessage && (<Error message={errorMessage} onClose={dismissError} />
+				
+			)}
 			<Input
 				type="username"
 				name="username"
@@ -95,24 +100,8 @@ function LoginForm() {
 				onChange={handleChange}
 				required
 			/>
-			<div className="flex items-center justify-between">
-				<div className="flex items-center">
-					<input
-						type="checkbox"
-						name="rememberMe"
-						id="rememberMe"
-						checked={formData.rememberMe}
-						onChange={handleChange}
-						className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-					/>
-					<label
-						htmlFor="rememberMe"
-						className="ml-2 block text-sm text-gray-900"
-					>
-						Remember for 30 days
-					</label>
-				</div>
-				<div className="text-sm">
+			<div className="items-center ">
+				<div className="text-sm mb-3 float-right">
 					<Link
 						href="/forgot-password"
 						className="font-medium text-purple-600 hover:text-purple-500"

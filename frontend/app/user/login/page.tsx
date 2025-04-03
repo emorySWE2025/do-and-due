@@ -1,10 +1,10 @@
 import LoginFrame from "@/components/LoginFrame";
-import PageLayout from "@/components/PageLayout";
+// import PageLayout from "@/components/PageLayout";
 
 export default function LoginPage() {
 	return (
-		<PageLayout>
+		// <PageLayout>
 			<LoginFrame />
-		</PageLayout>
+		// </PageLayout>
 	);
 }

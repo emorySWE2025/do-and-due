@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Input from "@/components/Input";
 import Button from "@/components/Button";
+import Error from "@/components/Error";
 import PasswordRequirements from "@/components/PasswordReqs";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -38,6 +39,8 @@ function SignupForm() {
 	const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const router = useRouter();
+
+	const dismissError = () => setErrorMessage("");
 
 	const validatePassword = (password: string) => {
 		const errors: string[] = [];
@@ -81,7 +84,6 @@ function SignupForm() {
 			});
 			if (!res.ok) {
 				const errorData = await res.json();
-				alert(`Signup Error: ${errorData.error}`);
 				setErrorMessage(errorData.error || "Signup failed");
 			}
 
@@ -116,13 +118,15 @@ function SignupForm() {
 			}
 		} catch (error) {
 			console.error("Error:", error);
-			setErrorMessage("An unexpected error occurred");
+			// setErrorMessage();
 		}
 	};
 
 	return (
 		<form onSubmit={handleSubmit} className="space-y-6">
-			{errorMessage && <div className="text-red-500">{errorMessage}</div>}
+			{errorMessage && (<Error message={errorMessage} onClose={dismissError} />
+				
+			)}
 
 			<Input
 				type="text"
