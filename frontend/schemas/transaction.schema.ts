@@ -1,4 +1,4 @@
-import { Dayjs } from "dayjs";
+import { User, Group, Event } from "./db.schema";
 
 export interface AddUserRequest {
 	// fe > be
@@ -10,23 +10,6 @@ export interface AddUserResponse {
 	// params we can expect to receive from the backend when trying to add a user
 	message: string;
 }
-
-// as discussed, not requiring for MVP
-// export interface Cost {
-// 	id: number;
-// 	name: string;
-// 	category: string; // ['food', 'utilities', etc.? maybe make these customizable in a group]
-// 	amount: number;
-
-// 	recipientId: number;
-// 	recipient: User;
-
-// 	senderIds: number[];
-// 	senders: User[];
-
-// 	groupId: number;
-// 	group: Group;
-// }
 
 export interface AddEventRequest {
 	name: string;
@@ -61,7 +44,7 @@ export interface ViewGroupResponse {
 	// groupCreatorUsername: string;
 	// groupMemberUsernames: string[]; // [Array of usernames]
 	groupEvents: Event[]; // [Array of Event items (eventId, eventName)]
-	groupCosts: Cost[]; // [Array of Cost items (costId, costName, costAmount)]
+	// groupCosts: Cost[]; // [Array of Cost items (costId, costName, costAmount)]
 }
 
 export interface CreateGroupRequest {
