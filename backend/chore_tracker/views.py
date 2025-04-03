@@ -5,7 +5,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
-from chore_tracker.models import Group
+from chore_tracker.models import Group, Event
+import datetime
+import json
+from json import JSONDecodeError
 
 
 class IndexView(APIView):
@@ -152,3 +155,50 @@ class InviteUserToGroup(APIView):
             return JsonResponse({'error': 'User not found'}, status=404)
         except Exception as e:
             return JsonResponse({'error': 'Failed to invite user: ' + str(e)}, status=500)
+        
+        
+class CreateEvent(APIView):
+
+    def post(self, request):
+
+        if request.method == "POST":
+            try:
+                data = json.loads(request.body)
+
+                # We have to check if the group exists before trying to create the event
+                try:
+                    group = Group.objects.get(id=data.get("groupId"))
+                except Group.DoesNotExist:
+                    return JsonResponse(
+                        {"success": False, "message": "No such Group"}, status=400
+                    )
+
+                event = Event.objects.create(
+                    # ID should be created automatically
+                    name=data.get("name"),
+                    # Need to determine date format
+                    first_date=datetime.strptime(
+                        data.get("date"), "%Y-%m-%d %H:%M:%S"
+                    ).date(),
+                    first_time=datetime.strptime(
+                        data.get("date"), "%Y-%m-%d %H:%M:%S"
+                    ).time(),
+                    # TODO: Add this in, for now its not in interface in schema.ts
+                    repeat_every="",
+                    group=group,
+                )
+
+                # Get assigned members and add them. This is required due to the ManyToManyField
+                members = User.objects.filter(id__in=data.get("memberIds", []))
+                event.members.set(members)
+
+                return JsonResponse({"success": True, "message": ""}, status=200)
+
+            except JSONDecodeError:
+                return JsonResponse(
+                    {"success": False, "message": "Invalid JSON in request"}, status=400
+                )
+
+        return JsonResponse(
+            {"success": False, "message": "Expected POST method"}, status=405
+        )

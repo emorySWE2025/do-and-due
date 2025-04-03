@@ -137,6 +137,20 @@ export interface Event {
 	group: Group;
 }
 
+export interface AddEventRequest {
+	name: string;
+	date: string; // Format: "%Y-%m-%d %H:%M:%S" Lmk if you want to change this -Lance
+
+	memberIds: number[];
+
+	groupId: number;
+}
+
+export interface AddEventResponse {
+	success: boolean;
+	message: string;
+}
+
 export interface Cost {
 	id: number;
 	name: string;
