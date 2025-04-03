@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import ErrorText from "@/components/ErrorText";
 import { loginUserAction } from "@/actions/users.server";
 import { loginUserSchema } from "@/actions/zod";
-import { LoginUserResponse } from "@/schemas/transaction.schema";
+import { LoginUserClientResponse } from "@/schemas/transaction.schema";
 
 export default function LoginFrame() {
 	return (
@@ -45,7 +45,7 @@ function LoginForm() {
 
 	const onSubmit = async (data: any) => {
 		console.log("Form submitted:", data);
-		const response: LoginUserResponse = await loginUserAction(data);
+		const response: LoginUserClientResponse = await loginUserAction(data);
 		if (!response.ok) {
 			console.log(response.message);
 			// if the response wasn't ok, the error message will be stored at response.message

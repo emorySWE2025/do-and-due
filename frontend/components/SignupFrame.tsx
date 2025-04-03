@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerUserSchema } from "@/actions/zod";
 import ErrorText from "@/components/ErrorText";
-import { RegisterUserResponse } from "@/schemas/transaction.schema";
+import { RegisterUserClientResponse } from "@/schemas/transaction.schema";
 
 export default function SignupFrame() {
 	return (
@@ -42,7 +42,8 @@ function SignupForm() {
 
 	const onSubmit = async (data: any) => {
 		console.log("Form submitted:", data);
-		const response: RegisterUserResponse = await registerUserAction(data);
+		const response: RegisterUserClientResponse =
+			await registerUserAction(data);
 		if (!response.ok) {
 			console.log(response.message);
 			// if the response wasn't ok, the error message will be stored at response.message

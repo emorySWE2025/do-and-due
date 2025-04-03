@@ -55,4 +55,8 @@ export interface LoginUserFormData {
 	confirmPassword: string;
 }
 
+export interface CreateGroupFormData {
+	groupName: string;
+	groupMemberUsernames?: string[]; // bea: i think ideally this is an optional param at group creation
+}
 // --------------------------------------------------------------------------------------

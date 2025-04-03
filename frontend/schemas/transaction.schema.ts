@@ -7,7 +7,8 @@ export interface RegisterUserRequest {
 	password: string;
 }
 
-export interface RegisterUserResponse {
+export interface RegisterUserClientResponse {
+	// response shared to the client
 	ok: boolean;
 	message: string;
 }
@@ -18,7 +19,8 @@ export interface LoginUserRequest {
 	username: string;
 	password: string;
 }
-export interface LoginUserResponse {
+export interface LoginUserClientResponse {
+	// response shared to the client
 	ok: boolean;
 	message: string;
 }
@@ -41,6 +43,11 @@ export interface CreateGroupResponse {
 	// params we can expect to receive from the backend when trying to create a group
 	message: string;
 	status: number;
+}
+export interface CreateGroupClientResponse {
+	// response shared to the client
+	ok: boolean;
+	message: string;
 }
 // --------------------------------------------------------------------------------------
 

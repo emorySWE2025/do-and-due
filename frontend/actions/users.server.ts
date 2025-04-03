@@ -8,13 +8,13 @@ import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adap
 import { registerUserSchema } from "@/actions/zod";
 import { RegisterUserFormData, LoginUserFormData } from "@/schemas/fe.schema";
 import {
-	RegisterUserResponse,
-	LoginUserResponse,
+	RegisterUserClientResponse,
+	LoginUserClientResponse,
 } from "@/schemas/transaction.schema";
 
 export async function registerUserAction(
 	formData: RegisterUserFormData,
-): Promise<RegisterUserResponse> {
+): Promise<RegisterUserClientResponse> {
 	try {
 		const res = await fetch("http://127.0.0.1:8000/api/register/", {
 			method: "POST",
@@ -50,7 +50,7 @@ export async function registerUserAction(
 
 export async function loginUserAction(
 	formData: LoginUserFormData,
-): Promise<LoginUserResponse> {
+): Promise<LoginUserClientResponse> {
 	try {
 		const res = await fetch("http://127.0.0.1:8000/api/login/", {
 			method: "POST",
