@@ -19,33 +19,32 @@ class IndexView(APIView):
 
 
 class RegisterUser(APIView):
-    """User Registration"""
+    """ User Registration """
 
     def post(self, request):
-        username = request.data.get("username")
-        email = request.data.get("email")
-        password = request.data.get("password")
+        username = request.data.get('username')
+        email = request.data.get('email')
+        password = request.data.get('password')
 
         if User.objects.filter(username=username).exists():
-            return Response({"error": "Username already exists"}, status=400)
+            return Response({'error': 'Username already exists'}, status=400)
 
         if User.objects.filter(email=email).exists():
-            return Response({"error": "Email already in use"}, status=400)
+            return Response({'error': 'Email already in use'}, status=400)
 
         try:
             User.objects.create_user(username=username, email=email, password=password)
         except ValidationError as e:
-            return Response({"error": str(e)}, status=400)
+            return Response({'error': str(e)}, status=400)
 
-        return Response({"message": "User registered successfully"}, status=201)
+        return Response({'message': 'User registered successfully'}, status=201)
 
 
 class LoginView(APIView):
-    """User Login with JWT in Cookies"""
-
+    """ User Login with JWT in Cookies """
     def post(self, request):
-        username = request.data.get("username")
-        password = request.data.get("password")
+        username = request.data.get('username')
+        password = request.data.get('password')
 
         # case-insensitive username check
         user = User.objects.filter(username__iexact=username).first()
@@ -54,77 +53,28 @@ class LoginView(APIView):
 
             login(request, user)
             refresh = RefreshToken.for_user(user)
-            response = Response(
-                {
-                    "message": "Login successful",
-                }
-            )
+            response = Response({
+                'message': 'Login successful',
+            })
 
             response.set_cookie(
-                key="access_token",
+                key='access_token',
                 value=str(refresh.access_token),
                 httponly=True,
                 secure=False,
-                samesite="Lax",
+                samesite='Lax'
             )
             response.set_cookie(
-                key="refresh_token",
+                key='refresh_token',
                 value=str(refresh),
                 httponly=True,
                 secure=False,
-                samesite="Lax",
+                samesite='Lax'
             )
 
             return response
         else:
-            return Response({"error": "Invalid credentials"}, status=401)
-
-
-class CreateEvent(APIView):
-
-    def post(self, request):
-
-        if request.method == "POST":
-            try:
-                data = json.loads(request.body)
-
-                # We have to check if the group exists before trying to create the event
-                try:
-                    group = Group.objects.get(id=data.get("groupId"))
-                except Group.DoesNotExist:
-                    return JsonResponse(
-                        {"success": False, "message": "No such Group"}, status=400
-                    )
-
-                event = Event.objects.create(
-                    # ID should be created automatically
-                    name=data.get("name"),
-                    # Need to determine date format
-                    first_date=datetime.strptime(
-                        data.get("date"), "%Y-%m-%d %H:%M:%S"
-                    ).date(),
-                    first_time=datetime.strptime(
-                        data.get("date"), "%Y-%m-%d %H:%M:%S"
-                    ).time(),
-                    # TODO: Add this in, for now its not in interface in schema.ts
-                    repeat_every="",
-                    group=group,
-                )
-
-                # Get assigned members and add them. This is required due to the ManyToManyField
-                members = User.objects.filter(id__in=data.get("memberIds", []))
-                event.members.set(members)
-
-                return JsonResponse({"success": True, "message": ""}, status=200)
-
-            except JSONDecodeError:
-                return JsonResponse(
-                    {"success": False, "message": "Invalid JSON in request"}, status=400
-                )
-
-        return JsonResponse(
-            {"success": False, "message": "Expected POST method"}, status=405
-        )
+            return Response({'error': 'Invalid credentials'}, status=401)
 
 
 class CreateGroup(APIView):
@@ -205,3 +155,50 @@ class InviteUserToGroup(APIView):
             return JsonResponse({'error': 'User not found'}, status=404)
         except Exception as e:
             return JsonResponse({'error': 'Failed to invite user: ' + str(e)}, status=500)
+        
+        
+class CreateEvent(APIView):
+
+    def post(self, request):
+
+        if request.method == "POST":
+            try:
+                data = json.loads(request.body)
+
+                # We have to check if the group exists before trying to create the event
+                try:
+                    group = Group.objects.get(id=data.get("groupId"))
+                except Group.DoesNotExist:
+                    return JsonResponse(
+                        {"success": False, "message": "No such Group"}, status=400
+                    )
+
+                event = Event.objects.create(
+                    # ID should be created automatically
+                    name=data.get("name"),
+                    # Need to determine date format
+                    first_date=datetime.strptime(
+                        data.get("date"), "%Y-%m-%d %H:%M:%S"
+                    ).date(),
+                    first_time=datetime.strptime(
+                        data.get("date"), "%Y-%m-%d %H:%M:%S"
+                    ).time(),
+                    # TODO: Add this in, for now its not in interface in schema.ts
+                    repeat_every="",
+                    group=group,
+                )
+
+                # Get assigned members and add them. This is required due to the ManyToManyField
+                members = User.objects.filter(id__in=data.get("memberIds", []))
+                event.members.set(members)
+
+                return JsonResponse({"success": True, "message": ""}, status=200)
+
+            except JSONDecodeError:
+                return JsonResponse(
+                    {"success": False, "message": "Invalid JSON in request"}, status=400
+                )
+
+        return JsonResponse(
+            {"success": False, "message": "Expected POST method"}, status=405
+        )

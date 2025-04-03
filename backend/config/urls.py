@@ -22,5 +22,6 @@ from chore_tracker.views import create_event
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/", include("chore_tracker.urls")),
+    path('api/', include('chore_tracker.urls'))
+
 ]
