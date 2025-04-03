@@ -10,6 +10,7 @@ export async function createGroupAction(
 	formData: CreateGroupFormData,
 	creatorId: number,
 ): Promise<CreateGroupClientResponse> {
+	// convert the form data to the format expected by the backend
 	const postData: CreateGroupRequest = {
 		groupName: formData.groupName,
 		groupStatus: "active",

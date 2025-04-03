@@ -10,20 +10,23 @@ import { RegisterUserFormData, LoginUserFormData } from "@/schemas/fe.schema";
 import {
 	RegisterUserClientResponse,
 	LoginUserClientResponse,
+	RegisterUserRequest,
+	LoginUserRequest,
 } from "@/schemas/transaction.schema";
 
 export async function registerUserAction(
 	formData: RegisterUserFormData,
 ): Promise<RegisterUserClientResponse> {
+	const postData: RegisterUserRequest = {
+		username: formData.username,
+		email: formData.email,
+		password: formData.password,
+	};
 	try {
 		const res = await fetch("http://127.0.0.1:8000/api/register/", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({
-				username: formData.username,
-				email: formData.email,
-				password: formData.password,
-			}),
+			body: JSON.stringify(postData),
 		});
 
 		if (res.ok) {
@@ -51,14 +54,15 @@ export async function registerUserAction(
 export async function loginUserAction(
 	formData: LoginUserFormData,
 ): Promise<LoginUserClientResponse> {
+	const postData: LoginUserRequest = {
+		username: formData.username,
+		password: formData.password,
+	};
 	try {
 		const res = await fetch("http://127.0.0.1:8000/api/login/", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({
-				username: formData.username,
-				password: formData.password,
-			}),
+			body: JSON.stringify(postData),
 			credentials: "include",
 		});
 
