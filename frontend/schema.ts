@@ -1,3 +1,5 @@
+import { Dayjs } from "dayjs";
+
 `
 // api routes
 /user/create
@@ -49,7 +51,25 @@ necessary mvp actions
     2. delete events
 `;
 
-// this file should always be kept consistent with our current database model schemas
+// this schema can be used to pass messages from react useActionState (recommended for next.js app router afaik)
+// not urgent currently but would be good to standardize how we deal with these
+export interface PageState {
+	message?: string;
+}
+
+// interface used to handle date state data in the home page
+export interface DateStateData {
+	current: Dayjs;
+	display: Dayjs;
+	target: Dayjs;
+}
+
+// interface used to handle group state data in the home page
+export interface GroupStateData {
+	direction: number;
+	index: number;
+	group: GroupDisplayData;
+}
 
 // expected format for general event display data passed to frontend pages
 export interface EventDisplayData {

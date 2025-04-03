@@ -1,120 +1,130 @@
 "use client";
 
-import { Dispatch, JSX, SetStateAction, use, useState } from "react";
 import CalendarFrame from "@/components/CalendarFrame";
 import ToDoFrame from "@/components/ToDoFrame";
-import { GroupDisplayData, UserDisplayData } from "@/schema";
+import GroupSelector from "@/components/GroupSelector";
+import CreateGroupFrame from "@/components/CreateGroupFrame";
+import {
+	DateStateData,
+	GroupDisplayData,
+	GroupStateData,
+	UserDisplayData,
+} from "@/schema";
 import dayjs, { Dayjs } from "dayjs";
+import { useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 
-// function getGroupById(userData: UserDisplayData, targetGroupId: number) {
-// 	return (
-// 		userData.groups.find(
-// 			(group: GroupDisplayData) => group.id === targetGroupId,
-// 		) || null
-// 	);
-// }
+const animationVariants = {
+	enter: (direction: number) => {
+		return {
+			zIndex: 0,
+			opacity: 0.0,
+			x: 150 * direction,
+		};
+	},
+	center: {
+		zIndex: 1,
+		opacity: 1,
+		x: 0,
+	},
+	exit: (direction: number) => {
+		return {
+			zIndex: 0,
+			opacity: 0.0,
+			x: -150 * direction,
+		};
+	},
+};
 
-export default function HomeFrame({ userData }: { userData: UserDisplayData }) {
-	// defaults to null if the user is not in any groups, otherwise defaults to the first
-	const [currentGroup, setCurrentGroup] = useState<GroupDisplayData | null>(
-		userData.groups.length > 0 ? userData.groups[0] : null,
-	);
-	// current date
-	const currentDate: Dayjs = dayjs();
-
-	// date displayed on the calendar
-	const [displayDate, setDisplayDate] = useState<Dayjs>(currentDate);
-
-	// date targeted on the calendar and shown on the todo list
-	const [targetDate, setTargetDate] = useState<Dayjs>(currentDate);
-
-	const homeContents =
-		currentGroup !== null ? (
-			<div className="flex h-full w-full flex-row flex-nowrap gap-12 p-10">
-				<ToDoFrame
-					groupData={currentGroup}
-					targetDate={targetDate}
-					setTargetDate={setTargetDate}
-				/>
-				<CalendarFrame
-					groupData={currentGroup}
-					currentDate={currentDate}
-					displayDate={displayDate}
-					setDisplayDate={setDisplayDate}
-					targetDate={targetDate}
-					setTargetDate={setTargetDate}
-				/>
-			</div>
-		) : (
-			<div className="">Please select a group</div>
-		);
-
-	return (
-		<div className="m-auto h-max w-full max-w-5xl">
-			<GroupSelector
-				groups={userData.groups}
-				setGroupCallback={setCurrentGroup}
-				currentGroupId={currentGroup?.id}
-			/>
-			{homeContents}
-		</div>
-	);
-}
-
-function GroupSelectorButton({
-	group,
-	currentGroupId,
-	setGroupCallback,
+function HomeFrameContents({
+	groupData,
+	dateState,
+	dateCallback,
 }: {
-	group: GroupDisplayData;
-	currentGroupId: number | undefined;
-	setGroupCallback: CallableFunction;
+	groupData: GroupDisplayData;
+	dateState: DateStateData;
+	dateCallback: CallableFunction;
 }) {
-	const handleClick = () => setGroupCallback(group);
-	// make an explicit new version of this component to create new groups
-	// should it redirect the user or just set a diff page state?
-	const isSelected: boolean = group.id === currentGroupId;
-	if (isSelected) {
-		return (
-			<div
-				className="cursor-pointer rounded bg-purple-100 p-2 text-sm hover:bg-purple-200"
-				onClick={handleClick}
-			>
-				{group.name}
-			</div>
-		);
+	if (groupData.id === -1) {
+		return <CreateGroupFrame />;
 	} else {
 		return (
-			<div
-				className="cursor-pointer rounded p-2 text-sm hover:bg-gray-50"
-				onClick={handleClick}
-			>
-				{group.name}
+			<div className="flex h-max w-full flex-row flex-nowrap gap-8 pt-8">
+				<ToDoFrame
+					groupData={groupData}
+					dateState={dateState}
+					dateCallback={dateCallback}
+				/>
+				<CalendarFrame
+					groupData={groupData}
+					dateState={dateState}
+					dateCallback={dateCallback}
+				/>
 			</div>
 		);
 	}
 }
 
-function GroupSelector({
-	groups,
-	currentGroupId,
-	setGroupCallback,
-}: {
-	groups: GroupDisplayData[];
-	currentGroupId: number | undefined;
-	setGroupCallback: CallableFunction;
-}) {
+export default function HomeFrame({ userData }: { userData: UserDisplayData }) {
+	// query current date
+	const currentDate: Dayjs = dayjs();
+
+	// this group object will be used to indicate when the user wants to create a new group
+	const createNewGroupPlaceholder: GroupDisplayData = {
+		id: -1,
+		name: "new group",
+		events: [],
+	};
+
+	// define state objects
+	const [groupState, updateGroupState] = useState<GroupStateData>({
+		direction: 1,
+		index: 0,
+		group:
+			userData.groups.length > 0
+				? userData.groups[0]
+				: createNewGroupPlaceholder,
+	});
+
+	const [dateState, updateDateState] = useState<DateStateData>({
+		current: currentDate,
+		display: currentDate,
+		target: currentDate,
+	});
+
 	return (
-		<div className="flex flex-row flex-nowrap items-center justify-center gap-8 border-b-[1px] border-gray-200 p-4">
-			{/* <NewGroupButton /> */}
-			{groups.map((group: GroupDisplayData) => (
-				<GroupSelectorButton
-					key={group.id}
-					group={group}
-					currentGroupId={currentGroupId}
-					setGroupCallback={setGroupCallback}
-				/>
-			))}
+		<div className="m-auto h-max w-full max-w-5xl">
+			<GroupSelector
+				groups={[createNewGroupPlaceholder].concat(userData.groups)}
+				groupState={groupState}
+				groupCallback={updateGroupState}
+			/>
+			<AnimatePresence
+				initial={false}
+				custom={groupState.direction}
+				mode="wait"
+			>
+				<motion.div
+					custom={groupState.direction}
+					variants={animationVariants}
+					initial="enter"
+					animate="center"
+					exit="exit"
+					transition={{
+						x: {
+							duration: 0.2,
+						},
+						opacity: { duration: 0.15 },
+					}}
+					key={groupState.index}
+				>
+					<HomeFrameContents
+						groupData={groupState.group}
+						dateState={dateState}
+						dateCallback={updateDateState}
+					/>
+				</motion.div>
+			</AnimatePresence>
 		</div>
 	);
 }
