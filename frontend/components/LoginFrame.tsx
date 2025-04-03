@@ -21,7 +21,7 @@ export default function LoginFrame() {
 			<LoginForm />
 			<div className="text-center">
 				<Link
-					href="/signup"
+					href="/user/signup"
 					className="font-medium text-purple-600 hover:text-purple-500"
 				>
 					Do not have an account? Sign up
@@ -79,8 +79,8 @@ function LoginForm() {
 
 	return (
 		<form onSubmit={handleSubmit} className="space-y-6">
-			{errorMessage && (<Error message={errorMessage} onClose={dismissError} />
-				
+			{errorMessage && (
+				<Error message={errorMessage} onClose={dismissError} />
 			)}
 			<Input
 				type="username"
@@ -100,10 +100,10 @@ function LoginForm() {
 				onChange={handleChange}
 				required
 			/>
-			<div className="items-center ">
-				<div className="text-sm mb-3 float-right">
+			<div className="items-center">
+				<div className="float-right mb-3 text-sm">
 					<Link
-						href="/forgot-password"
+						href="/user/forgot-password"
 						className="font-medium text-purple-600 hover:text-purple-500"
 					>
 						Forgot password
