@@ -11,6 +11,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerUserSchema } from "@/actions/zod";
+import ErrorText from "@/components/ErrorText";
 
 export default function SignupFrame() {
 	return (
@@ -31,10 +32,6 @@ export default function SignupFrame() {
 			</div>
 		</div>
 	);
-}
-
-function ErrorText({ message }: { message: string | undefined }) {
-	return <p className="mt-2 text-center text-sm text-red-500">{message}</p>;
 }
 
 function SignupForm() {
