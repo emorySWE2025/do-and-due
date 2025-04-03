@@ -1,4 +1,4 @@
-import { createGroupAction } from "@/actions/groups";
+import { createGroupAction } from "@/actions/groups.server";
 import { PageState } from "@/schema";
 import Form from "next/form";
 import { useActionState } from "react";
