@@ -44,3 +44,8 @@ export const registerUserSchema = z
 		message: "Passwords do not match",
 		path: ["confirmPassword"],
 	});
+
+export const createGroupSchema = z.object({
+	groupName: z.string({ required_error: "Group name is required" }),
+	members: z.string(),
+});
