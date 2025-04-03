@@ -7,7 +7,7 @@ import {
 	EventDisplayData,
 	GroupDisplayData,
 	DateStateData,
-} from "@/schemas/schema";
+} from "@/schemas/fe.schema";
 
 dayjs.extend(weekday);
 dayjs.extend(localeData);

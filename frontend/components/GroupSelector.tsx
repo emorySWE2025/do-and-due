@@ -4,7 +4,7 @@ import {
 	GroupDisplayData,
 	DateStateData,
 	GroupStateData,
-} from "@/schemas/schema";
+} from "@/schemas/fe.schema";
 import { JSX, useLayoutEffect, useRef } from "react";
 import { SnapList, SnapItem, useScroll } from "react-snaplist-carousel";
 

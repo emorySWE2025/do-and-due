@@ -4,7 +4,7 @@ import {
 	EventDisplayData,
 	GroupDisplayData,
 	DateStateData,
-} from "@/schemas/schema";
+} from "@/schemas/fe.schema";
 import dayjs, { Dayjs } from "dayjs";
 import { JSX } from "react";
 

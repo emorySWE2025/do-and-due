@@ -9,7 +9,7 @@ import {
 	GroupDisplayData,
 	GroupStateData,
 	UserDisplayData,
-} from "@/schemas/schema";
+} from "@/schemas/fe.schema";
 import dayjs, { Dayjs } from "dayjs";
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
