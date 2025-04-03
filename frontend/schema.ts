@@ -1,3 +1,5 @@
+import { Dayjs } from "dayjs";
+
 `
 // api routes
 /user/create
@@ -7,7 +9,7 @@
 /group/create
     [create a group in the db]
 /group/invite
-    [add a specific user id to the group (don't worry about accepting invites for now, let it be 1-sided)]
+    [add specific user ids to the group (don't worry about accepting invites for now, let it be 1-sided)]
 /group/view
     [request detailed info about a group (other members, events, costs etc.)]
 
@@ -49,7 +51,25 @@ necessary mvp actions
     2. delete events
 `;
 
-// this file should always be kept consistent with our current database model schemas
+// this schema can be used to pass messages from react useActionState (recommended for next.js app router afaik)
+// not urgent currently but would be good to standardize how we deal with these
+export interface PageState {
+	message?: string;
+}
+
+// interface used to handle date state data in the home page
+export interface DateStateData {
+	current: Dayjs;
+	display: Dayjs;
+	target: Dayjs;
+}
+
+// interface used to handle group state data in the home page
+export interface GroupStateData {
+	direction: number;
+	index: number;
+	group: GroupDisplayData;
+}
 
 // expected format for general event display data passed to frontend pages
 export interface EventDisplayData {
@@ -117,6 +137,20 @@ export interface Event {
 	group: Group;
 }
 
+export interface AddEventRequest {
+	name: string;
+	date: string; // Format: "%Y-%m-%d %H:%M:%S" Lmk if you want to change this -Lance
+
+	memberIds: number[];
+
+	groupId: number;
+}
+
+export interface AddEventResponse {
+	success: boolean;
+	message: string;
+}
+
 export interface Cost {
 	id: number;
 	name: string;
@@ -141,7 +175,7 @@ export interface Group {
 	timezone: string; // timezone used for all group events
 
 	creatorId: number;
-	creator?: User; // [User item that created the group, transferrable?]
+	creator?: User; // [User item that created the group, transferable?]
 
 	memberIds: number[];
 	members?: User[]; // [Array of User items]
@@ -152,4 +186,57 @@ export interface Group {
 	costIds: number[];
 	costs?: Cost[]; // [Array of Cost items, each should refer to a cost which is divvied up between selected members in the group]
 	// [Theming options for users to customize colors/other?]
+}
+
+export interface ViewGroupRequest {
+	// fe > be
+	// params necessary to view a group in the backend
+	groupId: number;
+}
+
+export interface ViewGroupResponse {
+	// be > fe
+	// params we can expect to receive from the backend when trying to view a group
+	groupId: number;
+	groupName: string;
+	groupStatus: string;
+	groupExpiration: string | null;
+	groupTimezone: string;
+	groupCreatorUsername: string;
+	groupMemberUsernames: string[]; // [Array of usernames]
+	groupEvents: Event[]; // [Array of Event items (eventId, eventName)]
+	groupCosts: Cost[]; // [Array of Cost items (costId, costName, costAmount)]
+}
+
+export interface CreateGroupRequest {
+	// fe > be
+	// params necessary to create a group in the backend
+	groupName: string;
+	groupStatus: string;
+	groupExpiration: string | null;
+	groupTimezone: string;
+	groupCreator: User;
+}
+
+export interface CreateGroupResponse {
+	// be > fe
+	// params we can expect to receive from the backend when trying to create a group
+	message: string;
+	status: number;
+}
+
+export interface AddUsersToGroupRequest {
+	// fe > be
+	// params necessary to add users to a group in the backend
+	groupId: number;
+	usernames: string[]; // [Array of usernames]
+}
+
+export interface AddUsersToGroupResponse {
+	// be > fe
+	// params we can expect to receive from the backend when trying to add users to a group
+	message: string;
+	result: JSON;  // not sure about this. i think this will be a dict.
+	// e.g. {"results": {"success": ["user1", "user2"], "not_found": ["nonexistent_user"]}}
+	status: number;
 }

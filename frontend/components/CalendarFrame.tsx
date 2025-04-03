@@ -3,52 +3,52 @@
 import dayjs, { Dayjs } from "dayjs";
 import weekday from "dayjs/plugin/weekday";
 import localeData from "dayjs/plugin/localeData";
-import { EventDisplayData, GroupDisplayData } from "@/schema";
+import { EventDisplayData, GroupDisplayData, DateStateData } from "@/schema";
 
 dayjs.extend(weekday);
 dayjs.extend(localeData);
 
 export default function CalendarFrame({
 	groupData,
-	currentDate,
-	displayDate,
-	setDisplayDate,
-	targetDate,
-	setTargetDate,
+	dateState,
+	dateCallback,
 }: {
 	groupData: GroupDisplayData;
-	currentDate: Dayjs;
-	displayDate: Dayjs;
-	setDisplayDate: CallableFunction;
-	targetDate: Dayjs;
-	setTargetDate: CallableFunction;
+	dateState: DateStateData;
+	dateCallback: CallableFunction;
 }) {
 	const handlePrevMonth = () => {
-		setDisplayDate(displayDate.subtract(1, "month"));
+		dateCallback({
+			current: dateState.current,
+			target: dateState.target,
+			display: dateState.display.subtract(1, "month"),
+		});
 	};
 
 	const handleNextMonth = () => {
-		setDisplayDate(displayDate.add(1, "month"));
+		dateCallback({
+			current: dateState.current,
+			target: dateState.target,
+			display: dateState.display.add(1, "month"),
+		});
 	};
 
 	const eventDates: Set<number> = getEventDatesInMonth(
 		groupData.events,
-		displayDate,
+		dateState.display,
 	);
 
 	return (
 		<div className="h-max w-full rounded-lg border-[1px] border-gray-300 p-4 shadow-sm">
 			<CalendarHeader
-				currentDate={displayDate}
+				currentDate={dateState.display}
 				onPrev={handlePrevMonth}
 				onNext={handleNextMonth}
 			/>
 			<CalendarGrid
 				eventDates={eventDates}
-				displayDate={displayDate}
-				currentDate={currentDate}
-				targetDate={targetDate}
-				setTargetDate={setTargetDate}
+				dateState={dateState}
+				dateCallback={dateCallback}
 			/>
 		</div>
 	);
@@ -104,10 +104,8 @@ function CalendarHeader({ currentDate, onPrev, onNext }: CalendarHeaderProps) {
 
 type CalendarGridProps = {
 	eventDates: Set<number>;
-	displayDate: Dayjs;
-	currentDate: Dayjs;
-	targetDate: Dayjs;
-	setTargetDate: CallableFunction;
+	dateState: DateStateData;
+	dateCallback: CallableFunction;
 };
 
 function getEventDatesInMonth(
@@ -128,13 +126,11 @@ function getEventDatesInMonth(
 
 function CalendarGrid({
 	eventDates,
-	displayDate,
-	currentDate,
-	targetDate,
-	setTargetDate,
+	dateState,
+	dateCallback,
 }: CalendarGridProps) {
-	const startOfMonth = displayDate.startOf("month");
-	const endOfMonth = displayDate.endOf("month");
+	const startOfMonth = dateState.display.startOf("month");
+	const endOfMonth = dateState.display.endOf("month");
 	const startDay = startOfMonth.weekday();
 	const daysInMonth = endOfMonth.date();
 
@@ -170,10 +166,8 @@ function CalendarGrid({
 							key={`${i}-${j}`}
 							day={day}
 							isEventDay={day ? eventDates.has(day) : false}
-							currentDate={currentDate}
-							displayDate={displayDate}
-							targetDate={targetDate}
-							setTargetDate={setTargetDate}
+							dateState={dateState}
+							dateCallback={dateCallback}
 						/>
 					)),
 				)}
@@ -185,39 +179,37 @@ function CalendarGrid({
 type CalendarDayProps = {
 	day: number | null;
 	isEventDay: boolean;
-	currentDate: Dayjs;
-	displayDate: Dayjs;
-	targetDate: Dayjs;
-	setTargetDate: CallableFunction;
+	dateState: DateStateData;
+	dateCallback: CallableFunction;
 };
 
 function CalendarDay({
 	day,
 	isEventDay,
-	currentDate,
-	displayDate,
-	targetDate,
-	setTargetDate,
+	dateState,
+	dateCallback,
 }: CalendarDayProps) {
 	const handleClick = () =>
 		day
-			? setTargetDate(
-					dayjs()
+			? dateCallback({
+					current: dateState.current,
+					display: dateState.display,
+					target: dayjs()
 						.set("date", day)
-						.set("month", displayDate.month())
-						.set("year", displayDate.year()),
-				)
+						.set("month", dateState.display.month())
+						.set("year", dateState.display.year()),
+				})
 			: null;
 
 	const isCurrentDate: boolean =
-		currentDate.date() === day &&
-		currentDate.month() === displayDate.month() &&
-		currentDate.year() === displayDate.year();
+		dateState.current.date() === day &&
+		dateState.current.month() === dateState.display.month() &&
+		dateState.current.year() === dateState.display.year();
 
 	const isTargetDate: boolean =
-		targetDate.date() === day &&
-		targetDate.month() === displayDate.month() &&
-		targetDate.year() === displayDate.year();
+		dateState.target.date() === day &&
+		dateState.target.month() === dateState.display.month() &&
+		dateState.target.year() === dateState.display.year();
 
 	var classElements: string =
 		"flex h-16 items-start justify-start rounded-md p-1.5 text-left text-sm font-semibold";
