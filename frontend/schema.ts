@@ -175,7 +175,7 @@ export interface Group {
 	timezone: string; // timezone used for all group events
 
 	creatorId: number;
-	creator?: User; // [User item that created the group, transferrable?]
+	creator?: User; // [User item that created the group, transferable?]
 
 	memberIds: number[];
 	members?: User[]; // [Array of User items]
@@ -186,4 +186,24 @@ export interface Group {
 	costIds: number[];
 	costs?: Cost[]; // [Array of Cost items, each should refer to a cost which is divvied up between selected members in the group]
 	// [Theming options for users to customize colors/other?]
+}
+
+export interface ViewGroupRequest {
+	// fe > be
+	// params necessary to add a user in the backend
+	groupId: number;
+}
+
+export interface ViewGroupResponse {
+	// be > fe
+	// params we can expect to receive from the backend when trying to add a user
+	groupId: number;
+	groupName: string;
+	groupStatus: string;
+	groupExpiration: string | null;
+	groupTimezone: string;
+	groupCreatorUsername: string;
+	groupMemberUsernames: string[]; // [Array of usernames]
+	groupEvents: Event[]; // [Array of Event items (eventId, eventName)]
+	groupCosts: Cost[]; // [Array of Cost items (costId, costName, costAmount)]
 }
