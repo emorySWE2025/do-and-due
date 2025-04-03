@@ -9,7 +9,7 @@ import { Dayjs } from "dayjs";
 /group/create
     [create a group in the db]
 /group/invite
-    [add a specific user id to the group (don't worry about accepting invites for now, let it be 1-sided)]
+    [add specific user ids to the group (don't worry about accepting invites for now, let it be 1-sided)]
 /group/view
     [request detailed info about a group (other members, events, costs etc.)]
 
@@ -222,5 +222,21 @@ export interface CreateGroupResponse {
 	// be > fe
 	// params we can expect to receive from the backend when trying to create a group
 	message: string;
+	status: number;
+}
+
+export interface AddUsersToGroupRequest {
+	// fe > be
+	// params necessary to add users to a group in the backend
+	groupId: number;
+	usernames: string[]; // [Array of usernames]
+}
+
+export interface AddUsersToGroupResponse {
+	// be > fe
+	// params we can expect to receive from the backend when trying to add users to a group
+	message: string;
+	result: JSON;  // not sure about this. i think this will be a dict.
+	// e.g. {"results": {"success": ["user1", "user2"], "not_found": ["nonexistent_user"]}}
 	status: number;
 }
