@@ -136,29 +136,49 @@ class ViewGroup(APIView):
             return JsonResponse({'error': 'Failed to view group: ' + str(e)}, status=500)
 
 
-class InviteUserToGroup(APIView):
-    """ Invite a User to a Group """
+class AddUsersToGroup(APIView):
+    """ Add Users to a Group """
 
     def post(self, request):
         group_id = request.data.get('group_id')
-        username = request.data.get('username')
+        usernames = request.data.get('usernames', [])
+
+        if not usernames:
+            return JsonResponse({'error': 'No usernames provided'}, status=400)
 
         try:
             group = Group.objects.get(id=group_id)
-            user = User.objects.get(username=username)
 
-            if user in group.members.all():
-                return JsonResponse({'error': 'User is already a member of the group'}, status=400)
+            # Track status for each username
+            result = {
+                'success': [],
+                'not_found': []
+            }
 
-            group.members.add(user)
+            # Get existing members usernames for efficient lookup
+            existing_members = set(group.members.values_list('username', flat=True))
 
-            return JsonResponse({'message': 'User invited successfully'}, status=200)
+            # Process each username individually
+            for username in usernames:
+                try:
+                    user = User.objects.get(username=username)
+                    if username in existing_members:
+                        continue  # Skip if user is already a member
+                    else:
+                        group.members.add(user)
+                        result['success'].append(username)
+                except User.DoesNotExist:
+                    result['not_found'].append(username)
+
+            return JsonResponse({
+                'message': 'Operation completed',
+                'results': result
+            }, status=200 if result['success'] else 404)
+
         except Group.DoesNotExist:
             return JsonResponse({'error': 'Group not found'}, status=404)
-        except User.DoesNotExist:
-            return JsonResponse({'error': 'User not found'}, status=404)
         except Exception as e:
-            return JsonResponse({'error': 'Failed to invite user: ' + str(e)}, status=500)
+            return JsonResponse({'error': f'Failed to invite users: {str(e)}'}, status=500)
         
         
 class CreateEvent(APIView):
