@@ -190,13 +190,13 @@ export interface Group {
 
 export interface ViewGroupRequest {
 	// fe > be
-	// params necessary to add a user in the backend
+	// params necessary to view a group in the backend
 	groupId: number;
 }
 
 export interface ViewGroupResponse {
 	// be > fe
-	// params we can expect to receive from the backend when trying to add a user
+	// params we can expect to receive from the backend when trying to view a group
 	groupId: number;
 	groupName: string;
 	groupStatus: string;
@@ -206,4 +206,21 @@ export interface ViewGroupResponse {
 	groupMemberUsernames: string[]; // [Array of usernames]
 	groupEvents: Event[]; // [Array of Event items (eventId, eventName)]
 	groupCosts: Cost[]; // [Array of Cost items (costId, costName, costAmount)]
+}
+
+export interface CreateGroupRequest {
+	// fe > be
+	// params necessary to create a group in the backend
+	groupName: string;
+	groupStatus: string;
+	groupExpiration: string | null;
+	groupTimezone: string;
+	groupCreator: User;
+}
+
+export interface CreateGroupResponse {
+	// be > fe
+	// params we can expect to receive from the backend when trying to create a group
+	message: string;
+	status: number;
 }
