@@ -4,7 +4,7 @@ import CalendarFrame from "@/components/CalendarFrame";
 import ToDoFrame from "@/components/ToDoFrame";
 import GroupSelector from "@/components/GroupSelector";
 import CreateGroupFrame from "@/components/CreateGroupFrame";
-import UserAuthCheck from "@/components/UserAuthCheck";
+import {withAuth} from "@/components/UserAuthCheck";
 import {
 	DateStateData,
 	GroupDisplayData,
@@ -68,7 +68,7 @@ function HomeFrameContents({
 	}
 }
 
-export default function HomePage() {
+function HomePage() {
 	// query current date
 	const currentDate: Dayjs = dayjs();
 
@@ -80,9 +80,7 @@ export default function HomePage() {
 	};
 
 	return (
-		<UserAuthCheck>
 			<HomeFrame createNewGroupPlaceholder={createNewGroupPlaceholder} />
-		</UserAuthCheck>
 	);
 }
 
@@ -137,3 +135,4 @@ function HomeFrame({ createNewGroupPlaceholder }: { createNewGroupPlaceholder: G
 		</div>
 	);
 }
+export default withAuth(HomePage);
