@@ -2,7 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { JSX } from "react";
-import LogoutComponent from "@/app/user/logout/page";
+// import LogoutComponent from "@/app/user/logout/page";
 function NavButton({ label, href }: { label: string; href: string }) {
 	return (
 		<Link
@@ -106,16 +106,16 @@ function NavNotificationsFrame({
 function NavProfileFrame() {
 	return (
 		<div>
-		<Link href={"/user/profile"}>
-			<Image
-				src="/profile-placeholder.png"
-				alt="Profile"
-				width={48}
-				height={48}
-				className="object-cove cursor-pointer rounded-[50%] hover:ring-3 hover:ring-purple-500"
-			/>
-		</Link>
-			<LogoutComponent/>
+			<Link href={"/user/profile"}>
+				<Image
+					src="/profile-placeholder.png"
+					alt="Profile"
+					width={48}
+					height={48}
+					className="object-cove cursor-pointer rounded-[50%] hover:ring-3 hover:ring-purple-500"
+				/>
+			</Link>
+			{/* <LogoutComponent /> */}
 		</div>
 	);
 }

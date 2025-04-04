@@ -1,19 +1,16 @@
-import { getCurrentSession } from "@/actions/users.server";
-import HomeFrame from "@/components/HomeFrame";
-import PageLayout from "@/components/PageLayout";
+import { getCurrentSession, logoutUserAction } from "@/actions/users.server";
 import { UserDisplayData } from "@/schemas/fe.schema";
 import { redirect } from "next/navigation";
+import { NextResponse } from "next/server";
 
-export default async function Home() {
+export async function GET() {
 	// if user is not authenticated, redirect them to login
 	const userData: UserDisplayData | null = await getCurrentSession();
 	if (userData === null) {
 		redirect("/user/login");
+	} else {
+		await logoutUserAction(userData);
+		console.log("logged out");
+		redirect("/user/login");
 	}
-
-	return (
-		<PageLayout>
-			<HomeFrame userData={userData} />
-		</PageLayout>
-	);
 }
