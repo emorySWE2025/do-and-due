@@ -1,12 +1,51 @@
 "use server";
 
-import { RegisterUserFormData, LoginUserFormData } from "@/schemas/fe.schema";
+import {
+	RegisterUserFormData,
+	LoginUserFormData,
+	UserDisplayData,
+} from "@/schemas/fe.schema";
 import {
 	RegisterUserClientResponse,
 	LoginUserClientResponse,
 	RegisterUserRequest,
 	LoginUserRequest,
 } from "@/schemas/transaction.schema";
+import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
+import { cookies } from "next/headers";
+
+export const getCurrentSession = async (): Promise<UserDisplayData | null> => {
+	// test whether we can cache this
+	// try to get the access token from the request cookies
+	const cookieStore: ReadonlyRequestCookies = await cookies();
+	// console.log(cookieStore);
+	const token: string | null = cookieStore.get("access_token")?.value ?? null;
+
+	// if token is null, return user is null
+	if (token === null) {
+		console.log("no token found");
+		return null;
+	}
+
+	console.log("getting user data");
+	// otherwise try to retrieve user data
+	const response: Response = await fetch(
+		"http://127.0.0.1:8000/api/get-current-user/",
+		{
+			headers: {
+				Authorization: `Bearer ${token}`,
+				"Content-Type": "application/json",
+			},
+		},
+	);
+	// console.log(response);
+	if (response.ok) {
+		console.log("response ok");
+		return await response.json();
+	} else {
+		return null;
+	}
+};
 
 export async function registerUserAction(
 	formData: RegisterUserFormData,
@@ -45,6 +84,14 @@ export async function registerUserAction(
 	}
 }
 
+export async function logoutUserAction(userData: UserDisplayData) {
+	// invalidate sessions in the database
+	// DOES THIS EXIST?
+
+	// clear local cookies
+	await deleteSessionTokenCookie();
+}
+
 export async function loginUserAction(
 	formData: LoginUserFormData,
 ): Promise<LoginUserClientResponse> {
@@ -53,7 +100,7 @@ export async function loginUserAction(
 		password: formData.password,
 	};
 	try {
-		const res = await fetch("http://127.0.0.1:8000/api/login/", {
+		const res: Response = await fetch("http://127.0.0.1:8000/api/login/", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(postData),
@@ -62,92 +109,63 @@ export async function loginUserAction(
 
 		if (res.ok) {
 			console.log("login ok");
+
+			const data = await res.json();
+
+			const accessToken = data.access;
+			const refreshToken = data.refresh;
+
+			if (accessToken && refreshToken) {
+				await setSessionTokenCookie(accessToken);
+				console.log("Access token set.");
+			} else {
+				console.log("No access token or refresh token received.");
+			}
+
 			return { ok: true, message: "" };
 		} else {
-			console.log("login backend error");
+			console.log("login rejection - backend");
 			// if an error occurred on the backend
 			return {
 				ok: false,
-				message: "A backend error occurred during login!",
+				message: "Incorrect username or password",
 			};
 		}
 		// if an error occurred on the frontend
 	} catch (error) {
 		// if an error occurred on the backend
-		console.log("login frontend error");
+		console.log("login rejection - frontend");
 		return {
 			ok: false,
-			message: "A frontend error occurred during login!",
+			message: "A server error occurred during login!",
 		};
 	}
 }
 
-// export const getCurrentSession = cache(
-// 	// cache the results of the session cookie retrieval so we don't need to
-// 	// repeatedly query the database
-// 	async (): Promise<SessionValidationResult> => {
-// 		const cookieStore: ReadonlyRequestCookies = await cookies();
-// 		const token: string | null = cookieStore.get("session")?.value ?? null;
-// 		if (token === null) {
-// 			return { session: null, user: null };
-// 		}
-// 		const result: SessionValidationResult =
-// 			await validateSessionToken(token);
-// 		return result;
-// 	},
-// );
+export async function setSessionTokenCookie(
+	token: string,
+	// expiresAt: Date,
+): Promise<void> {
+	"use server";
+	// get cookies from the browser and set the session token
+	const cookieStore: ReadonlyRequestCookies = await cookies();
+	cookieStore.set("access_token", token, {
+		httpOnly: true,
+		sameSite: "lax",
+		secure: process.env.NODE_ENV === "production",
+		// expires: expiresAt,
+		path: "/",
+	});
+}
 
-// export async function validateUserAction(
-// 	prevState: PageState | void,
-// 	formData: FormData,
-// ): Promise<PageState | void> {
-// 	"use server";
-// 	// validate form data with zod
-// 	const result: SafeParseReturnType<LoginFormData, LoginFormData> =
-// 		await loginSchema.safeParseAsync(Object.fromEntries(formData));
-// 	console.log(result);
-// 	// return any zod errors
-// 	if (!result.success) {
-// 		return {
-// 			message:
-// 				result.error.issues[0] != null
-// 					? result.error.issues[0].message
-// 					: "An unknown error occured!",
-// 		};
-// 	}
-
-// 	// destructure credentials output
-// 	const { username, password } = result.data;
-
-// 	// validate credentials in db
-// 	const user: User | null = await validateCredentials(username, password);
-// 	if (user !== null) {
-// 		await handleSessionLogIn(user.id);
-// 	} else {
-// 		return { message: "Invalid credentials!" };
-// 	}
-// }
-
-// async function validateCredentials(
-// 	username: string,
-// 	password: string,
-// ): Promise<User | null> {
-// 	try {
-// 		// search for the user in the db
-// 		const user: User | null = await _findUser(username);
-
-// 		// if they exist, return the user if their password is correct
-// 		// otherwise return null
-// 		if (user !== null) {
-// 			const userValidated: boolean = await bcrypt.compare(
-// 				password,
-// 				user?.hash,
-// 			);
-// 			return userValidated ? user : null;
-// 		} else {
-// 			return null;
-// 		}
-// 	} catch {
-// 		return null;
-// 	}
-// }
+export async function deleteSessionTokenCookie(): Promise<void> {
+	"use server";
+	const cookieStore: ReadonlyRequestCookies = await cookies();
+	cookieStore.set("access_token", "", {
+		httpOnly: true,
+		sameSite: "lax",
+		secure: process.env.NODE_ENV === "production",
+		maxAge: 0,
+		path: "/",
+	});
+}
