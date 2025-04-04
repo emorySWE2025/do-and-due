@@ -1,11 +1,15 @@
 "use client";
 
-import { useState } from "react";
 import Input from "@/components/Input";
 import Button from "@/components/Button";
-import Error from "@/components/Error";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import ErrorText from "@/components/ErrorText";
+import { loginUserAction } from "@/actions/users.server";
+import { loginUserSchema } from "@/actions/zod";
+import { LoginUserClientResponse } from "@/schemas/transaction.schema";
 
 export default function LoginFrame() {
 	return (
@@ -32,87 +36,49 @@ export default function LoginFrame() {
 }
 
 function LoginForm() {
-	const [formData, setFormData] = useState({
-		username: "",
-		password: "",
-		rememberMe: false,
-	});
-	const [errorMessage, setErrorMessage] = useState<string | null>(null);
-	const router = useRouter();
+	const {
+		register,
+		handleSubmit,
+		setError,
+		formState: { errors, isSubmitting },
+	} = useForm({ resolver: zodResolver(loginUserSchema) });
 
-	const dismissError = () => setErrorMessage("");
-	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const { name, type, value, checked } = e.target;
-		setFormData((prev) => ({
-			...prev,
-			[name]: type === "checkbox" ? checked : value,
-		}));
-	};
-
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-		try {
-			const response = await fetch("http://127.0.0.1:8000/api/login/", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					username: formData.username.toLowerCase(),
-					password: formData.password,
-				}),
-				credentials: "include",
-			});
-			if (response.ok) {
-				console.log("Login successful");
-				router.push("/");
-			} else {
-				const errorData = await response.json();
-				setErrorMessage(
-					errorData.error || "Login failed. Please try again.",
-				);
-			}
-		} catch (error) {
-			console.error("Error logging in:", error);
+	const onSubmit = async (data: any) => {
+		console.log("Form submitted:", data);
+		const response: LoginUserClientResponse = await loginUserAction(data);
+		if (!response.ok) {
+			console.log(response.message);
+			// if the response wasn't ok, the error message will be stored at response.message
+			setError("root", { message: response.message });
+		} else {
+			// if response was ok, redirect to root
+			redirect("/");
 		}
 	};
 
 	return (
-		<form onSubmit={handleSubmit} className="space-y-6">
-			{errorMessage && (
-				<Error message={errorMessage} onClose={dismissError} />
-			)}
-			<Input
-				type="username"
-				name="username"
-				label="Username"
-				placeholder="Enter your username"
-				value={formData.username}
-				onChange={handleChange}
-				required
-			/>
-			<Input
-				type="password"
-				name="password"
-				label="Password"
-				placeholder="Enter your password"
-				value={formData.password}
-				onChange={handleChange}
-				required
-			/>
-			<div className="items-center">
-				<div className="float-right mb-3 text-sm">
-					<Link
-						href="/user/forgot-password"
-						className="font-medium text-purple-600 hover:text-purple-500"
-					>
-						Forgot password
-					</Link>
-				</div>
+		<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+			<div>
+				<Input type="text" {...register("username")} label="Username" />
+				{errors.username && (
+					<ErrorText message={errors.username.message} />
+				)}
 			</div>
-			<Button type="submit" className="w-full">
-				Sign in
+			<div>
+				<Input
+					type="password"
+					{...register("password")}
+					label="Password"
+				/>
+				{errors.password && (
+					<ErrorText message={errors.password.message} />
+				)}
+			</div>
+
+			<Button className="w-full" type="submit" disabled={isSubmitting}>
+				Submit
 			</Button>
+			{errors.root && <ErrorText message={errors.root.message} />}
 		</form>
 	);
 }
