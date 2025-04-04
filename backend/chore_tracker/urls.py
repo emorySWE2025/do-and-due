@@ -1,10 +1,12 @@
 from django.urls import path
-from .views import RegisterUser, LoginView, CreateGroup, IndexView, AddUsersToGroup, ViewGroup, CreateEvent
+from .views import (RegisterUser, LoginView, CreateGroup, IndexView, AddUsersToGroup, ViewGroup,
+                    CreateEvent, CurrentUserView)
 
 urlpatterns = [
     path('', IndexView.as_view(), name='index'),
     path('register/', RegisterUser.as_view(), name='register'),
     path('login/', LoginView.as_view(), name='login'),
+    path('get-current-user/', CurrentUserView.as_view(), name='get-current-user'),
     path('group/create/', CreateGroup.as_view(), name='create_group'),
     path('group/add_users/', AddUsersToGroup.as_view(), name='add_group'),
     path('group/view/', ViewGroup.as_view(), name='view_group'),

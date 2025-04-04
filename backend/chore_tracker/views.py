@@ -1,8 +1,10 @@
 from django.contrib.auth.models import User
 from django.contrib.auth import login
 from django.http import JsonResponse
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
 from chore_tracker.models import Group, Event
@@ -27,21 +29,23 @@ class RegisterUser(APIView):
         password = request.data.get('password')
 
         if User.objects.filter(username=username).exists():
-            return Response({'error': 'Username already exists'}, status=400)
+            return JsonResponse({'error': 'Username already exists'}, status=400)
 
         if User.objects.filter(email=email).exists():
-            return Response({'error': 'Email already in use'}, status=400)
+            return JsonResponse({'error': 'Email already in use'}, status=400)
 
         try:
             User.objects.create_user(username=username, email=email, password=password)
         except ValidationError as e:
-            return Response({'error': str(e)}, status=400)
+            return JsonResponse({'error': str(e)}, status=400)
 
-        return Response({'message': 'User registered successfully'}, status=201)
+        return JsonResponse({'message': 'User registered successfully'}, status=201)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class LoginView(APIView):
     """ User Login with JWT in Cookies """
+
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
@@ -53,28 +57,15 @@ class LoginView(APIView):
 
             login(request, user)
             refresh = RefreshToken.for_user(user)
-            response = Response({
+            response = JsonResponse({
                 'message': 'Login successful',
+                'refresh': str(refresh),
+                'access': str(refresh.access_token)
             })
-
-            response.set_cookie(
-                key='access_token',
-                value=str(refresh.access_token),
-                httponly=True,
-                secure=False,
-                samesite='Lax'
-            )
-            response.set_cookie(
-                key='refresh_token',
-                value=str(refresh),
-                httponly=True,
-                secure=False,
-                samesite='Lax'
-            )
 
             return response
         else:
-            return Response({'error': 'Invalid credentials'}, status=401)
+            return JsonResponse({'error': 'Invalid credentials'}, status=401)
 
 
 class CreateGroup(APIView):
@@ -179,8 +170,8 @@ class AddUsersToGroup(APIView):
             return JsonResponse({'error': 'Group not found'}, status=404)
         except Exception as e:
             return JsonResponse({'error': f'Failed to invite users: {str(e)}'}, status=500)
-        
-        
+
+
 class CreateEvent(APIView):
 
     def post(self, request):
@@ -226,3 +217,21 @@ class CreateEvent(APIView):
         return JsonResponse(
             {"success": False, "message": "Expected POST method"}, status=405
         )
+
+
+class CurrentUserView(APIView):
+    """ Fetches User Info for Auth """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if request.user.is_authenticated:
+            user = request.user
+            groups = user.groups.values('id', 'name')
+            return JsonResponse({
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'groups': list(groups)
+            })
+
+        return JsonResponse({'error': 'Forbidden'}, status=403)
