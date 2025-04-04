@@ -4,6 +4,7 @@ import CalendarFrame from "@/components/CalendarFrame";
 import ToDoFrame from "@/components/ToDoFrame";
 import GroupSelector from "@/components/GroupSelector";
 import CreateGroupFrame from "@/components/CreateGroupFrame";
+import UserAuthCheck from "@/components/UserAuthCheck";
 import {
 	DateStateData,
 	GroupDisplayData,
@@ -67,7 +68,7 @@ function HomeFrameContents({
 	}
 }
 
-export default function HomeFrame({ userData }: { userData: UserDisplayData }) {
+export default function HomePage() {
 	// query current date
 	const currentDate: Dayjs = dayjs();
 
@@ -78,26 +79,31 @@ export default function HomeFrame({ userData }: { userData: UserDisplayData }) {
 		events: [],
 	};
 
+	return (
+		<UserAuthCheck>
+			<HomeFrame createNewGroupPlaceholder={createNewGroupPlaceholder} />
+		</UserAuthCheck>
+	);
+}
+
+function HomeFrame({ createNewGroupPlaceholder }: { createNewGroupPlaceholder: GroupDisplayData }) {
 	// define state objects
 	const [groupState, updateGroupState] = useState<GroupStateData>({
 		direction: 1,
 		index: 0,
-		group:
-			userData.groups.length > 0
-				? userData.groups[0]
-				: createNewGroupPlaceholder,
+		group: createNewGroupPlaceholder,
 	});
 
 	const [dateState, updateDateState] = useState<DateStateData>({
-		current: currentDate,
-		display: currentDate,
-		target: currentDate,
+		current: dayjs(),
+		display: dayjs(),
+		target: dayjs(),
 	});
 
 	return (
 		<div className="m-auto h-max w-full max-w-5xl">
 			<GroupSelector
-				groups={[createNewGroupPlaceholder].concat(userData.groups)}
+				groups={[createNewGroupPlaceholder].concat([])}
 				groupState={groupState}
 				groupCallback={updateGroupState}
 			/>
