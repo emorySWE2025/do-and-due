@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import  UserAuthCheck from "@/components/UserAuthCheck";
+import {withAuth} from "@/components/UserAuthCheck";
 import PageLayout from "@/components/PageLayout";
 import { UserDisplayData } from "@/schema";
 
-export default function ProfilePage() {
+function ProfilePage() {
   const [userData, setUserData] = useState<UserDisplayData | null>(null);
 
   useEffect(() => {
@@ -41,7 +41,6 @@ export default function ProfilePage() {
   }
 
   return (
-    <UserAuthCheck>
       <PageLayout>
         <div className="m-auto h-full w-full pt-16 text-center">
           <h2 className="text-3xl font-bold mb-4">Profile</h2>
@@ -61,6 +60,6 @@ export default function ProfilePage() {
           </ul>
         </div>
       </PageLayout>
-    </UserAuthCheck>
   );
 }
+export default withAuth(ProfilePage)

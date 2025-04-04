@@ -1,56 +1,56 @@
 "use client";
-import { useEffect, useState } from "react";
+
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import type { ComponentType } from "react";
 
-export default function UserAuthCheck({ children }: { children: React.ReactNode }) {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [redirected, setRedirected] = useState(false);
-    const router = useRouter();
+export function withAuth<P extends object>(WrappedComponent: ComponentType<P>): ComponentType<P> {
+	return function AuthenticatedComponent(props: P) {
+		// for redirecting users
+		const router = useRouter();
+		// shows a loading screen while we're validating the tokens
+		const [loading, setLoading] = useState(true);
+		// check whether the user is logged in or not
+		const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-    useEffect(() => {
-        // if a redirect has already occurred, not redirecting again
-        if (redirected) return;
+		// grabs an access token and validates user, else if invalid/expired token, redirects to login page
+		useEffect(() => {
+			const accessToken = localStorage.getItem("access_token");
 
-        const accessToken = localStorage.getItem("access_token");
-        const refreshToken = localStorage.getItem("refresh_token");
-        console.log('Access Token:', accessToken);
-        console.log('Refresh Token:', refreshToken);
+			if (!accessToken) {
+				router.push("/user/login");
+				return;
+			}
 
-        if (!accessToken) {
-            setLoading(false);
-            router.push("/user/login");
-            setRedirected(true);
-            return;
-        }
+			fetch("http://127.0.0.1:8000/api/get-current-user/", {
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+					"Content-Type": "application/json",
+				},
+			})
+				.then((res) => {
+					if (!res.ok) throw new Error("Unauthenticated");
+					return res.json();
+				})
+				.then(() => {
+					setIsAuthenticated(true);
+					setLoading(false);
+				})
+				.catch(() => {
+					router.push("/user/login");
+				});
+		}, [router]);
 
-        fetch("http://127.0.0.1:8000/api/get-current-user/", {
-            method: "GET",
-            headers: {
-                "Authorization": `Bearer ${accessToken}`,
-                "Content-Type": "application/json"
-            }
-        })
-        .then(response => {
-            if (!response.ok) throw new Error("Not authenticated");
-            return response.json();
-        })
-        .then(data => {
-            console.log("User Data:", data);
-            setUser(data);
-            setLoading(false);
-        })
-        .catch(() => {
-            console.error("Authentication failed");
-            setLoading(false);
-            router.push("/user/login");
-            setRedirected(true);
-        });
-    }, [router, redirected]);
+		// updates while token is being validated
+		if (loading) {
+			console.log("validating credentials")
+		}
 
-    if (loading) {
-        return <div>Loading...</div>;
-    }
+		if (!isAuthenticated) {
+			return null;
+		}
 
-    return <>{children}</>;
+		// if token is valid, render the original page we wrapped
+		return <WrappedComponent {...props} />;
+	};
 }

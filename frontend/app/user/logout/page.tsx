@@ -1,12 +1,26 @@
-import PageLayout from "@/components/PageLayout";
+"use client";
+import {useRouter} from "next/navigation";
+import {withAuth} from "@/components/UserAuthCheck";
 
-export default function LoginPage() {
-	// placeholder page here, this should send a request to the logout api route
-	return (
-		<PageLayout>
-			<div className="m-auto h-full w-full cursor-progress pt-16 text-center text-purple-600">
-				Logging you out...
-			</div>
-		</PageLayout>
-	);
+function useLogout() {
+	const router = useRouter();
+	return () => {
+		localStorage.removeItem("access_token");
+		localStorage.removeItem("refresh_token");
+		router.push("/user/login");
+	};
+
 }
+
+function LogoutComponent(){
+	const logout = useLogout();
+  return (
+<button
+	onClick={logout}
+	className="mt-2 bg-red-500 text-white font-semibold px-2 py-0.5 rounded-lg shadow hover:bg-red-600 transition"
+> Log Out
+</button>
+  );
+}
+
+export default withAuth(LogoutComponent);
