@@ -10,7 +10,7 @@ import {
 	GroupDisplayData,
 	GroupStateData,
 	UserDisplayData,
-} from "@/schema";
+} from "@/schemas/fe.schema";
 import dayjs, { Dayjs } from "dayjs";
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
@@ -38,16 +38,18 @@ const animationVariants = {
 };
 
 function HomeFrameContents({
+	userData,
 	groupData,
 	dateState,
 	dateCallback,
 }: {
+	userData: UserDisplayData;
 	groupData: GroupDisplayData;
 	dateState: DateStateData;
 	dateCallback: CallableFunction;
 }) {
 	if (groupData.id === -1) {
-		return <CreateGroupFrame />;
+		return <CreateGroupFrame userId={userData.id} />;
 	} else {
 		return (
 			<div className="flex h-max w-full flex-row flex-nowrap gap-8 pt-8">
@@ -128,6 +130,7 @@ function HomeFrame({ createNewGroupPlaceholder }: { createNewGroupPlaceholder: G
 						groupData={groupState.group}
 						dateState={dateState}
 						dateCallback={updateDateState}
+						userData={userData}
 					/>
 				</motion.div>
 			</AnimatePresence>

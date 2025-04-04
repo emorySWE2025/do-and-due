@@ -3,7 +3,11 @@
 import dayjs, { Dayjs } from "dayjs";
 import weekday from "dayjs/plugin/weekday";
 import localeData from "dayjs/plugin/localeData";
-import { EventDisplayData, GroupDisplayData, DateStateData } from "@/schema";
+import {
+	EventDisplayData,
+	GroupDisplayData,
+	DateStateData,
+} from "@/schemas/fe.schema";
 
 dayjs.extend(weekday);
 dayjs.extend(localeData);

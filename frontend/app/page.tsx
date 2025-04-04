@@ -1,6 +1,6 @@
 import HomeFrame from "@/components/HomeFrame";
 import PageLayout from "@/components/PageLayout";
-import { UserDisplayData } from "@/schema";
+import { UserDisplayData } from "@/schemas/schema";
 
 const placeholderUser: UserDisplayData = {
 	id: 1,

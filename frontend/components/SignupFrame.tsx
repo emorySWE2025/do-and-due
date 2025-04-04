@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
 import Input from "@/components/Input";
 import Button from "@/components/Button";
-import Error from "@/components/Error";
-import PasswordRequirements from "@/components/PasswordReqs";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import Link from "next/link";
+import { registerUserAction } from "@/actions/users.server";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { registerUserSchema } from "@/actions/zod";
+import ErrorText from "@/components/ErrorText";
+import { RegisterUserClientResponse } from "@/schemas/transaction.schema";
 
 export default function SignupFrame() {
 	return (
@@ -30,141 +33,67 @@ export default function SignupFrame() {
 }
 
 function SignupForm() {
-	const [formData, setFormData] = useState({
-		username: "",
-		email: "",
-		password: "",
-	});
+	const {
+		register,
+		handleSubmit,
+		setError,
+		formState: { errors, isSubmitting },
+	} = useForm({ resolver: zodResolver(registerUserSchema) });
 
-	const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
-	const [errorMessage, setErrorMessage] = useState<string | null>(null);
-	const router = useRouter();
-
-	const dismissError = () => setErrorMessage("");
-
-	const validatePassword = (password: string) => {
-		const errors: string[] = [];
-		if (password.length < 8) errors.push("Must be at least 8 characters");
-		if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-			errors.push("Must contain one special character");
-		}
-		setPasswordErrors(errors);
-		return errors.length === 0;
-	};
-
-	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const { name, value } = e.target;
-		setFormData((prev) => ({
-			...prev,
-			[name]: value,
-		}));
-
-		if (name === "password") {
-			validatePassword(value);
-		}
-	};
-
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-
-		if (!validatePassword(formData.password)) {
-			console.log("Invalid password");
-			return;
-		}
-
-		try {
-			const res = await fetch("http://127.0.0.1:8000/api/register/", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					username: formData.username,
-					email: formData.email,
-					password: formData.password,
-				}),
-			});
-			if (!res.ok) {
-				const errorData = await res.json();
-				setErrorMessage(errorData.error || "Signup failed");
-			}
-
-			if (res.ok) {
-				console.log("Signup successful");
-
-				const loginRes = await fetch(
-					"http://127.0.0.1:8000/api/login/",
-					{
-						method: "POST",
-						headers: { "Content-Type": "application/json" },
-						credentials: "include",
-						body: JSON.stringify({
-							username: formData.username,
-							password: formData.password,
-						}),
-					},
-				);
-
-				if (loginRes.ok) {
-					console.log("Login successful");
-					router.push("/");
-				} else {
-					const errorData = await loginRes.json();
-					setErrorMessage(
-						errorData.error || "Login failed after signup",
-					);
-				}
-			} else {
-				const errorData = await res.json();
-				setErrorMessage(errorData.error || "Signup failed");
-			}
-		} catch (error) {
-			console.error("Error:", error);
-			// setErrorMessage();
+	const onSubmit = async (data: any) => {
+		console.log("Form submitted:", data);
+		const response: RegisterUserClientResponse =
+			await registerUserAction(data);
+		if (!response.ok) {
+			console.log(response.message);
+			// if the response wasn't ok, the error message will be stored at response.message
+			setError("root", { message: response.message });
+		} else {
+			// if response was ok, redirect to login
+			redirect("/user/login");
 		}
 	};
 
 	return (
-		<form onSubmit={handleSubmit} className="space-y-6">
-			{errorMessage && (
-				<Error message={errorMessage} onClose={dismissError} />
-			)}
+		<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+			<div>
+				<Input type="text" {...register("username")} label="Username" />
+				{errors.username && (
+					<ErrorText message={errors.username.message} />
+				)}
+			</div>
 
-			<Input
-				type="text"
-				name="username"
-				label="Username"
-				placeholder="Enter your username"
-				value={formData.username}
-				onChange={handleChange}
-				required
-			/>
-			<Input
-				type="email"
-				name="email"
-				label="Email"
-				placeholder="Enter your email"
-				value={formData.email}
-				onChange={handleChange}
-				required
-			/>
+			<div>
+				<Input type="text" {...register("email")} label="Email" />
+				{errors.email && <ErrorText message={errors.email.message} />}
+			</div>
+
 			<div>
 				<Input
 					type="password"
-					name="password"
+					{...register("password")}
 					label="Password"
-					placeholder="Create a password"
-					value={formData.password}
-					onChange={handleChange}
-					required
 				/>
-				<PasswordRequirements errors={passwordErrors} />
+				{errors.password && (
+					<ErrorText message={errors.password.message} />
+				)}
 			</div>
-			<Button
-				type="submit"
-				className="w-full"
-				disabled={passwordErrors.length > 0}
-			>
-				Get started
+
+			<div>
+				<Input
+					type="password"
+					{...register("confirmPassword")}
+					label="Confirm Password"
+				/>
+				{errors.confirmPassword && (
+					<ErrorText message={errors.confirmPassword.message} />
+				)}
+			</div>
+
+			<Button className="w-full" type="submit" disabled={isSubmitting}>
+				Submit
 			</Button>
+			{errors.root && <ErrorText message={errors.root.message} />}
 		</form>
 	);
 }
