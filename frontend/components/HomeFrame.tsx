@@ -4,9 +4,6 @@ import CalendarFrame from "@/components/CalendarFrame";
 import ToDoFrame from "@/components/ToDoFrame";
 import GroupSelector from "@/components/GroupSelector";
 import CreateGroupFrame from "@/components/CreateGroupFrame";
-import {withAuth} from "@/components/UserAuthCheck";
-import FetchUserData from "@/components/FetchUserData";
-
 import {
 	DateStateData,
 	GroupDisplayData,
@@ -70,49 +67,38 @@ function HomeFrameContents({
 	}
 }
 
-function HomePage() {
+export default function HomeFrame({ userData }: { userData: UserDisplayData }) {
 	// query current date
 	const currentDate: Dayjs = dayjs();
 
-	const { userData, loading, error } = FetchUserData();
-
-	if (loading) return <div>Loading...</div>;
-	if (error) return <div>Error: {error}</div>;
-	if (!userData) return <div>No user data found.</div>;
-
 	// this group object will be used to indicate when the user wants to create a new group
+	// this isn't a real group, it's just here to indicate the status of the homeframe component
 	const createNewGroupPlaceholder: GroupDisplayData = {
 		id: -1,
 		name: "new group",
 		events: [],
 	};
 
-	return (
- 		<HomeFrame createNewGroupPlaceholder={createNewGroupPlaceholder} userData={userData} />
-	);
-}
-
-function HomeFrame({ createNewGroupPlaceholder, userData }: {
-    createNewGroupPlaceholder: GroupDisplayData;
-    userData: UserDisplayData;
-}) {
 	// define state objects
 	const [groupState, updateGroupState] = useState<GroupStateData>({
 		direction: 1,
 		index: 0,
-		group: createNewGroupPlaceholder,
+		group:
+			userData.groups.length > 1
+				? userData.groups[1]
+				: createNewGroupPlaceholder,
 	});
 
 	const [dateState, updateDateState] = useState<DateStateData>({
-		current: dayjs(),
-		display: dayjs(),
-		target: dayjs(),
+		current: currentDate,
+		display: currentDate,
+		target: currentDate,
 	});
 
 	return (
 		<div className="m-auto h-max w-full max-w-5xl">
 			<GroupSelector
-				groups={[createNewGroupPlaceholder].concat([])}
+				groups={[createNewGroupPlaceholder].concat(userData.groups)}
 				groupState={groupState}
 				groupCallback={updateGroupState}
 			/>
@@ -146,4 +132,3 @@ function HomeFrame({ createNewGroupPlaceholder, userData }: {
 		</div>
 	);
 }
-export default withAuth(HomePage);
