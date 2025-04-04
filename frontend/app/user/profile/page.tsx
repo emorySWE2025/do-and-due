@@ -1,44 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import {withAuth} from "@/components/UserAuthCheck";
 import PageLayout from "@/components/PageLayout";
-import { UserDisplayData } from "@/schema";
+import FetchUserData from "@/components/FetchUserData";
 
 function ProfilePage() {
-  const [userData, setUserData] = useState<UserDisplayData | null>(null);
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const accessToken = localStorage.getItem("access_token");
-      if (!accessToken) return;
-
-      try {
-        const response = await fetch("http://127.0.0.1:8000/api/get-current-user/", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setUserData(data);
-        } else {
-          console.error("Failed to fetch user data.");
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
-
-    fetchUserData();
-  }, []);
-
+  const { userData, loading, error } = FetchUserData();
+  if (loading) return <div>Loading...</div>;
   if (!userData) {
     return <div>Loading...</div>;
   }
+  if (error) return <div>Error: {error}</div>;
 
   return (
       <PageLayout>
