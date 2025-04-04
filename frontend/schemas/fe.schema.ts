@@ -33,6 +33,7 @@ export interface GroupDisplayData {
 
 // expected format for general user display data passed to frontend pages
 export interface UserDisplayData {
+	email: string;
 	id: number;
 	username: string;
 	photoPath: string;

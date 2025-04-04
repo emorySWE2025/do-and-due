@@ -5,6 +5,8 @@ import ToDoFrame from "@/components/ToDoFrame";
 import GroupSelector from "@/components/GroupSelector";
 import CreateGroupFrame from "@/components/CreateGroupFrame";
 import {withAuth} from "@/components/UserAuthCheck";
+import FetchUserData from "@/components/FetchUserData";
+
 import {
 	DateStateData,
 	GroupDisplayData,
@@ -72,6 +74,12 @@ function HomePage() {
 	// query current date
 	const currentDate: Dayjs = dayjs();
 
+	const { userData, loading, error } = FetchUserData();
+
+	if (loading) return <div>Loading...</div>;
+	if (error) return <div>Error: {error}</div>;
+	if (!userData) return <div>No user data found.</div>;
+
 	// this group object will be used to indicate when the user wants to create a new group
 	const createNewGroupPlaceholder: GroupDisplayData = {
 		id: -1,
@@ -80,11 +88,14 @@ function HomePage() {
 	};
 
 	return (
-			<HomeFrame createNewGroupPlaceholder={createNewGroupPlaceholder} />
+ 		<HomeFrame createNewGroupPlaceholder={createNewGroupPlaceholder} userData={userData} />
 	);
 }
 
-function HomeFrame({ createNewGroupPlaceholder }: { createNewGroupPlaceholder: GroupDisplayData }) {
+function HomeFrame({ createNewGroupPlaceholder, userData }: {
+    createNewGroupPlaceholder: GroupDisplayData;
+    userData: UserDisplayData;
+}) {
 	// define state objects
 	const [groupState, updateGroupState] = useState<GroupStateData>({
 		direction: 1,
