@@ -26,6 +26,25 @@ export interface LoginUserClientResponse {
 }
 // --------------------------------------------------------------------------------------
 
+// NOT IMPLEMENTED ON THE BACKEND YET AFAIK
+// view public user data (requested by another user account) ----------------------------
+export interface ViewPublicUserRequest {
+	// fe > be
+	// params necessary to view data about a user
+	username: string;
+}
+
+export interface PublicUserData {
+	username: string;
+	photoUrl: string;
+}
+
+export interface ViewPublicUserResponse {
+	userExists: boolean;
+	userData?: PublicUserData; // optional, only returned if this user exists
+}
+// --------------------------------------------------------------------------------------
+
 // create group -------------------------------------------------------------------------
 export interface CreateGroupRequest {
 	// fe > be

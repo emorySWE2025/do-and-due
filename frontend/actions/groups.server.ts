@@ -41,7 +41,7 @@ export async function createGroupAction(
 		// if an error occurred on the frontend
 	} catch (error) {
 		// if an error occurred on the backend
-		console.log("sign up frontend error");
+		console.log("createGroupAction", error);
 		return {
 			ok: false,
 			message: "A frontend error occurred during registration!",

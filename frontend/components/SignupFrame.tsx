@@ -8,7 +8,7 @@ import { registerUserAction } from "@/actions/users.server";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerUserSchema } from "@/actions/zod";
-import ErrorText from "@/components/ErrorText";
+import { ErrorText, ErrorPopup } from "@/components/Errors";
 import { RegisterUserClientResponse } from "@/schemas/transaction.schema";
 
 export default function SignupFrame() {
@@ -56,6 +56,7 @@ function SignupForm() {
 
 	return (
 		<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+			{errors.root && <ErrorPopup message={errors.root.message} />}
 			<div>
 				<Input type="text" {...register("username")} label="Username" />
 				{errors.username && (
@@ -93,7 +94,6 @@ function SignupForm() {
 			<Button className="w-full" type="submit" disabled={isSubmitting}>
 				Submit
 			</Button>
-			{errors.root && <ErrorText message={errors.root.message} />}
 		</form>
 	);
 }
