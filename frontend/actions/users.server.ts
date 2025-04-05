@@ -15,34 +15,40 @@ import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adap
 import { cookies } from "next/headers";
 
 export const getCurrentSession = async (): Promise<UserDisplayData | null> => {
-	// test whether we can cache this
-	// try to get the access token from the request cookies
-	const cookieStore: ReadonlyRequestCookies = await cookies();
-	// console.log(cookieStore);
-	const token: string | null = cookieStore.get("access_token")?.value ?? null;
+	try {
+		// test whether we can cache this
+		// try to get the access token from the request cookies
+		const cookieStore: ReadonlyRequestCookies = await cookies();
+		// console.log(cookieStore);
+		const token: string | null =
+			cookieStore.get("access_token")?.value ?? null;
 
-	// if token is null, return user is null
-	if (token === null) {
-		console.log("no token found");
-		return null;
-	}
+		// if token is null, return user is null
+		if (token === null) {
+			console.log("no token found");
+			return null;
+		}
 
-	console.log("getting user data");
-	// otherwise try to retrieve user data
-	const response: Response = await fetch(
-		"http://127.0.0.1:8000/api/get-current-user/",
-		{
-			headers: {
-				Authorization: `Bearer ${token}`,
-				"Content-Type": "application/json",
+		console.log("getting user data");
+		// otherwise try to retrieve user data
+		const response: Response = await fetch(
+			"http://127.0.0.1:8000/api/get-current-user/",
+			{
+				headers: {
+					Authorization: `Bearer ${token}`,
+					"Content-Type": "application/json",
+				},
 			},
-		},
-	);
-	// console.log(response);
-	if (response.ok) {
-		console.log("response ok");
-		return await response.json();
-	} else {
+		);
+		// console.log(response);
+		if (response.ok) {
+			console.log("response ok");
+			return await response.json();
+		} else {
+			return null;
+		}
+	} catch (error) {
+		console.log("getCurrentSession", error);
 		return null;
 	}
 };
@@ -76,7 +82,7 @@ export async function registerUserAction(
 		// if an error occurred on the frontend
 	} catch (error) {
 		// if an error occurred on the backend
-		console.log("sign up frontend error");
+		console.log("registerUserAction", error);
 		return {
 			ok: false,
 			message: "A frontend error occurred during registration!",
@@ -134,7 +140,7 @@ export async function loginUserAction(
 		// if an error occurred on the frontend
 	} catch (error) {
 		// if an error occurred on the backend
-		console.log("login rejection - frontend");
+		console.log("loginUserAction", error);
 		return {
 			ok: false,
 			message: "A server error occurred during login!",
@@ -153,7 +159,7 @@ export async function setSessionTokenCookie(
 		httpOnly: true,
 		sameSite: "lax",
 		secure: process.env.NODE_ENV === "production",
-		// expires: expiresAt,
+		// expires: expiresAt, // are we handling token expiration on the backend?
 		path: "/",
 	});
 }

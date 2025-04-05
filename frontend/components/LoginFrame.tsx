@@ -6,7 +6,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import ErrorText from "@/components/ErrorText";
+import { ErrorText, ErrorPopup } from "@/components/Errors";
 import { loginUserAction } from "@/actions/users.server";
 import { loginUserSchema } from "@/actions/zod";
 import { LoginUserClientResponse } from "@/schemas/transaction.schema";
@@ -58,6 +58,7 @@ function LoginForm() {
 
 	return (
 		<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+			{errors.root && <ErrorPopup message={errors.root.message} />}
 			<div>
 				<Input type="text" {...register("username")} label="Username" />
 				{errors.username && (
@@ -78,7 +79,6 @@ function LoginForm() {
 			<Button className="w-full" type="submit" disabled={isSubmitting}>
 				Submit
 			</Button>
-			{errors.root && <ErrorText message={errors.root.message} />}
 		</form>
 	);
 }
