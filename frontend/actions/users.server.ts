@@ -48,7 +48,7 @@ export const getCurrentSession = async (): Promise<UserDisplayData | null> => {
 			return null;
 		}
 	} catch (error) {
-		console.log(error);
+		console.log("getCurrentSession", error);
 		return null;
 	}
 };
@@ -82,7 +82,7 @@ export async function registerUserAction(
 		// if an error occurred on the frontend
 	} catch (error) {
 		// if an error occurred on the backend
-		console.log("sign up frontend error");
+		console.log("registerUserAction", error);
 		return {
 			ok: false,
 			message: "A frontend error occurred during registration!",
@@ -140,7 +140,7 @@ export async function loginUserAction(
 		// if an error occurred on the frontend
 	} catch (error) {
 		// if an error occurred on the backend
-		console.log("login rejection - frontend");
+		console.log("loginUserAction", error);
 		return {
 			ok: false,
 			message: "A server error occurred during login!",
@@ -159,7 +159,7 @@ export async function setSessionTokenCookie(
 		httpOnly: true,
 		sameSite: "lax",
 		secure: process.env.NODE_ENV === "production",
-		// expires: expiresAt,
+		// expires: expiresAt, // are we handling token expiration on the backend?
 		path: "/",
 	});
 }
