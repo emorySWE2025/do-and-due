@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { redirect } from "next/navigation";
 import { CreateGroupClientResponse } from "@/schemas/transaction.schema";
 import { createGroupSchema } from "@/actions/zod";
-import ErrorText from "@/components/ErrorText";
+import { ErrorText, ErrorPopup } from "@/components/Errors";
 
 export default function CreateGroupFrame({ userId }: { userId: number }) {
 	return (
