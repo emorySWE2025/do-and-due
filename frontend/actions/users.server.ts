@@ -15,34 +15,40 @@ import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adap
 import { cookies } from "next/headers";
 
 export const getCurrentSession = async (): Promise<UserDisplayData | null> => {
-	// test whether we can cache this
-	// try to get the access token from the request cookies
-	const cookieStore: ReadonlyRequestCookies = await cookies();
-	// console.log(cookieStore);
-	const token: string | null = cookieStore.get("access_token")?.value ?? null;
+	try {
+		// test whether we can cache this
+		// try to get the access token from the request cookies
+		const cookieStore: ReadonlyRequestCookies = await cookies();
+		// console.log(cookieStore);
+		const token: string | null =
+			cookieStore.get("access_token")?.value ?? null;
 
-	// if token is null, return user is null
-	if (token === null) {
-		console.log("no token found");
-		return null;
-	}
+		// if token is null, return user is null
+		if (token === null) {
+			console.log("no token found");
+			return null;
+		}
 
-	console.log("getting user data");
-	// otherwise try to retrieve user data
-	const response: Response = await fetch(
-		"http://127.0.0.1:8000/api/get-current-user/",
-		{
-			headers: {
-				Authorization: `Bearer ${token}`,
-				"Content-Type": "application/json",
+		console.log("getting user data");
+		// otherwise try to retrieve user data
+		const response: Response = await fetch(
+			"http://127.0.0.1:8000/api/get-current-user/",
+			{
+				headers: {
+					Authorization: `Bearer ${token}`,
+					"Content-Type": "application/json",
+				},
 			},
-		},
-	);
-	// console.log(response);
-	if (response.ok) {
-		console.log("response ok");
-		return await response.json();
-	} else {
+		);
+		// console.log(response);
+		if (response.ok) {
+			console.log("response ok");
+			return await response.json();
+		} else {
+			return null;
+		}
+	} catch (error) {
+		console.log(error);
 		return null;
 	}
 };
