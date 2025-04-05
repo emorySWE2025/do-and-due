@@ -1,6 +1,5 @@
 import { getCurrentSession } from "@/actions/users.server";
 import LoginFrame from "@/components/LoginFrame";
-import PageLayout from "@/components/PageLayout";
 import { UserDisplayData } from "@/schemas/fe.schema";
 import { redirect } from "next/navigation";
 
@@ -12,8 +11,6 @@ export default async function LoginPage() {
 	}
 
 	return (
-		<PageLayout>
 			<LoginFrame />
-		</PageLayout>
 	);
 }

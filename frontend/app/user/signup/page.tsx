@@ -1,5 +1,4 @@
 import SignupFrame from "@/components/SignupFrame";
-import PageLayout from "@/components/PageLayout";
 import { UserDisplayData } from "@/schemas/fe.schema";
 import { getCurrentSession } from "@/actions/users.server";
 import { redirect } from "next/navigation";
@@ -12,8 +11,6 @@ export default async function SignupPage() {
 	}
 
 	return (
-		<PageLayout>
 			<SignupFrame />
-		</PageLayout>
 	);
 }
