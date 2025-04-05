@@ -36,6 +36,14 @@ const animationVariants = {
 	},
 };
 
+// this group object will be used to indicate when the user wants to create a new group
+// this isn't a real group, it's just here to indicate the status of the homeframe component
+const createNewGroupPlaceholder: GroupDisplayData = {
+	id: -1,
+	name: "new group",
+	events: [],
+};
+
 function HomeFrameContents({
 	userData,
 	groupData,
@@ -70,14 +78,6 @@ function HomeFrameContents({
 export default function HomeFrame({ userData }: { userData: UserDisplayData }) {
 	// query current date
 	const currentDate: Dayjs = dayjs();
-
-	// this group object will be used to indicate when the user wants to create a new group
-	// this isn't a real group, it's just here to indicate the status of the homeframe component
-	const createNewGroupPlaceholder: GroupDisplayData = {
-		id: -1,
-		name: "new group",
-		events: [],
-	};
 
 	// define state objects
 	const [groupState, updateGroupState] = useState<GroupStateData>({
