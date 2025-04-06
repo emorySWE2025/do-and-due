@@ -1,5 +1,5 @@
-import { getCurrentSession } from "@/actions/users.server";
 import LoginFrame from "@/components/LoginFrame";
+import { getCurrentSession } from "@/actions/users.server";
 import { UserDisplayData } from "@/schemas/fe.schema";
 import { redirect } from "next/navigation";
 
@@ -11,6 +11,8 @@ export default async function LoginPage() {
 	}
 
 	return (
+		<div className="flex h-[100vh] w-[100vw]">
 			<LoginFrame />
+		</div>
 	);
 }

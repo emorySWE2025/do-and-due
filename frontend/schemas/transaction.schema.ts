@@ -115,7 +115,7 @@ export interface AddUsersToGroupResponse {
 // --------------------------------------------------------------------------------------
 
 // create event -------------------------------------------------------------------------
-export interface AddEventRequest {
+export interface CreateEventRequest {
 	name: string;
 	date: string; // Format: "%Y-%m-%d %H:%M:%S" Lmk if you want to change this -Lance
 	repeatEvery?: string; // Should be in the set {"Daily", "Weekly", "Monthly"}
@@ -125,8 +125,13 @@ export interface AddEventRequest {
 	groupId: number;
 }
 
-export interface AddEventResponse {
+export interface CreateEventResponse {
 	success: boolean;
+	message: string;
+}
+export interface CreateEventClientResponse {
+	// response shared to the client
+	ok: boolean;
 	message: string;
 }
 // --------------------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 "use client";
 
 import CalendarFrame from "@/components/CalendarFrame";
-import ToDoFrame from "@/components/ToDoFrame";
+import EventsFrame from "@/components/EventsFrame";
 import GroupSelector from "@/components/GroupSelector";
 import CreateGroupFrame from "@/components/CreateGroupFrame";
 import {
@@ -41,6 +41,7 @@ const animationVariants = {
 const createNewGroupPlaceholder: GroupDisplayData = {
 	id: -1,
 	name: "new group",
+	members: [],
 	events: [],
 };
 
@@ -60,7 +61,7 @@ function HomeFrameContents({
 	} else {
 		return (
 			<div className="flex h-max w-full flex-row flex-nowrap gap-8 pt-8">
-				<ToDoFrame
+				<EventsFrame
 					groupData={groupData}
 					dateState={dateState}
 					dateCallback={dateCallback}

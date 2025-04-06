@@ -49,3 +49,12 @@ export const createGroupSchema = z.object({
 	groupName: z.string({ required_error: "Group name is required" }),
 	members: z.string(),
 });
+
+export const createEventSchema = z.object({
+	name: z.string({ required_error: "Event name is required" }),
+	date: z.string({ required_error: "A date must be specified" }).datetime(),
+	members: z.string({
+		required_error: "At least one member must be selected",
+	}),
+	repeats: z.string({ required_error: "Repeat frequency must be specified" }),
+});
