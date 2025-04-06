@@ -118,7 +118,7 @@ export interface AddUsersToGroupResponse {
 export interface AddEventRequest {
 	name: string;
 	date: string; // Format: "%Y-%m-%d %H:%M:%S" Lmk if you want to change this -Lance
-	repeatEvery?: number; // Let's do this as number of days for now. If it's a single event, please omit this
+	repeatEvery?: string; // Should be in the set {"Daily", "Weekly", "Monthly"}
 
 	memberNames: string[]; // Usernames
 

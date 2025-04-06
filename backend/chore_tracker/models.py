@@ -33,8 +33,8 @@ class Event(models.Model):
     name = models.CharField(max_length=60)
     first_date = models.DateField()
     first_time = models.TimeField()
-    #repeat_every = models.CharField(max_length=40, null=True, blank=True)
-    repeat_every = models.IntegerField(null=True)
+    repeat_every = models.CharField(max_length=40, null=True, blank=True)
+    #repeat_every = models.IntegerField(null=True)
 
     # Relationships
     group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="events")
