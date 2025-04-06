@@ -1,6 +1,6 @@
 "use server";
 
-import { CreateEventFormData } from "@/schemas/fe.schema";
+import { CreateEventFormData, GroupDisplayData } from "@/schemas/fe.schema";
 import {
 	CreateEventClientResponse,
 	CreateEventRequest,
@@ -10,14 +10,14 @@ import {
 
 export async function createEventAction(
 	formData: CreateEventFormData,
-	groupId: number,
+	groupData: GroupDisplayData,
 ): Promise<CreateEventClientResponse> {
 	// convert the form data to the format expected by the backend
 	const postData: CreateEventRequest = {
-		name: "",
-		date: "",
-		members: [],
-		groupId: 0,
+		name: formData.name,
+		date: formData.date,
+		memberNames: groupData.members.flatMap((member) => member.username),
+		groupId: groupData.id,
 	};
 
 	try {
