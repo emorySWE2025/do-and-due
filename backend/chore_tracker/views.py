@@ -176,47 +176,57 @@ class CreateEvent(APIView):
 
     def post(self, request):
 
-        if request.method == "POST":
-            try:
-                data = json.loads(request.body)
+        try:
+            data = json.loads(request.body)
 
-                # We have to check if the group exists before trying to create the event
+            # We have to check if the group exists before trying to create the event
+            try:
+                group = Group.objects.get(id=data.get("groupId"))
+            except Group.DoesNotExist:
+                return JsonResponse(
+                    {"success": False, "message": "No such Group"}, status=400
+                )
+
+            event = Event.objects.create(
+                # ID should be created automatically
+                name=data.get("name"),
+                # Need to determine date format
+                first_date=datetime.strptime(
+                    data.get("date"), "%Y-%m-%d %H:%M:%S"
+                ).date(),
+                first_time=datetime.strptime(
+                    data.get("date"), "%Y-%m-%d %H:%M:%S"
+                ).time(),
+                # TODO: Add this in, for now its not in interface in schema.ts
+                repeat_every="",
+                group=group,
+            )
+
+            # Get assigned members and add them. This is required due to the ManyToManyField
+            memberNames = data.get("memberNames", [])
+            for username in memberNames:
                 try:
-                    group = Group.objects.get(id=data.get("groupId"))
-                except Group.DoesNotExist:
+                    user = User.objects.get(username=username)
+
+                    group_members = group.members.all()
+                    if user in group_members:
+                        event.members.add(user)
+                    else:
+                        return JsonResponse(
+                            {"success": False, "message": f"User {username} not in group"}, status=400
+                        )
+                    
+                except User.DoesNotExist:
                     return JsonResponse(
-                        {"success": False, "message": "No such Group"}, status=400
+                        {"success": False, "message": f"User {username} not found"}, status=400
                     )
 
-                event = Event.objects.create(
-                    # ID should be created automatically
-                    name=data.get("name"),
-                    # Need to determine date format
-                    first_date=datetime.strptime(
-                        data.get("date"), "%Y-%m-%d %H:%M:%S"
-                    ).date(),
-                    first_time=datetime.strptime(
-                        data.get("date"), "%Y-%m-%d %H:%M:%S"
-                    ).time(),
-                    # TODO: Add this in, for now its not in interface in schema.ts
-                    repeat_every="",
-                    group=group,
-                )
+            return JsonResponse({"success": True, "message": ""}, status=200)
 
-                # Get assigned members and add them. This is required due to the ManyToManyField
-                members = User.objects.filter(id__in=data.get("memberIds", []))
-                event.members.set(members)
-
-                return JsonResponse({"success": True, "message": ""}, status=200)
-
-            except JSONDecodeError:
-                return JsonResponse(
-                    {"success": False, "message": "Invalid JSON in request"}, status=400
-                )
-
-        return JsonResponse(
-            {"success": False, "message": "Expected POST method"}, status=405
-        )
+        except JSONDecodeError:
+            return JsonResponse(
+                {"success": False, "message": "Invalid JSON in request"}, status=400
+            )
 
 
 class CurrentUserView(APIView):

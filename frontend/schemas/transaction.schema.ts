@@ -119,7 +119,7 @@ export interface AddEventRequest {
 	name: string;
 	date: string; // Format: "%Y-%m-%d %H:%M:%S" Lmk if you want to change this -Lance
 
-	memberIds: number[];
+	memberNames: string[]; // Usernames
 
 	groupId: number;
 }
