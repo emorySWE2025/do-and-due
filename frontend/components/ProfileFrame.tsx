@@ -1,4 +1,5 @@
 import { UserDisplayData } from "@/schemas/fe.schema";
+import Image from "next/image";
 
 export default function ProfileFrame({
 	userData,
@@ -6,11 +7,30 @@ export default function ProfileFrame({
 	userData: UserDisplayData;
 }) {
 	return (
-		<div className="m-auto h-full w-full pt-16 text-center">
-			<h2 className="mb-4 text-3xl font-bold">Profile</h2>
-			<p className="text-xl">Username: {userData.username}</p>
-			<p className="text-xl">Email: {userData.email}</p>
-			<h3 className="mt-4 text-2xl">Groups:</h3>
+		<div className="m-auto mt-16 h-max w-full max-w-xl space-y-4 rounded-lg border-[1px] border-gray-300 p-16 shadow-sm">
+			<h2 className="text-3xl font-bold">Profile</h2>
+			<div className="flex flex-row flex-nowrap items-center justify-between">
+				<div className="flex flex-col flex-nowrap gap-4">
+					<div className="flex flex-row flex-nowrap items-center gap-2">
+						<div className="font-semibold">Username: </div>
+						<div className="text-gray-600">{userData.username}</div>
+					</div>
+					<div className="flex flex-row flex-nowrap items-center gap-2">
+						<div className="font-semibold">Email: </div>
+						<div className="text-gray-600">{userData.email}</div>
+					</div>
+				</div>
+				<div className="">
+					<Image
+						src="/profile-placeholder.png"
+						alt="Profile"
+						width={96}
+						height={96}
+						className="rounded-[50%] object-cover"
+					/>
+				</div>
+			</div>
+			<div className="font-semibold">Groups:</div>
 			<ul>
 				{userData.groups.length > 0 ? (
 					userData.groups.map((group, index) => (
@@ -19,7 +39,7 @@ export default function ProfileFrame({
 						</li>
 					))
 				) : (
-					<p>No groups found</p>
+					<div className="text-gray-600">No groups found</div>
 				)}
 			</ul>
 		</div>
