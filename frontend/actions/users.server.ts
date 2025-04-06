@@ -90,9 +90,9 @@ export async function registerUserAction(
 	}
 }
 
-export async function logoutUserAction(userData: UserDisplayData) {
+export async function logoutUserAction() {
 	// invalidate sessions in the database
-	// DOES THIS EXIST?
+	// when this exists we need to make sure this function receives the current userData
 
 	// clear local cookies
 	await deleteSessionTokenCookie();
