@@ -99,6 +99,9 @@ class CreateGroup(APIView):
             )
             group.creator = user
             group.save()
+
+            group.members.add(user)
+            group.save()
             
             return JsonResponse({'message': 'Group created successfully'}, status=201)
         except Exception as e:
@@ -120,7 +123,7 @@ class ViewGroup(APIView):
             group = Group.objects.get(id=group_id)
             members = group.members.all()
             events = group.events.all()
-            costs = group.costs.all()
+            # costs = group.costs.all()
 
             return JsonResponse({
                 'group': {
@@ -308,11 +311,20 @@ class CurrentUserView(APIView):
         if request.user.is_authenticated:
             user = request.user
             # groups = user.groups.values('id', 'name')
-            groups = Group.objects.filter(creator=user).values('id', 'name')
+            groups = Group.objects.filter(members__in=[user]).prefetch_related('events')
+
+            group_data = []
+            for group in groups:
+                events = group.events.all().values('id', 'name', 'first_date', 'first_time', 'repeat_every') # type: ignore
+                group_data.append({
+                    'id': group.id,
+                    'name': group.name,
+                    'events': list(events)
+                })
 
             return JsonResponse({
                 'id': user.id,
                 'username': user.username,
                 'email': user.email,
-                'groups': list(groups)
+                'groups': group_data
             })
