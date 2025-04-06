@@ -6,13 +6,14 @@ import { redirect } from "next/navigation";
 
 const placeholderUser: UserDisplayData = {
 	id: 1,
-	username: "bea-bm",
+	username: "bea",
 	email: "test@test.com",
 	photoPath: "/profile-placeholder.png",
 	groups: [
 		{
 			id: 101,
 			name: "Home 🏠︎",
+			members: ["bea", "vee"],
 			events: [
 				{
 					name: "Vacuum the living room",
@@ -74,6 +75,7 @@ const placeholderUser: UserDisplayData = {
 		{
 			id: 102,
 			name: "Chicago Trip 🏙️",
+			members: ["bea", "vee", "kaily", "tif"],
 			events: [
 				{
 					name: "Take out the trash",

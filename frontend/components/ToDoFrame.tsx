@@ -79,9 +79,6 @@ export default function ToDoFrame({
 
 	return (
 		<div className="h-max w-1/2 rounded-lg border-[1px] border-gray-300 p-4 shadow-sm">
-			<div className="h-max w-full text-center text-lg font-[500]">
-				To-Do
-			</div>
 			<div className="flex h-max flex-row flex-nowrap items-center justify-between p-1">
 				<button
 					onClick={handlePrevDay}
@@ -102,7 +99,7 @@ export default function ToDoFrame({
 						<path d="m15 18-6-6 6-6" />
 					</svg>
 				</button>
-				<div className="w-full text-center text-sm leading-6 text-gray-600">
+				<div className="w-full text-center text-lg font-[500]">
 					{dateState.target.format("MMMM D, YYYY")}
 				</div>
 				<button

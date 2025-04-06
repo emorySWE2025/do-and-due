@@ -28,6 +28,7 @@ export interface EventDisplayData {
 export interface GroupDisplayData {
 	id: number;
 	name: string;
+	members: string[];
 	events: EventDisplayData[];
 }
 
