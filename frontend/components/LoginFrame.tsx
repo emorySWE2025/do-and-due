@@ -7,9 +7,11 @@ import { redirect } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ErrorText, ErrorPopup } from "@/components/Errors";
-import { loginUserAction } from "@/actions/users.server";
+import { getCurrentSession, loginUserAction } from "@/actions/users.server";
 import { loginUserSchema } from "@/actions/zod";
 import { LoginUserClientResponse } from "@/schemas/transaction.schema";
+import { useRouter } from "next/navigation";
+import { UserDisplayData } from "@/schemas/fe.schema";
 
 export default function LoginFrame() {
 	return (
@@ -42,17 +44,20 @@ function LoginForm() {
 		setError,
 		formState: { errors, isSubmitting },
 	} = useForm({ resolver: zodResolver(loginUserSchema) });
+	const router = useRouter();
 
 	const onSubmit = async (data: any) => {
-		const response: LoginUserClientResponse = await loginUserAction(data);
-		if (!response.ok) {
-			console.log(response.message);
-			// if the response wasn't ok, the error message will be stored at response.message
-			setError("root", { message: response.message });
-		} else {
-			// if response was ok, redirect to root
-			redirect("/");
-		}
+		await loginUserAction(data).then(
+			async (response: LoginUserClientResponse) => {
+				if (!response.ok) {
+					console.log(response.message);
+					// if the response wasn't ok, the error message will be stored at response.message
+					setError("root", { message: response.message });
+				} else {
+					router.push("/");
+				}
+			},
+		);
 	};
 
 	return (
