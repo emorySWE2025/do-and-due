@@ -115,17 +115,22 @@ export interface AddUsersToGroupResponse {
 // --------------------------------------------------------------------------------------
 
 // create event -------------------------------------------------------------------------
-export interface AddEventRequest {
+export interface CreateEventRequest {
 	name: string;
 	date: string; // Format: "%Y-%m-%d %H:%M:%S" Lmk if you want to change this -Lance
 
-	memberIds: number[];
+	members: string[]; // might be easier to pass usernames here?
 
 	groupId: number;
 }
 
-export interface AddEventResponse {
+export interface CreateEventResponse {
 	success: boolean;
+	message: string;
+}
+export interface CreateEventClientResponse {
+	// response shared to the client
+	ok: boolean;
 	message: string;
 }
 // --------------------------------------------------------------------------------------
