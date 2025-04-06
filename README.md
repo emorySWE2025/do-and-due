@@ -26,6 +26,10 @@ Clone the repository and `cd` into it.
 2. Use `npm install` to install dependencies
 3. Finally, run the frontend server with `npm run dev`
 
+### Running the Unit Tests
+- run the command `python -m pytest --cov=chore_tracker --cov-report=html`
+- navigate to  `/htmlcov/index.html` to see the coverage
+
 ## Demo
 
 ![demo](./demo.gif)
