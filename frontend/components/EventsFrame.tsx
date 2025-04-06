@@ -8,7 +8,7 @@ import {
 import dayjs, { Dayjs } from "dayjs";
 import { JSX } from "react";
 
-interface ToDo {
+interface Event {
 	label: string;
 	completed: boolean;
 }
@@ -37,7 +37,7 @@ function filterEventsByDate(events: EventDisplayData[], targetDate: Dayjs) {
 	);
 }
 
-export default function ToDoFrame({
+export default function EventsFrame({
 	groupData,
 	dateState,
 	dateCallback,
