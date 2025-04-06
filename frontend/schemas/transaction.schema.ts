@@ -118,8 +118,9 @@ export interface AddUsersToGroupResponse {
 export interface AddEventRequest {
 	name: string;
 	date: string; // Format: "%Y-%m-%d %H:%M:%S" Lmk if you want to change this -Lance
+	repeatEvery?: string; // Should be in the set {"Daily", "Weekly", "Monthly"}
 
-	memberIds: number[];
+	memberNames: string[]; // Usernames
 
 	groupId: number;
 }
@@ -128,4 +129,18 @@ export interface AddEventResponse {
 	success: boolean;
 	message: string;
 }
+// --------------------------------------------------------------------------------------
+
+// change users assigned to event -------------------------------------------------------
+export interface ChangeEventMembersRequest {
+	name: string;
+	memberNames: string[]; // Usernames
+	groupId: number;
+}
+
+export interface ChangeEventMembersResponse {
+	success: boolean;
+	message: string;
+}
+
 // --------------------------------------------------------------------------------------

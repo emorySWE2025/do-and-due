@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
-from chore_tracker.models import Group, Event
+from chore_tracker.models import Group, Event, EventOccurrence
 import datetime
 import json
 from json import JSONDecodeError
@@ -175,50 +175,117 @@ class AddUsersToGroup(APIView):
 
 
 class CreateEvent(APIView):
+    """ Create an Event """
 
     def post(self, request):
 
-        if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+
+            # We have to check if the group exists before trying to create the event
             try:
-                data = json.loads(request.body)
-
-                # We have to check if the group exists before trying to create the event
-                try:
-                    group = Group.objects.get(id=data.get("groupId"))
-                except Group.DoesNotExist:
-                    return JsonResponse(
-                        {"success": False, "message": "No such Group"}, status=400
-                    )
-
-                event = Event.objects.create(
-                    # ID should be created automatically
-                    name=data.get("name"),
-                    # Need to determine date format
-                    first_date=datetime.strptime(
-                        data.get("date"), "%Y-%m-%d %H:%M:%S"
-                    ).date(),
-                    first_time=datetime.strptime(
-                        data.get("date"), "%Y-%m-%d %H:%M:%S"
-                    ).time(),
-                    # TODO: Add this in, for now its not in interface in schema.ts
-                    repeat_every="",
-                    group=group,
-                )
-
-                # Get assigned members and add them. This is required due to the ManyToManyField
-                members = User.objects.filter(id__in=data.get("memberIds", []))
-                event.members.set(members)
-
-                return JsonResponse({"success": True, "message": ""}, status=200)
-
-            except JSONDecodeError:
+                group = Group.objects.get(id=data.get("groupId"))
+            except Group.DoesNotExist:
                 return JsonResponse(
-                    {"success": False, "message": "Invalid JSON in request"}, status=400
+                    {"success": False, "message": "No such Group"}, status=400
                 )
 
-        return JsonResponse(
-            {"success": False, "message": "Expected POST method"}, status=405
-        )
+            event = Event.objects.create(
+                # ID should be created automatically
+                name=data.get("name"),
+                # Need to determine date format
+                first_date=datetime.strptime(
+                    data.get("date"), "%Y-%m-%d %H:%M:%S"
+                ).date(),
+                first_time=datetime.strptime(
+                    data.get("date"), "%Y-%m-%d %H:%M:%S"
+                ).time(),
+                repeat_every=data.get("repeatEvery") if "repeatEvery" in data else None,
+                group=group,
+            )
+
+            # Get assigned members and add them. This is required due to the ManyToManyField
+            group_members = group.members.all()
+            memberNames = data.get("memberNames", [])
+
+            for username in memberNames:
+                try:
+                    user = User.objects.get(username=username)
+
+                    if user in group_members:
+                        event.members.add(user)
+                    else:
+                        return JsonResponse(
+                            {"success": False, "message": f"User {username} not in group"}, status=400
+                        )
+                    
+                except User.DoesNotExist:
+                    return JsonResponse(
+                        {"success": False, "message": f"User {username} not found"}, status=400
+                    )
+                
+            # TODO: Add an occurrence of the Event 
+            #       For recurring Events, we need to add multiple. 
+            #       Maybe we can make a new one when the date/time for previous one has passed?
+
+            return JsonResponse({"success": True, "message": ""}, status=200)
+
+        except JSONDecodeError:
+            return JsonResponse(
+                {"success": False, "message": "Invalid JSON in request"}, status=400
+            )
+        
+
+class ChangeEventMembers(APIView):
+    """ Change who is assigned to an event """
+
+    def post(self, request):
+
+        try:
+            data = json.loads(request.body)
+
+            # Check that the group is valid
+            try:
+                group = Group.objects.get(id=data.get("groupId"))
+            except Group.DoesNotExist:
+                return JsonResponse(
+                    {"success": False, "message": "No such Group"}, status=400
+                )
+
+            # Check if the event exists
+            try:
+                event = Event.objects.get(name=data.get("name"), group=group)
+            except Event.DoesNotExist:
+                return JsonResponse(
+                    {"success": False, "message": "No such Event"}, status=400
+                )
+
+            # Check that members to assign exist and are in the group. Then, assign them
+            group_members = group.members.all()
+            memberNames = data.get("memberNames", [])
+            
+            for username in memberNames:
+                try:
+                    user = User.objects.get(username=username)
+
+                    if not user in group_members:
+                        return JsonResponse(
+                            {"success": False, "message": f"User {username} not in group"}, status=400
+                        )
+                    
+                except User.DoesNotExist:
+                    return JsonResponse(
+                        {"success": False, "message": f"User {username} not found"}, status=400
+                    )
+                
+            event.members.set(memberNames)
+
+            return JsonResponse({"success": True, "message": ""}, status=200)
+
+        except JSONDecodeError:
+            return JsonResponse(
+                {"success": False, "message": "Invalid JSON in request"}, status=400
+            )
 
 
 class CurrentUserView(APIView):
