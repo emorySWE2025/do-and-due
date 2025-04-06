@@ -13,9 +13,9 @@ import { RegisterUserClientResponse } from "@/schemas/transaction.schema";
 
 export default function SignupFrame() {
 	return (
-		<div className="m-auto h-full max-w-md space-y-8 py-12">
+		<div className="m-auto h-max w-full max-w-lg space-y-8 rounded-2xl border-[1px] border-gray-300 p-16 shadow-sm">
 			<div className="text-center">
-				<h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+				<h2 className="text-3xl font-extrabold text-gray-900">
 					Create an account
 				</h2>
 			</div>
@@ -41,7 +41,6 @@ function SignupForm() {
 	} = useForm({ resolver: zodResolver(registerUserSchema) });
 
 	const onSubmit = async (data: any) => {
-		console.log("Form submitted:", data);
 		const response: RegisterUserClientResponse =
 			await registerUserAction(data);
 		if (!response.ok) {
