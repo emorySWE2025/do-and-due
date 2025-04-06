@@ -1,5 +1,7 @@
 import { UserDisplayData } from "@/schemas/fe.schema";
 import Image from "next/image";
+import Button from "@/components/Button";
+import Link from "next/link";
 
 export default function ProfileFrame({
 	userData,
@@ -42,6 +44,9 @@ export default function ProfileFrame({
 					<div className="text-gray-600">No groups found</div>
 				)}
 			</ul>
+			<Link href={"/user/logout"} className="mt-12 block">
+				<Button className="w-full">Log Out</Button>
+			</Link>
 		</div>
 	);
 }
