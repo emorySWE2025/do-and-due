@@ -60,7 +60,7 @@ function HomeFrameContents({
 		return <CreateGroupFrame userId={userData.id} />;
 	} else {
 		return (
-			<div className="flex h-max w-full flex-row flex-nowrap gap-8 pt-8">
+			<div className="flex h-max w-full flex-row flex-nowrap gap-8">
 				<EventsFrame
 					groupData={groupData}
 					dateState={dateState}
