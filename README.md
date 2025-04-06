@@ -4,8 +4,8 @@
 
 ## Sprint 4 Tasks to Complete
 
-1. _pending_
-2. _pending_
+1. Make events repeatable with different time frequencies (daily, weekly, monthly etc.)
+2. Add the UI and backend routes necessary so users can edit details and members in their groups
 3. _pending_
 4. _pending_
 
