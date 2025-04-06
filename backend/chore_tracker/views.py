@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.contrib.auth import login
 from django.http import JsonResponse
+from django.utils.dateparse import parse_datetime
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.permissions import IsAuthenticated
@@ -36,7 +37,7 @@ class RegisterUser(APIView):
 
         try:
             User.objects.create_user(username=username, email=email, password=password)
-        except ValidationError as e:
+        except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
 
         return JsonResponse({'message': 'User registered successfully'}, status=201)
@@ -74,7 +75,8 @@ class CreateGroup(APIView):
     def post(self, request):
         name = request.data.get('name')
         status = request.data.get('status')
-        expiration = request.data.get('expiration')
+        expiration_raw = request.data.get('expiration')
+        expiration = parse_datetime(expiration_raw) if expiration_raw else None
         timezone = request.data.get('timezone')
         creator = request.user
 
@@ -233,5 +235,3 @@ class CurrentUserView(APIView):
                 'email': user.email,
                 'groups': list(groups)
             })
-
-        return JsonResponse({'error': 'Forbidden'}, status=403)
