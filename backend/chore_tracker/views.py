@@ -1,4 +1,5 @@
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.contrib.auth import login
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
@@ -11,6 +12,8 @@ from chore_tracker.models import Group, Event
 import datetime
 import json
 from json import JSONDecodeError
+
+User = get_user_model()
 
 
 class IndexView(APIView):
@@ -81,7 +84,7 @@ class CreateGroup(APIView):
         creator = request.data.get('groupCreatorId')
         user = User.objects.get(id=creator)
         # creator = request.user
-        print(user)
+        print(creator)
 
 
         try:
@@ -90,10 +93,10 @@ class CreateGroup(APIView):
                 status=status,
                 expiration=expiration,
                 timezone=timezone,
-                creator = user
 
             )
             group.creator = user
+            group.members.add(user)
             group.save()
             
             return JsonResponse({'message': 'Group created successfully'}, status=201)
@@ -236,7 +239,9 @@ class CurrentUserView(APIView):
     def get(self, request):
         if request.user.is_authenticated:
             user = request.user
-            groups = user.groups.values('id', 'name')
+            # groups = user.groups.values('id', 'name')
+            groups = Group.objects.filter(creator=user).values('id', 'name')
+
             return JsonResponse({
                 'id': user.id,
                 'username': user.username,

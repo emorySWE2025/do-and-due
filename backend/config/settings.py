@@ -91,7 +91,7 @@ DATABASES = {
     }
 }
 
-# AUTH_USER_MODEL = 'chore_tracker.User'
+AUTH_USER_MODEL = 'chore_tracker.User'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
