@@ -1,16 +1,21 @@
 from django.db import models
+from django.contrib.auth.models import AbstractBaseUser
+from django.conf import settings
 
 
-class User(models.Model):
+class User(AbstractBaseUser):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=40)
-    username = models.CharField(max_length=40)
+    username = models.CharField(max_length=40, unique=True)
     password = models.CharField(max_length=162)
     email = models.EmailField(max_length=60)
     photo_url = models.CharField(max_length=60, default="None")
 
     def __str__(self):
         return self.username
+    
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['email']
 
 
 class Group(models.Model):

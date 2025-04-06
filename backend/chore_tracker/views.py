@@ -72,28 +72,38 @@ class CreateGroup(APIView):
     """ Create a Group """
 
     def post(self, request):
-        name = request.data.get('name')
-        status = request.data.get('status')
-        expiration = request.data.get('expiration')
-        timezone = request.data.get('timezone')
-        creator = request.user
+
+
+        name = request.data.get('groupName')
+        status = request.data.get('groupStatus')
+        expiration = request.data.get('groupExpiration')
+        timezone = request.data.get('groupTimezone')
+        creator = request.data.get('groupCreatorId')
+        user = User.objects.get(id=creator)
+        # creator = request.user
+        print(user)
+
 
         try:
-            group = Group.objects.create(
+            group = Group(
                 name=name,
                 status=status,
                 expiration=expiration,
                 timezone=timezone,
-                creator=creator
+                creator = user
+
             )
-
-            group.members.add(creator)
-
+            group.creator = user
+            group.save()
+            
             return JsonResponse({'message': 'Group created successfully'}, status=201)
-        except ValidationError as e:
-            return JsonResponse({'error': str(e)}, status=400)
         except Exception as e:
-            return JsonResponse({'error': 'Failed to create group: ' + str(e)}, status=500)
+            print(e)
+            return JsonResponse({'error': 'Failed to create group'}, status=500)
+        # except ValidationError as e:
+        #     return JsonResponse({'error': str(e)}, status=400)
+        # except Exception as e:
+        #     return JsonResponse({'error': 'Failed to create group: ' + str(e)}, status=500)
 
 
 class ViewGroup(APIView):
