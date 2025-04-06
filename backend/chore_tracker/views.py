@@ -98,7 +98,6 @@ class CreateGroup(APIView):
 
             )
             group.creator = user
-            group.members.add(user)
             group.save()
             
             return JsonResponse({'message': 'Group created successfully'}, status=201)
