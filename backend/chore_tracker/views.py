@@ -1,4 +1,5 @@
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.contrib.auth import login
 from django.http import JsonResponse
 from django.utils.dateparse import parse_datetime
@@ -12,6 +13,8 @@ from chore_tracker.models import Group, Event, EventOccurrence
 import datetime
 import json
 from json import JSONDecodeError
+
+User = get_user_model()
 
 
 class IndexView(APIView):
@@ -73,29 +76,38 @@ class CreateGroup(APIView):
     """ Create a Group """
 
     def post(self, request):
-        name = request.data.get('name')
-        status = request.data.get('status')
-        expiration_raw = request.data.get('expiration')
+
+
+        name = request.data.get('groupName')
+        status = request.data.get('groupStatus')
+        expiration_raw = request.data.get('groupExpiration')
         expiration = parse_datetime(expiration_raw) if expiration_raw else None
-        timezone = request.data.get('timezone')
-        creator = request.user
+        timezone = request.data.get('groupTimezone')
+        creator = request.data.get('groupCreatorId')
+        user = User.objects.get(id=creator)
+        # creator = request.user
+        print(creator)
+
 
         try:
-            group = Group.objects.create(
+            group = Group(
                 name=name,
                 status=status,
                 expiration=expiration,
                 timezone=timezone,
-                creator=creator
+
             )
-
-            group.members.add(creator)
-
+            group.creator = user
+            group.save()
+            
             return JsonResponse({'message': 'Group created successfully'}, status=201)
-        except ValidationError as e:
-            return JsonResponse({'error': str(e)}, status=400)
         except Exception as e:
-            return JsonResponse({'error': 'Failed to create group: ' + str(e)}, status=500)
+            print(e)
+            return JsonResponse({'error': 'Failed to create group'}, status=500)
+        # except ValidationError as e:
+        #     return JsonResponse({'error': str(e)}, status=400)
+        # except Exception as e:
+        #     return JsonResponse({'error': 'Failed to create group: ' + str(e)}, status=500)
 
 
 class ViewGroup(APIView):
@@ -295,7 +307,9 @@ class CurrentUserView(APIView):
     def get(self, request):
         if request.user.is_authenticated:
             user = request.user
-            groups = user.groups.values('id', 'name')
+            # groups = user.groups.values('id', 'name')
+            groups = Group.objects.filter(creator=user).values('id', 'name')
+
             return JsonResponse({
                 'id': user.id,
                 'username': user.username,
