@@ -16,6 +16,7 @@ import { cookies } from "next/headers";
 
 export const getCurrentSession = async (): Promise<UserDisplayData | null> => {
 	try {
+		console.log("getting user data");
 		// test whether we can cache this
 		// try to get the access token from the request cookies
 		const cookieStore: ReadonlyRequestCookies = await cookies();
@@ -29,7 +30,6 @@ export const getCurrentSession = async (): Promise<UserDisplayData | null> => {
 			return null;
 		}
 
-		console.log("getting user data");
 		// otherwise try to retrieve user data
 		const response: Response = await fetch(
 			"http://127.0.0.1:8000/api/get-current-user/",
@@ -90,9 +90,9 @@ export async function registerUserAction(
 	}
 }
 
-export async function logoutUserAction(userData: UserDisplayData) {
+export async function logoutUserAction() {
 	// invalidate sessions in the database
-	// DOES THIS EXIST?
+	// when this exists we need to make sure this function receives the current userData
 
 	// clear local cookies
 	await deleteSessionTokenCookie();
@@ -122,7 +122,7 @@ export async function loginUserAction(
 			const refreshToken = data.refresh;
 
 			if (accessToken && refreshToken) {
-				await setSessionTokenCookie(accessToken);
+				await setSessionTokenCookie(accessToken, refreshToken);
 				console.log("Access token set.");
 			} else {
 				console.log("No access token or refresh token received.");
@@ -149,13 +149,21 @@ export async function loginUserAction(
 }
 
 export async function setSessionTokenCookie(
-	token: string,
+	accessToken: string,
+	refreshToken: string,
 	// expiresAt: Date,
 ): Promise<void> {
 	"use server";
 	// get cookies from the browser and set the session token
 	const cookieStore: ReadonlyRequestCookies = await cookies();
-	cookieStore.set("access_token", token, {
+	cookieStore.set("access_token", accessToken, {
+		httpOnly: true,
+		sameSite: "lax",
+		secure: process.env.NODE_ENV === "production",
+		// expires: expiresAt, // are we handling token expiration on the backend?
+		path: "/",
+	});
+	cookieStore.set("refresh_token", refreshToken, {
 		httpOnly: true,
 		sameSite: "lax",
 		secure: process.env.NODE_ENV === "production",
@@ -168,6 +176,13 @@ export async function deleteSessionTokenCookie(): Promise<void> {
 	"use server";
 	const cookieStore: ReadonlyRequestCookies = await cookies();
 	cookieStore.set("access_token", "", {
+		httpOnly: true,
+		sameSite: "lax",
+		secure: process.env.NODE_ENV === "production",
+		maxAge: 0,
+		path: "/",
+	});
+	cookieStore.set("refresh_token", "", {
 		httpOnly: true,
 		sameSite: "lax",
 		secure: process.env.NODE_ENV === "production",

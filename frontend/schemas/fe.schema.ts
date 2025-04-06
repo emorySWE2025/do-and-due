@@ -28,6 +28,7 @@ export interface EventDisplayData {
 export interface GroupDisplayData {
 	id: number;
 	name: string;
+	members: string[];
 	events: EventDisplayData[];
 }
 
@@ -59,5 +60,11 @@ export interface LoginUserFormData {
 export interface CreateGroupFormData {
 	groupName: string;
 	groupMemberUsernames?: string[]; // bea: i think ideally this is an optional param at group creation
+}
+
+export interface CreateEventFormData {
+	name: string;
+	date: string;
+	members: string;
 }
 // --------------------------------------------------------------------------------------

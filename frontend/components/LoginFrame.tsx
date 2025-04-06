@@ -7,15 +7,17 @@ import { redirect } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ErrorText, ErrorPopup } from "@/components/Errors";
-import { loginUserAction } from "@/actions/users.server";
+import { getCurrentSession, loginUserAction } from "@/actions/users.server";
 import { loginUserSchema } from "@/actions/zod";
 import { LoginUserClientResponse } from "@/schemas/transaction.schema";
+import { useRouter } from "next/navigation";
+import { UserDisplayData } from "@/schemas/fe.schema";
 
 export default function LoginFrame() {
 	return (
-		<div className="m-auto h-full max-w-md space-y-8 py-12">
+		<div className="m-auto h-max w-full max-w-lg space-y-8 rounded-2xl border-[1px] border-gray-300 p-16 shadow-sm">
 			<div className="text-center">
-				<h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+				<h2 className="text-3xl font-extrabold text-gray-900">
 					Log in to your account
 				</h2>
 				<p className="mt-2 text-sm text-gray-600">
@@ -42,18 +44,20 @@ function LoginForm() {
 		setError,
 		formState: { errors, isSubmitting },
 	} = useForm({ resolver: zodResolver(loginUserSchema) });
+	const router = useRouter();
 
 	const onSubmit = async (data: any) => {
-		console.log("Form submitted:", data);
-		const response: LoginUserClientResponse = await loginUserAction(data);
-		if (!response.ok) {
-			console.log(response.message);
-			// if the response wasn't ok, the error message will be stored at response.message
-			setError("root", { message: response.message });
-		} else {
-			// if response was ok, redirect to root
-			redirect("/");
-		}
+		await loginUserAction(data).then(
+			async (response: LoginUserClientResponse) => {
+				if (!response.ok) {
+					console.log(response.message);
+					// if the response wasn't ok, the error message will be stored at response.message
+					setError("root", { message: response.message });
+				} else {
+					router.push("/");
+				}
+			},
+		);
 	};
 
 	return (
