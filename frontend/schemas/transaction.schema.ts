@@ -118,6 +118,7 @@ export interface AddUsersToGroupResponse {
 export interface AddEventRequest {
 	name: string;
 	date: string; // Format: "%Y-%m-%d %H:%M:%S" Lmk if you want to change this -Lance
+	repeatEvery?: number; // Let's do this as number of days for now. If it's a single event, please omit this
 
 	memberNames: string[]; // Usernames
 
@@ -133,9 +134,7 @@ export interface AddEventResponse {
 // change users assigned to event -------------------------------------------------------
 export interface ChangeEventMembersRequest {
 	name: string;
-
 	memberNames: string[]; // Usernames
-
 	groupId: number;
 }
 

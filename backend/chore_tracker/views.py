@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
-from chore_tracker.models import Group, Event
+from chore_tracker.models import Group, Event, EventOccurrence
 import datetime
 import json
 from json import JSONDecodeError
@@ -173,6 +173,7 @@ class AddUsersToGroup(APIView):
 
 
 class CreateEvent(APIView):
+    """ Create an Event """
 
     def post(self, request):
 
@@ -197,8 +198,7 @@ class CreateEvent(APIView):
                 first_time=datetime.strptime(
                     data.get("date"), "%Y-%m-%d %H:%M:%S"
                 ).time(),
-                # TODO: Add this in, for now its not in interface in schema.ts
-                repeat_every="",
+                repeat_every=data.get("repeatEvery") if "repeatEvery" in data else None,
                 group=group,
             )
 
@@ -221,6 +221,10 @@ class CreateEvent(APIView):
                     return JsonResponse(
                         {"success": False, "message": f"User {username} not found"}, status=400
                     )
+                
+            # TODO: Add an occurrence of the Event 
+            #       For recurring Events, we need to add multiple. 
+            #       Maybe we can make a new one when the date/time for previous one has passed?
 
             return JsonResponse({"success": True, "message": ""}, status=200)
 
@@ -231,6 +235,7 @@ class CreateEvent(APIView):
         
 
 class ChangeEventMembers(APIView):
+    """ Change who is assigned to an event """
 
     def post(self, request):
 
