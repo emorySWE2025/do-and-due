@@ -86,7 +86,7 @@ export default function HomeFrame({ userData }: { userData: UserDisplayData }) {
 		index: 0,
 		group:
 			userData.groups.length > 1
-				? userData.groups[1]
+				? userData.groups[0]
 				: createNewGroupPlaceholder,
 	});
 
