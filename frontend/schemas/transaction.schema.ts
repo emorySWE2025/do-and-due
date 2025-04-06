@@ -129,3 +129,19 @@ export interface AddEventResponse {
 	message: string;
 }
 // --------------------------------------------------------------------------------------
+
+// change users assigned to event -------------------------------------------------------
+export interface ChangeEventMembersRequest {
+	name: string;
+
+	memberNames: string[]; // Usernames
+
+	groupId: number;
+}
+
+export interface ChangeEventMembersResponse {
+	success: boolean;
+	message: string;
+}
+
+// --------------------------------------------------------------------------------------

@@ -203,12 +203,13 @@ class CreateEvent(APIView):
             )
 
             # Get assigned members and add them. This is required due to the ManyToManyField
+            group_members = group.members.all()
             memberNames = data.get("memberNames", [])
+
             for username in memberNames:
                 try:
                     user = User.objects.get(username=username)
 
-                    group_members = group.members.all()
                     if user in group_members:
                         event.members.add(user)
                     else:
@@ -220,6 +221,57 @@ class CreateEvent(APIView):
                     return JsonResponse(
                         {"success": False, "message": f"User {username} not found"}, status=400
                     )
+
+            return JsonResponse({"success": True, "message": ""}, status=200)
+
+        except JSONDecodeError:
+            return JsonResponse(
+                {"success": False, "message": "Invalid JSON in request"}, status=400
+            )
+        
+
+class ChangeEventMembers(APIView):
+
+    def post(self, request):
+
+        try:
+            data = json.loads(request.body)
+
+            # Check that the group is valid
+            try:
+                group = Group.objects.get(id=data.get("groupId"))
+            except Group.DoesNotExist:
+                return JsonResponse(
+                    {"success": False, "message": "No such Group"}, status=400
+                )
+
+            # Check if the event exists
+            try:
+                event = Event.objects.get(name=data.get("name"), group=group)
+            except Event.DoesNotExist:
+                return JsonResponse(
+                    {"success": False, "message": "No such Event"}, status=400
+                )
+
+            # Check that members to assign exist and are in the group. Then, assign them
+            group_members = group.members.all()
+            memberNames = data.get("memberNames", [])
+            
+            for username in memberNames:
+                try:
+                    user = User.objects.get(username=username)
+
+                    if not user in group_members:
+                        return JsonResponse(
+                            {"success": False, "message": f"User {username} not in group"}, status=400
+                        )
+                    
+                except User.DoesNotExist:
+                    return JsonResponse(
+                        {"success": False, "message": f"User {username} not found"}, status=400
+                    )
+                
+            event.members.set(memberNames)
 
             return JsonResponse({"success": True, "message": ""}, status=200)
 
