@@ -112,7 +112,7 @@ function NavProfileFrame() {
 					alt="Profile"
 					width={48}
 					height={48}
-					className="object-cove cursor-pointer rounded-[50%] hover:ring-3 hover:ring-purple-500"
+					className="cursor-pointer rounded-[50%] object-cover hover:ring-3 hover:ring-purple-500"
 				/>
 			</Link>
 			{/* <LogoutComponent /> */}
