@@ -19,8 +19,10 @@ export interface GroupStateData {
 // display interfaces -------------------------------------------------------------------
 // expected format for general event display data passed to frontend pages
 export interface EventDisplayData {
+	id: number;
 	name: string;
-	date: string;
+	first_date: string;
+	repeat_every: string | null;
 	completed: boolean;
 }
 

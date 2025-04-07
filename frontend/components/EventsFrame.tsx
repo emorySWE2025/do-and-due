@@ -114,7 +114,7 @@ function AddEventForm({
 						type="text"
 						{...register("date")}
 						label="First Date"
-						value={dateState.target.format()}
+						value={dateState.target.format("YYYY-MM-DD")}
 						disabled
 					/>
 					{errors.date && <ErrorText message={errors.date.message} />}
@@ -157,9 +157,9 @@ function AddEventForm({
 							),
 						)}
 					</div>
-					{errors.repeats && (
+					{/* {errors.repeats && (
 						<ErrorText message={errors.repeats.message} />
-					)}
+					)} */}
 				</div>
 
 				<Button
@@ -299,7 +299,7 @@ function EventItem({ event }: { event: EventDisplayData }) {
 
 function filterEventsByDate(events: EventDisplayData[], targetDate: Dayjs) {
 	return events.filter((event) =>
-		dayjs(event.date).isSame(targetDate, "day"),
+		dayjs(event.first_date).isSame(targetDate, "day"),
 	);
 }
 

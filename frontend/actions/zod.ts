@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { coerce, z } from "zod";
 
 const passwordSchema = z
 	.string({ required_error: "Password is required" })
@@ -51,10 +51,12 @@ export const createGroupSchema = z.object({
 });
 
 export const createEventSchema = z.object({
-	name: z.string({ required_error: "Event name is required" }),
-	date: z.string({ required_error: "A date must be specified" }).datetime(),
+	name: z
+		.string({ required_error: "Event name is required" })
+		.min(2, "Event name must be at least 3 characters"),
+	date: z.string({ required_error: "A date must be specified" }),
 	members: z.string({
 		required_error: "At least one member must be selected",
 	}),
-	repeats: z.string({ required_error: "Repeat frequency must be specified" }),
+	repeats: z.any(), // not implemented yet
 });

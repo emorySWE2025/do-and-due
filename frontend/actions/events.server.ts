@@ -19,6 +19,7 @@ export async function createEventAction(
 		memberNames: groupData.members.flatMap((member) => member.username),
 		groupId: groupData.id,
 	};
+	console.log(postData);
 
 	try {
 		const res = await fetch("http://127.0.0.1:8000/api/event/create/", {
