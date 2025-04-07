@@ -74,4 +74,9 @@ export interface CreateEventFormData {
 	date: string;
 	members: string;
 }
+
+export interface AddUserToGroupFormData {
+	groupId: number;
+	usernames: string[];
+}
 // --------------------------------------------------------------------------------------
