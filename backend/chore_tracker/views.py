@@ -99,6 +99,9 @@ class CreateGroup(APIView):
             )
             group.creator = user
             group.save()
+
+            group.members.add(user)
+            group.save()
             
             return JsonResponse({'message': 'Group created successfully'}, status=201)
         except Exception as e:
@@ -119,8 +122,8 @@ class ViewGroup(APIView):
         try:
             group = Group.objects.get(id=group_id)
             members = group.members.all()
-            events = group.events.all()
-            costs = group.costs.all()
+            # events = group.events.all()
+            # costs = group.costs.all()
 
             return JsonResponse({
                 'group': {
@@ -131,8 +134,8 @@ class ViewGroup(APIView):
                     'timezone': group.timezone,
                     'creator': group.creator.username,
                     'members': [member.username for member in members],
-                    'events': [{'id': event.id, 'name': event.name} for event in events],
-                    'costs': [{'id': cost.id, 'name': cost.name, 'amount': cost.amount} for cost in costs],
+                    # 'events': [{'id': event.id, 'name': event.name} for event in events],
+                    # 'costs': [{'id': cost.id, 'name': cost.name, 'amount': cost.amount} for cost in costs],
                 }
             }, status=200)
         except Group.DoesNotExist:
@@ -308,11 +311,21 @@ class CurrentUserView(APIView):
         if request.user.is_authenticated:
             user = request.user
             # groups = user.groups.values('id', 'name')
-            groups = Group.objects.filter(creator=user).values('id', 'name','status')
+            groups = Group.objects.filter(members__in=[user]).prefetch_related('events')
+
+            group_data = []
+            for group in groups:
+                events = group.events.all().values('id', 'name', 'first_date', 'first_time', 'repeat_every') # type: ignore
+                group_data.append({
+                    'id': group.id,
+                    'name': group.name,
+                    'members': list(group.members.all().values('username', 'photo_url')),
+                    'events': list(events)
+                })
 
             return JsonResponse({
                 'id': user.id,
                 'username': user.username,
                 'email': user.email,
-                'groups': list(groups)
+                'groups': group_data
             })

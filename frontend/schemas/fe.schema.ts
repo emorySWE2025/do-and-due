@@ -28,8 +28,13 @@ export interface EventDisplayData {
 export interface GroupDisplayData {
 	id: number;
 	name: string;
-	members: string[];
+	members: PublicUserDisplayData[];
 	events: EventDisplayData[];
+}
+
+export interface PublicUserDisplayData {
+	username: string;
+	photoUrl: string;
 }
 
 // expected format for general user display data passed to frontend pages
@@ -37,7 +42,7 @@ export interface UserDisplayData {
 	email: string;
 	id: number;
 	username: string;
-	photoPath: string;
+	photoUrl: string;
 	groups: GroupDisplayData[];
 }
 // --------------------------------------------------------------------------------------
