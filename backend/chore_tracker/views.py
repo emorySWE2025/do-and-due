@@ -308,7 +308,7 @@ class CurrentUserView(APIView):
         if request.user.is_authenticated:
             user = request.user
             # groups = user.groups.values('id', 'name')
-            groups = Group.objects.filter(creator=user).values('id', 'name')
+            groups = Group.objects.filter(creator=user).values('id', 'name','status')
 
             return JsonResponse({
                 'id': user.id,
