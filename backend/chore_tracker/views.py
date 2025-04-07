@@ -329,3 +329,32 @@ class CurrentUserView(APIView):
                 'email': user.email,
                 'groups': group_data
             })
+        
+class MarkEventComplete(APIView):
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+
+            # Check that the event exists
+            try:
+                event = Event.objects.get(id=data.get("eventId"))
+            except Event.DoesNotExist:
+                return JsonResponse(
+                    {"success": False, "message": "No such Event"}, status=400
+                )
+           
+            #Toggle event completion status
+            if event.completed:
+                event.completed = False
+            else:
+                event.completed = True
+            event.save()
+
+            return JsonResponse({"success": True, "message": "event status updated", "data": event}, status=200)
+        
+        except JSONDecodeError:
+            return JsonResponse(
+                {"success": False, "message": "Invalid JSON in request"}, status=400
+            )
+
+
