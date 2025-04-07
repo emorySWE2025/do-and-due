@@ -9,6 +9,7 @@ import {
 	GroupDisplayData,
 	DateStateData,
 } from "@/schemas/fe.schema";
+import { useEffect, useState } from "react";
 
 dayjs.extend(weekday);
 dayjs.extend(localeData);
@@ -38,6 +39,17 @@ export default function CalendarFrame({
 			display: dateState.display.add(1, "month"),
 		});
 	};
+
+	// const [eventDates, setEventDates] = useState<Set<number>>(
+	// 	getEventDatesInMonth(groupData.events, dateState.display),
+	// );
+	// useEffect(() => {
+	// 	const newEventDates: Set<number> = getEventDatesInMonth(
+	// 		groupData.events,
+	// 		dateState.display,
+	// 	);
+	// 	setEventDates(newEventDates);
+	// }, [groupData, dateState]);
 
 	const eventDates: Set<number> = getEventDatesInMonth(
 		groupData.events,

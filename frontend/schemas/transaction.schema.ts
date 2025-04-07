@@ -156,11 +156,11 @@ export interface MarkEventCompleteRequest {
 }
 
 export interface MarkEventCompleteResponse {
-	// be > fe 
+	// be > fe
 
 	success: boolean;
 	message: string;
-	data: Event;
+	eventStatus?: boolean;
 }
 
 // --------------------------------------------------------------------------------------
