@@ -62,7 +62,7 @@ class Event(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=60)
     first_date = models.DateField()
-    first_time = models.TimeField()
+    # first_time = models.TimeField()
     repeat_every = models.CharField(max_length=40, null=True, blank=True)
     #repeat_every = models.IntegerField(null=True)
 

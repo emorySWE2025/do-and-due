@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
 from chore_tracker.models import Group, Event, EventOccurrence
-import datetime
+from datetime import datetime
 import json
 from json import JSONDecodeError
 
@@ -210,11 +210,11 @@ class CreateEvent(APIView):
                 name=data.get("name"),
                 # Need to determine date format
                 first_date=datetime.strptime(
-                    data.get("date"), "%Y-%m-%d %H:%M:%S"
+                    data.get("date"), "%Y-%m-%d"
                 ).date(),
-                first_time=datetime.strptime(
-                    data.get("date"), "%Y-%m-%d %H:%M:%S"
-                ).time(),
+                # first_time=datetime.strptime(
+                #     data.get("date"), "%Y-%m-%d %H:%M:%S"
+                # ).time(),
                 repeat_every=data.get("repeatEvery") if "repeatEvery" in data else None,
                 group=group,
             )
@@ -315,7 +315,7 @@ class CurrentUserView(APIView):
 
             group_data = []
             for group in groups:
-                events = group.events.all().values('id', 'name', 'first_date', 'first_time', 'repeat_every') # type: ignore
+                events = group.events.all().values('id', 'name', 'first_date', 'repeat_every') # type: ignore
                 group_data.append({
                     'id': group.id,
                     'name': group.name,

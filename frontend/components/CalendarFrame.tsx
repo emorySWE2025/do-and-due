@@ -3,6 +3,7 @@
 import dayjs, { Dayjs } from "dayjs";
 import weekday from "dayjs/plugin/weekday";
 import localeData from "dayjs/plugin/localeData";
+// import customParseFormat from "dayjs/plugin/customParseFormat";
 import {
 	EventDisplayData,
 	GroupDisplayData,
@@ -11,6 +12,7 @@ import {
 
 dayjs.extend(weekday);
 dayjs.extend(localeData);
+// dayjs.extend(customParseFormat);
 
 export default function CalendarFrame({
 	groupData,
@@ -117,14 +119,12 @@ function getEventDatesInMonth(
 	displayDate: Dayjs,
 ): Set<number> {
 	const eventDates = new Set<number>();
-
 	events.forEach((event) => {
-		const eventDate = dayjs(event.date);
+		const eventDate = dayjs(event.first_date);
 		if (eventDate.isSame(displayDate, "month")) {
 			eventDates.add(eventDate.date());
 		}
 	});
-
 	return eventDates;
 }
 
