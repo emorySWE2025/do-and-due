@@ -74,7 +74,7 @@ export default function GroupSelector({
 	}, []);
 
 	return (
-		<div className="relative w-full border-b-[1px] border-gray-200 pt-4 pb-4">
+		<div className="relative w-full pt-4 pb-4">
 			<SnapList
 				ref={snapList}
 				direction={"horizontal"}

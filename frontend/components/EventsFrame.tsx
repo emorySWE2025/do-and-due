@@ -1,19 +1,24 @@
 "use client";
 
-import { createEventAction } from "@/actions/events.server";
+import {
+	createEventAction,
+	setEventStatusAction,
+} from "@/actions/events.server";
 import {
 	EventDisplayData,
 	GroupDisplayData,
 	DateStateData,
 } from "@/schemas/fe.schema";
 import dayjs, { Dayjs } from "dayjs";
-import { JSX, useState } from "react";
+import { JSX, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { ErrorPopup, ErrorText } from "@/components/Errors";
 import Input from "@/components/Input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createEventSchema } from "@/actions/zod";
 import Button from "@/components/Button";
+import { MarkEventCompleteResponse } from "@/schemas/transaction.schema";
+import { useRouter } from "next/navigation";
 
 export default function EventsFrame({
 	groupData,
@@ -26,9 +31,7 @@ export default function EventsFrame({
 }) {
 	const [showAddEventForm, setAddEventState] = useState<boolean>(false);
 	const toggleAddEventState = () => {
-		console.log("before", showAddEventForm);
 		setAddEventState(!showAddEventForm);
-		console.log("after", showAddEventForm);
 	};
 
 	return (
@@ -68,9 +71,16 @@ function AddEventForm({
 		setError,
 		formState: { errors, isSubmitting },
 	} = useForm({ resolver: zodResolver(createEventSchema) });
+	const router = useRouter();
 
 	const onSubmit = async (data: any) => {
-		await createEventAction(data, groupData.id);
+		const res = await createEventAction(data, groupData);
+		// toggleAddEventState()
+		console.log("AddEventForm", res);
+		if (res.ok) {
+			toggleAddEventState();
+			router.push("/");
+		}
 	};
 
 	return (
@@ -114,7 +124,7 @@ function AddEventForm({
 						type="text"
 						{...register("date")}
 						label="First Date"
-						value={dateState.target.format()}
+						value={dateState.target.format("YYYY-MM-DD")}
 						disabled
 					/>
 					{errors.date && <ErrorText message={errors.date.message} />}
@@ -132,10 +142,12 @@ function AddEventForm({
 				</div>
 
 				<div>
-					<label className="mb-2 block font-medium">Repeats</label>
+					<label className="mb-1 block text-sm font-medium text-gray-700">
+						Repeats (not implemented yet)
+					</label>
 					<div className="flex space-x-2 overflow-x-auto pb-2">
 						{["None", "Daily", "Weekly", "Monthly", "Yearly"].map(
-							(option) => (
+							(option, index) => (
 								<label
 									key={option}
 									className="flex-shrink-0 cursor-pointer rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm transition-all duration-200 hover:border-purple-500 hover:shadow"
@@ -143,6 +155,8 @@ function AddEventForm({
 									<input
 										type="radio"
 										value={option}
+										checked={index === 0 ? true : false}
+										disabled // TODO: implement backend logic to allow repeat events
 										{...register("repeats")}
 										className="peer hidden"
 									/>
@@ -153,9 +167,9 @@ function AddEventForm({
 							),
 						)}
 					</div>
-					{errors.repeats && (
+					{/* {errors.repeats && (
 						<ErrorText message={errors.repeats.message} />
-					)}
+					)} */}
 				</div>
 
 				<Button
@@ -197,18 +211,28 @@ function EventsDisplay({
 		});
 	};
 
-	const relevantEvents: EventDisplayData[] = filterEventsByDate(
-		groupData.events,
-		dateState.target,
+	const [relevantEvents, setRelevantEvents] = useState<EventDisplayData[]>(
+		filterEventsByDate(groupData.events, dateState.target),
 	);
+
+	useEffect(() => {
+		setRelevantEvents(
+			filterEventsByDate(groupData.events, dateState.target),
+		);
+	}, [groupData, dateState]);
+	// const relevantEvents: EventDisplayData[] = filterEventsByDate(
+	// 	groupData.events,
+	// 	dateState.target,
+	// );
+
 	const eventItemsDisplay: JSX.Element | JSX.Element[] =
 		relevantEvents.length === 0 ? (
 			<div className="text-center text-sm text-gray-400">
 				nothing scheduled!
 			</div>
 		) : (
-			relevantEvents.map((event: EventDisplayData, idx: number) => (
-				<EventItem key={idx} event={event} />
+			relevantEvents.map((event: EventDisplayData) => (
+				<EventItem key={event.id} event={event} />
 			))
 		);
 
@@ -258,10 +282,10 @@ function EventsDisplay({
 				</button>
 			</div>
 
-			<div className="flex w-max flex-col gap-2 p-6">
+			<div className="flex w-full flex-col gap-2 p-6">
 				{eventItemsDisplay}
 			</div>
-			<NewEventButton toggleAddEventState={toggleAddEventState} />
+			<AddEventButton toggleAddEventState={toggleAddEventState} />
 		</div>
 	);
 }
@@ -272,30 +296,52 @@ interface Event {
 }
 
 function EventItem({ event }: { event: EventDisplayData }) {
+	const [eventState, setEventState] = useState<boolean>(event.is_complete);
+
+	const handleClick = async () => {
+		const res: MarkEventCompleteResponse = await setEventStatusAction(
+			event.id,
+			!event.is_complete,
+		);
+		if (res.success) {
+			console.log(res);
+			setEventState(
+				res.eventStatus !== undefined
+					? res.eventStatus
+					: event.is_complete,
+			);
+		}
+	};
+
 	return (
-		<div className="flex items-start gap-2 p-1 text-base hover:bg-gray-50">
+		<div className="flex w-full flex-row flex-nowrap items-start gap-2 p-1 text-base hover:bg-gray-50">
 			<input
 				type="checkbox"
-				checked={event.completed}
+				checked={eventState}
+				onClick={handleClick}
 				readOnly
-				className="h-6 w-6 rounded-lg accent-purple-500"
+				className="h-6 w-6 flex-shrink-0 rounded-lg accent-purple-500"
 			/>
-			<span
-				className={event.completed ? "text-gray-500 line-through" : ""}
+			<div
+				className={
+					eventState
+						? "w-full flex-shrink-0 text-gray-500 line-through"
+						: "w-full flex-shrink-0"
+				}
 			>
 				{event.name}
-			</span>
+			</div>
 		</div>
 	);
 }
 
 function filterEventsByDate(events: EventDisplayData[], targetDate: Dayjs) {
 	return events.filter((event) =>
-		dayjs(event.date).isSame(targetDate, "day"),
+		dayjs(event.first_date).isSame(targetDate, "day"),
 	);
 }
 
-function NewEventButton({
+function AddEventButton({
 	toggleAddEventState,
 }: {
 	toggleAddEventState: CallableFunction;

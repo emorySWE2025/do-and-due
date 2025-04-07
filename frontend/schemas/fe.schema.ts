@@ -19,17 +19,24 @@ export interface GroupStateData {
 // display interfaces -------------------------------------------------------------------
 // expected format for general event display data passed to frontend pages
 export interface EventDisplayData {
+	id: number;
 	name: string;
-	date: string;
-	completed: boolean;
+	first_date: string;
+	repeat_every: string | null;
+	is_complete: boolean;
 }
 
 // expected format for general group display data passed to frontend pages
 export interface GroupDisplayData {
 	id: number;
 	name: string;
-	members: string[];
+	members: PublicUserDisplayData[];
 	events: EventDisplayData[];
+}
+
+export interface PublicUserDisplayData {
+	username: string;
+	photoUrl: string;
 }
 
 // expected format for general user display data passed to frontend pages
@@ -37,7 +44,7 @@ export interface UserDisplayData {
 	email: string;
 	id: number;
 	username: string;
-	photoPath: string;
+	photoUrl: string;
 	groups: GroupDisplayData[];
 }
 // --------------------------------------------------------------------------------------
@@ -66,5 +73,10 @@ export interface CreateEventFormData {
 	name: string;
 	date: string;
 	members: string;
+}
+
+export interface AddUserToGroupFormData {
+	groupId: number;
+	usernames: string[];
 }
 // --------------------------------------------------------------------------------------

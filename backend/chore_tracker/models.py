@@ -62,13 +62,14 @@ class Event(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=60)
     first_date = models.DateField()
-    first_time = models.TimeField()
+    # first_time = models.TimeField()
     repeat_every = models.CharField(max_length=40, null=True, blank=True)
     #repeat_every = models.IntegerField(null=True)
 
     # Relationships
     group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="events")
     members = models.ManyToManyField(User, related_name="events")
+    is_complete = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -76,11 +77,11 @@ class Event(models.Model):
 
 class EventOccurrence(models.Model):
     id = models.AutoField(primary_key=True)
-    date = models.DateField()
-    time = models.TimeField()
+    date = models.DateField(default=None)
+    time = models.TimeField(default=None)
 
     # Relationships
-    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="occurrences")
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="occurrences",default=None)
 
     def __str__(self):
         return self.event.name

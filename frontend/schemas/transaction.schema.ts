@@ -106,6 +106,7 @@ export interface AddUsersToGroupRequest {
 export interface AddUsersToGroupResponse {
 	// be > fe
 	// params we can expect to receive from the backend when trying to add users to a group
+	ok: boolean;
 	message: string;
 	result: { success: string[]; failure: string[] }; // not sure about this. i think this will be a dict.
 	// e.g. {"results": {"success": ["user1", "user2"], "not_found": ["nonexistent_user"]}}
@@ -146,6 +147,21 @@ export interface ChangeEventMembersRequest {
 export interface ChangeEventMembersResponse {
 	success: boolean;
 	message: string;
+}
+// --------------------------------------------------------------------------------------
+export interface MarkEventCompleteRequest {
+	// fe > be - params necessary to mark an event as complete
+
+	eventId: number;
+	eventIsComplete: boolean;
+}
+
+export interface MarkEventCompleteResponse {
+	// be > fe
+
+	success: boolean;
+	message: string;
+	eventStatus?: boolean;
 }
 
 // --------------------------------------------------------------------------------------

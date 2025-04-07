@@ -3,14 +3,17 @@
 import dayjs, { Dayjs } from "dayjs";
 import weekday from "dayjs/plugin/weekday";
 import localeData from "dayjs/plugin/localeData";
+// import customParseFormat from "dayjs/plugin/customParseFormat";
 import {
 	EventDisplayData,
 	GroupDisplayData,
 	DateStateData,
 } from "@/schemas/fe.schema";
+import { useEffect, useState } from "react";
 
 dayjs.extend(weekday);
 dayjs.extend(localeData);
+// dayjs.extend(customParseFormat);
 
 export default function CalendarFrame({
 	groupData,
@@ -36,6 +39,17 @@ export default function CalendarFrame({
 			display: dateState.display.add(1, "month"),
 		});
 	};
+
+	// const [eventDates, setEventDates] = useState<Set<number>>(
+	// 	getEventDatesInMonth(groupData.events, dateState.display),
+	// );
+	// useEffect(() => {
+	// 	const newEventDates: Set<number> = getEventDatesInMonth(
+	// 		groupData.events,
+	// 		dateState.display,
+	// 	);
+	// 	setEventDates(newEventDates);
+	// }, [groupData, dateState]);
 
 	const eventDates: Set<number> = getEventDatesInMonth(
 		groupData.events,
@@ -117,14 +131,12 @@ function getEventDatesInMonth(
 	displayDate: Dayjs,
 ): Set<number> {
 	const eventDates = new Set<number>();
-
 	events.forEach((event) => {
-		const eventDate = dayjs(event.date);
+		const eventDate = dayjs(event.first_date);
 		if (eventDate.isSame(displayDate, "month")) {
 			eventDates.add(eventDate.date());
 		}
 	});
-
 	return eventDates;
 }
 
@@ -193,17 +205,17 @@ function CalendarDay({
 	dateState,
 	dateCallback,
 }: CalendarDayProps) {
-	const handleClick = () =>
-		day
-			? dateCallback({
-					current: dateState.current,
-					display: dateState.display,
-					target: dayjs()
-						.set("date", day)
-						.set("month", dateState.display.month())
-						.set("year", dateState.display.year()),
-				})
-			: null;
+	const handleClick = () => {
+		day &&
+			dateCallback({
+				current: dateState.current,
+				display: dateState.display,
+				target: dayjs()
+					.year(dateState.display.year())
+					.month(dateState.display.month())
+					.date(day),
+			});
+	};
 
 	const isCurrentDate: boolean =
 		dateState.current.date() === day &&

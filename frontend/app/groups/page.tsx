@@ -2,6 +2,7 @@ import { getCurrentSession } from "@/actions/users.server";
 import PageLayout from "@/components/PageLayout";
 import { UserDisplayData } from "@/schemas/fe.schema";
 import { redirect } from "next/navigation";
+import GroupsFrame from "@/components/GroupsFrame";
 
 export default async function GroupsPage() {
 	// if user is not authenticated, redirect them to login
@@ -12,9 +13,7 @@ export default async function GroupsPage() {
 
 	return (
 		<PageLayout>
-			<div className="m-auto h-full w-full pt-16 text-center">
-				[group info here]
-			</div>
+			 <GroupsFrame GroupsData={userData.groups} />
 		</PageLayout>
 	);
 }
