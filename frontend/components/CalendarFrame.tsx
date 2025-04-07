@@ -193,17 +193,17 @@ function CalendarDay({
 	dateState,
 	dateCallback,
 }: CalendarDayProps) {
-	const handleClick = () =>
-		day
-			? dateCallback({
-					current: dateState.current,
-					display: dateState.display,
-					target: dayjs()
-						.set("date", day)
-						.set("month", dateState.display.month())
-						.set("year", dateState.display.year()),
-				})
-			: null;
+	const handleClick = () => {
+		day &&
+			dateCallback({
+				current: dateState.current,
+				display: dateState.display,
+				target: dayjs()
+					.year(dateState.display.year())
+					.month(dateState.display.month())
+					.date(day),
+			});
+	};
 
 	const isCurrentDate: boolean =
 		dateState.current.date() === day &&

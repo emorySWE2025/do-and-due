@@ -70,7 +70,7 @@ function AddEventForm({
 	} = useForm({ resolver: zodResolver(createEventSchema) });
 
 	const onSubmit = async (data: any) => {
-		await createEventAction(data, groupData.id);
+		await createEventAction(data, groupData);
 	};
 
 	return (
@@ -132,10 +132,12 @@ function AddEventForm({
 				</div>
 
 				<div>
-					<label className="mb-2 block font-medium">Repeats</label>
+					<label className="mb-1 block text-sm font-medium text-gray-700">
+						Repeats (not implemented yet)
+					</label>
 					<div className="flex space-x-2 overflow-x-auto pb-2">
 						{["None", "Daily", "Weekly", "Monthly", "Yearly"].map(
-							(option) => (
+							(option, index) => (
 								<label
 									key={option}
 									className="flex-shrink-0 cursor-pointer rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm transition-all duration-200 hover:border-purple-500 hover:shadow"
@@ -143,6 +145,8 @@ function AddEventForm({
 									<input
 										type="radio"
 										value={option}
+										checked={index === 0 ? true : false}
+										disabled // TODO: implement backend logic to allow repeat events
 										{...register("repeats")}
 										className="peer hidden"
 									/>
@@ -258,10 +262,10 @@ function EventsDisplay({
 				</button>
 			</div>
 
-			<div className="flex w-max flex-col gap-2 p-6">
+			<div className="flex w-full flex-col gap-2 p-6">
 				{eventItemsDisplay}
 			</div>
-			<NewEventButton toggleAddEventState={toggleAddEventState} />
+			<AddEventButton toggleAddEventState={toggleAddEventState} />
 		</div>
 	);
 }
@@ -273,18 +277,22 @@ interface Event {
 
 function EventItem({ event }: { event: EventDisplayData }) {
 	return (
-		<div className="flex items-start gap-2 p-1 text-base hover:bg-gray-50">
+		<div className="flex w-full flex-row flex-nowrap items-start gap-2 p-1 text-base hover:bg-gray-50">
 			<input
 				type="checkbox"
 				checked={event.completed}
 				readOnly
-				className="h-6 w-6 rounded-lg accent-purple-500"
+				className="h-6 w-6 flex-shrink-0 rounded-lg accent-purple-500"
 			/>
-			<span
-				className={event.completed ? "text-gray-500 line-through" : ""}
+			<div
+				className={
+					event.completed
+						? "w-full flex-shrink-0 text-gray-500 line-through"
+						: "w-full flex-shrink-0"
+				}
 			>
 				{event.name}
-			</span>
+			</div>
 		</div>
 	);
 }
@@ -295,7 +303,7 @@ function filterEventsByDate(events: EventDisplayData[], targetDate: Dayjs) {
 	);
 }
 
-function NewEventButton({
+function AddEventButton({
 	toggleAddEventState,
 }: {
 	toggleAddEventState: CallableFunction;
