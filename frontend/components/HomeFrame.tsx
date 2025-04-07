@@ -80,14 +80,13 @@ export default function HomeFrame({ userData }: { userData: UserDisplayData }) {
 	// query current date
 	const currentDate: Dayjs = dayjs();
 
+	const groups = [createNewGroupPlaceholder].concat(userData.groups);
+
 	// define state objects
 	const [groupState, updateGroupState] = useState<GroupStateData>({
 		direction: 1,
 		index: 0,
-		group:
-			userData.groups.length > 1
-				? userData.groups[0]
-				: createNewGroupPlaceholder,
+		group: groups.length > 1 ? groups[1] : groups[0],
 	});
 
 	const [dateState, updateDateState] = useState<DateStateData>({
@@ -99,7 +98,7 @@ export default function HomeFrame({ userData }: { userData: UserDisplayData }) {
 	return (
 		<div className="m-auto h-max w-full max-w-5xl">
 			<GroupSelector
-				groups={[createNewGroupPlaceholder].concat(userData.groups)}
+				groups={groups}
 				groupState={groupState}
 				groupCallback={updateGroupState}
 			/>
