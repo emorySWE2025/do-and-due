@@ -8,6 +8,21 @@ import {
 
 // export function createEventAction() {}
 
+export async function setEventStatusAction(
+	eventId: number,
+	eventState: boolean,
+) {
+	try {
+		const res = await fetch("http://127.0.0.1:8000/api/event/create/");
+	} catch (error) {
+		console.log("setEventStatusAction", error);
+		return {
+			ok: false,
+			message: "A frontend error occurred!",
+		};
+	}
+}
+
 export async function createEventAction(
 	formData: CreateEventFormData,
 	groupData: GroupDisplayData,
@@ -40,9 +55,8 @@ export async function createEventAction(
 				message: "A backend error occurred during creation!",
 			};
 		}
-		// if an error occurred on the frontend
 	} catch (error) {
-		// if an error occurred on the backend
+		// if an error occurred on the frontend
 		console.log("createEventAction", error);
 		return {
 			ok: false,
