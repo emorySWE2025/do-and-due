@@ -7,7 +7,7 @@
 1. Make events repeatable with different time frequencies (daily, weekly, monthly etc.)
 2. Add the UI and backend routes necessary so users can edit details and members in their groups
 3. Implement a model or modify the existing Events model to allow users to divide costs between members of a household
-4. _pending_
+4. Add the UI and backend routes necessary so users can edit details on their profile (like their profile photo)
 
 ## Testing Deployment Instructions
 
