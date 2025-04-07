@@ -70,7 +70,7 @@ function AddEventForm({
 	} = useForm({ resolver: zodResolver(createEventSchema) });
 
 	const onSubmit = async (data: any) => {
-		await createEventAction(data, groupData.id);
+		await createEventAction(data, groupData);
 	};
 
 	return (
