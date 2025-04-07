@@ -23,7 +23,7 @@ export interface EventDisplayData {
 	name: string;
 	first_date: string;
 	repeat_every: string | null;
-	completed: boolean;
+	is_complete: boolean;
 }
 
 // expected format for general group display data passed to frontend pages
