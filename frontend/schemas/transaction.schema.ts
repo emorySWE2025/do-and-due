@@ -147,5 +147,20 @@ export interface ChangeEventMembersResponse {
 	success: boolean;
 	message: string;
 }
+// --------------------------------------------------------------------------------------
+export interface MarkEventCompleteRequest {
+	// fe > be - params necessary to mark an event as complete
+
+	eventId: number;
+	eventIsComplete: boolean;
+}
+
+export interface MarkEventCompleteResponse {
+	// be > fe 
+
+	success: boolean;
+	message: string;
+	data: Event;
+}
 
 // --------------------------------------------------------------------------------------
