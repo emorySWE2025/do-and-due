@@ -315,7 +315,7 @@ class CurrentUserView(APIView):
 
             group_data = []
             for group in groups:
-                events = group.events.all().values('id', 'name', 'first_date', 'repeat_every') # type: ignore
+                events = group.events.all().values('id', 'name', 'first_date', 'repeat_every', 'is_complete') # type: ignore
                 group_data.append({
                     'id': group.id,
                     'name': group.name,
@@ -342,19 +342,19 @@ class MarkEventComplete(APIView):
                 return JsonResponse(
                     {"success": False, "message": "No such Event"}, status=400
                 )
-           
+
             #Toggle event completion status
-            if event.completed:
-                event.completed = False
+            if event.is_complete:
+                event.is_complete = False
             else:
-                event.completed = True
+                event.is_complete = True
             event.save()
 
-            return JsonResponse({"success": True, "message": "event status updated", "data": event}, status=200)
+            return JsonResponse({"success": True, "message": "event status updated", "eventStatus": event.is_complete}, status=200)
         
         except JSONDecodeError:
             return JsonResponse(
-                {"success": False, "message": "Invalid JSON in request"}, status=400
+                {"success": False, "message": "Invalid JSON in request", "eventStatus": event.is_complete}, status=400
             )
 
 

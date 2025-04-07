@@ -1,19 +1,24 @@
 "use client";
 
-import { createEventAction } from "@/actions/events.server";
+import {
+	createEventAction,
+	setEventStatusAction,
+} from "@/actions/events.server";
 import {
 	EventDisplayData,
 	GroupDisplayData,
 	DateStateData,
 } from "@/schemas/fe.schema";
 import dayjs, { Dayjs } from "dayjs";
-import { JSX, useState } from "react";
+import { JSX, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { ErrorPopup, ErrorText } from "@/components/Errors";
 import Input from "@/components/Input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createEventSchema } from "@/actions/zod";
 import Button from "@/components/Button";
+import { MarkEventCompleteResponse } from "@/schemas/transaction.schema";
+import { useRouter } from "next/navigation";
 
 export default function EventsFrame({
 	groupData,
@@ -26,9 +31,7 @@ export default function EventsFrame({
 }) {
 	const [showAddEventForm, setAddEventState] = useState<boolean>(false);
 	const toggleAddEventState = () => {
-		console.log("before", showAddEventForm);
 		setAddEventState(!showAddEventForm);
-		console.log("after", showAddEventForm);
 	};
 
 	return (
@@ -68,9 +71,16 @@ function AddEventForm({
 		setError,
 		formState: { errors, isSubmitting },
 	} = useForm({ resolver: zodResolver(createEventSchema) });
+	const router = useRouter();
 
 	const onSubmit = async (data: any) => {
-		await createEventAction(data, groupData);
+		const res = await createEventAction(data, groupData);
+		// toggleAddEventState()
+		console.log("AddEventForm", res);
+		if (res.ok) {
+			toggleAddEventState();
+			router.push("/");
+		}
 	};
 
 	return (
@@ -201,18 +211,28 @@ function EventsDisplay({
 		});
 	};
 
-	const relevantEvents: EventDisplayData[] = filterEventsByDate(
-		groupData.events,
-		dateState.target,
+	const [relevantEvents, setRelevantEvents] = useState<EventDisplayData[]>(
+		filterEventsByDate(groupData.events, dateState.target),
 	);
+
+	useEffect(() => {
+		setRelevantEvents(
+			filterEventsByDate(groupData.events, dateState.target),
+		);
+	}, [groupData, dateState]);
+	// const relevantEvents: EventDisplayData[] = filterEventsByDate(
+	// 	groupData.events,
+	// 	dateState.target,
+	// );
+
 	const eventItemsDisplay: JSX.Element | JSX.Element[] =
 		relevantEvents.length === 0 ? (
 			<div className="text-center text-sm text-gray-400">
 				nothing scheduled!
 			</div>
 		) : (
-			relevantEvents.map((event: EventDisplayData, idx: number) => (
-				<EventItem key={idx} event={event} />
+			relevantEvents.map((event: EventDisplayData) => (
+				<EventItem key={event.id} event={event} />
 			))
 		);
 
@@ -276,17 +296,35 @@ interface Event {
 }
 
 function EventItem({ event }: { event: EventDisplayData }) {
+	const [eventState, setEventState] = useState<boolean>(event.is_complete);
+
+	const handleClick = async () => {
+		const res: MarkEventCompleteResponse = await setEventStatusAction(
+			event.id,
+			!event.is_complete,
+		);
+		if (res.success) {
+			console.log(res);
+			setEventState(
+				res.eventStatus !== undefined
+					? res.eventStatus
+					: event.is_complete,
+			);
+		}
+	};
+
 	return (
 		<div className="flex w-full flex-row flex-nowrap items-start gap-2 p-1 text-base hover:bg-gray-50">
 			<input
 				type="checkbox"
-				checked={event.completed}
+				checked={eventState}
+				onClick={handleClick}
 				readOnly
 				className="h-6 w-6 flex-shrink-0 rounded-lg accent-purple-500"
 			/>
 			<div
 				className={
-					event.completed
+					eventState
 						? "w-full flex-shrink-0 text-gray-500 line-through"
 						: "w-full flex-shrink-0"
 				}
