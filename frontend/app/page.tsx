@@ -11,7 +11,12 @@ export default async function Home() {
 		redirect("/user/login");
 	}
 
-	console.log(userData.groups[0].events);
+	// Safely access the events property, checking if groups exists and has items
+	console.log("User data:", userData);
+	console.log("Groups:", userData.groups);
+	if (userData.groups && userData.groups.length > 0) {
+		console.log("First group events:", userData.groups[0].events);
+	}
 	return (
 		<PageLayout>
 			<HomeFrame userData={userData} />
