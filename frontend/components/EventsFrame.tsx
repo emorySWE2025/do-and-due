@@ -346,35 +346,41 @@ function EventItem({ event }: { event: EventDisplayData }) {
 
 function filterEventsByDate(events: EventDisplayData[], targetDate: Dayjs) {
 	return events.filter((event) => {
-		const eventDate = dayjs(event.first_date);
+		// Use startOf('day') to ignore time component for comparisons
+		const eventDate = dayjs(event.first_date).startOf('day');
+		const targetDateStart = targetDate.startOf('day');
 
 		// Check if it's the same day (for non-repeating or first occurrence)
-		if (eventDate.isSame(targetDate, "day")) {
+		if (eventDate.isSame(targetDateStart, "day")) {
 			return true;
 		}
 
-		// Handle repeating events
-		if (event.repeat_every) {
+		// Handle repeating events: Ensure repeat_every is valid and not "None"
+		if (event.repeat_every && event.repeat_every !== "None") {
 			// Only check events that started on or before the target date
-			if (eventDate.isAfter(targetDate)) {
+			if (eventDate.isAfter(targetDateStart)) {
 				return false;
 			}
 
-			const daysDiff = targetDate.diff(eventDate, "day");
+			// No need for daysDiff for weekly/monthly/yearly checks here, compare date parts directly
 
 			switch (event.repeat_every) {
 				case "Daily":
-					return true; // Every day after start date
+					// Event occurs daily on or after its start date
+					return !eventDate.isAfter(targetDateStart);
 				case "Weekly":
-					return daysDiff % 7 === 0; // Every 7 days
+					// Event occurs on the same day of the week, on or after its start date
+					return eventDate.day() === targetDateStart.day() && !eventDate.isAfter(targetDateStart);
 				case "Monthly":
-					// Same day of month
-					return eventDate.date() === targetDate.date();
+					// Same day of month, on or after its start date
+					return eventDate.date() === targetDateStart.date() && !eventDate.isAfter(targetDateStart);
 				case "Yearly":
-					// Same day and month
-					return eventDate.date() === targetDate.date() &&
-						eventDate.month() === targetDate.month();
+					// Same day and month, on or after its start date
+					return eventDate.date() === targetDateStart.date() &&
+						eventDate.month() === targetDateStart.month() && !eventDate.isAfter(targetDateStart);
 				default:
+					// Handle unexpected repeat_every values gracefully
+					console.warn(`Unexpected repeat_every value in filterEventsByDate: ${event.repeat_every}`);
 					return false;
 			}
 		}
