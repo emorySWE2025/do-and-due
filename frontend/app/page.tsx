@@ -11,7 +11,7 @@ export default async function Home() {
 		redirect("/user/login");
 	}
 
-	console.log(userData.groups[0].events);
+	// console.log(userData.groups[0].events);
 	return (
 		<PageLayout>
 			<HomeFrame userData={userData} />

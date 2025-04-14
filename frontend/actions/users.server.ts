@@ -10,6 +10,9 @@ import {
 	LoginUserClientResponse,
 	RegisterUserRequest,
 	LoginUserRequest,
+	EditProfileResponse,
+	EditProfileRequest,
+	EditProfileClientResponse,
 } from "@/schemas/transaction.schema";
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { cookies } from "next/headers";
@@ -86,6 +89,42 @@ export async function registerUserAction(
 		return {
 			ok: false,
 			message: "A frontend error occurred during registration!",
+		};
+	}
+}
+
+export async function editProfileAction(
+	formData: UserDisplayData,
+): Promise<EditProfileClientResponse> {
+	const postData: EditProfileRequest = {
+		username: formData.username,
+		email: formData.email,
+	};
+	try {
+		const res = await fetch("http://127.0.0.1:8000/api/edit_profile/", {
+			method: "PUT",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(postData),
+		});
+
+		if (res.ok) {
+			console.log("edit profile ok");
+			return { ok: true, message: "" };
+		} else {
+			console.log("edit profile backend error");
+			// if an error occurred on the backend
+			return {
+				ok: false,
+				message: "A backend error occurred during edit profile request!",
+			};
+		}
+		// if an error occurred on the frontend
+	} catch (error) {
+		// if an error occurred on the backend
+		console.log("editProfileAction", error);
+		return {
+			ok: false,
+			message: "A frontend error occurred during edit profile action!",
 		};
 	}
 }

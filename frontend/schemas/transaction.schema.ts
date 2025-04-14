@@ -26,6 +26,24 @@ export interface LoginUserClientResponse {
 }
 // --------------------------------------------------------------------------------------
 
+// edit user data profile ---------------------------------------------------------------
+
+export interface EditProfileRequest{
+	username: string;
+	email: string;
+}
+
+export interface EditProfileResponse{
+	message: string;
+	status: number;
+}
+
+export interface EditProfileClientResponse {
+	// response shared to the client
+	ok: boolean;
+	message: string;
+}
+// --------------------------------------------------------------------------------------
 // NOT IMPLEMENTED ON THE BACKEND YET AFAIK
 // view public user data (requested by another user account) ----------------------------
 export interface ViewPublicUserRequest {
