@@ -44,6 +44,47 @@ class RegisterUser(APIView):
             return JsonResponse({'error': str(e)}, status=400)
 
         return JsonResponse({'message': 'User registered successfully'}, status=201)
+    
+class EditUserProfile(APIView):
+    """ Edit User Info """
+    def put(self, request):
+        try:
+            data = json.loads(request.body)
+            user_id = data.get('user_id')  # Assuming user_id is passed in the request body
+            new_username = data.get('username')
+            new_email = data.get('email')
+
+            # Retrieve the user instance
+            try:
+                user = User.objects.get(pk=user_id)
+            except User.DoesNotExist:
+                    return JsonResponse({'error': 'User does not exist'}, status=404)
+
+                # Check if the new username already exists (and is not the current user's username)
+            if new_username and User.objects.filter(username=new_username).exclude(pk=user_id).exists():
+                    return JsonResponse({'error': 'Username already exists'}, status=400)
+
+                # Check if the new email already exists (and is not the current user's email)
+            if new_email and User.objects.filter(email=new_email).exclude(pk=user_id).exists():
+                    return JsonResponse({'error': 'Email already in use'}, status=400)
+
+                # Update the user's information
+            if new_username:
+                    user.username = new_username
+            if new_email:
+                    user.email = new_email
+                # Save the changes
+            user.save()
+
+            return JsonResponse({'message': 'User profile updated successfully'}, status=201)
+
+        except JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON in request'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+        
+
+
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -111,6 +152,7 @@ class CreateGroup(APIView):
         #     return JsonResponse({'error': str(e)}, status=400)
         # except Exception as e:
         #     return JsonResponse({'error': 'Failed to create group: ' + str(e)}, status=500)
+
 
 
 class ViewGroup(APIView):
