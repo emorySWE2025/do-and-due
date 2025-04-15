@@ -62,6 +62,7 @@ export async function createEventAction(
 		name: formData.name,
 		date: formData.date,
 		memberNames: memberNames,
+		repeatEvery: formData.repeats !== "None" ? formData.repeats : null,
 		groupId: groupData.id,
 	};
 	

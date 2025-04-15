@@ -94,6 +94,7 @@ export interface CreateEventFormData {
 	name: string;
 	date: string;
 	members: string;
+	repeats: string;
 }
 
 export interface AddUserToGroupFormData {

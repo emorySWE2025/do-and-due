@@ -131,10 +131,60 @@ function getEventDatesInMonth(
 	displayDate: Dayjs,
 ): Set<number> {
 	const eventDates = new Set<number>();
+	const daysInMonth = displayDate.daysInMonth();
+	const displayMonthStart = displayDate.startOf('month'); // For month comparison
+
 	events.forEach((event) => {
-		const eventDate = dayjs(event.first_date);
-		if (eventDate.isSame(displayDate, "month")) {
+		// Use startOf('day') to ignore time component for comparisons
+		const eventDate = dayjs(event.first_date).startOf('day');
+
+		// Add the original event date if it's in this month
+		if (eventDate.isSame(displayMonthStart, "month")) {
 			eventDates.add(eventDate.date());
+		}
+
+		// Handle repeating events
+		if (event.repeat_every) {
+			// Check each day in the month
+			for (let day = 1; day <= daysInMonth; day++) {
+				const currentDate = displayDate.date(day);
+
+				// Skip dates before the event starts
+				if (currentDate.isBefore(eventDate)) {
+					continue;
+				}
+
+				const daysDiff = currentDate.diff(eventDate, "day");
+
+				switch (event.repeat_every) {
+					case "Daily":
+						eventDates.add(day);
+						break;
+					case "Weekly":
+						// Occurs on the same day of the week, on or after start date
+						if (eventDate.day() === currentDate.day()) {
+							eventDates.add(day);
+						}
+						break;
+					case "Monthly":
+						// Same day of month, on or after start date
+						if (eventDate.date() === day) {
+							eventDates.add(day);
+						}
+						break;
+					case "Yearly":
+						// Same day and month, on or after start date
+						if (eventDate.date() === day &&
+							eventDate.month() === displayMonthStart.month()) {
+							eventDates.add(day);
+						}
+						break;
+					default:
+						// Handle unexpected repeat_every values gracefully
+						console.warn(`Unexpected repeat_every value in getEventDatesInMonth: ${event.repeat_every}`);
+						break; // Do nothing for unknown types
+				}
+			}
 		}
 	});
 	return eventDates;
