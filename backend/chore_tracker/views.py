@@ -1,4 +1,6 @@
 # from django.contrib.auth.models import User
+import uuid
+from _decimal import Decimal, ROUND_HALF_UP
 from django.contrib.auth import get_user_model
 from django.contrib.auth import login
 from django.http import JsonResponse
@@ -9,7 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
-from chore_tracker.models import Group, Event, EventOccurrence
+from chore_tracker.models import Group, Event, EventOccurrence, Cost
 from datetime import datetime
 import json
 from json import JSONDecodeError
@@ -374,3 +376,64 @@ class UserExists(APIView):
                 'exists': False,
                 'message': 'User not found'
             }, status=404)
+
+
+class CreateCost(APIView):
+    """ Create a Cost entry """
+
+    def post(self, request):
+        group_id = request.data.get('group_id')
+        name = request.data.get('name')
+        category = request.data.get('category')
+        date = request.data.get('date')
+        time = request.data.get('time')
+        amount = request.data.get('amount')
+        payer = request.data.get('payer')
+        borrowers = request.data.get('borrower', [])
+
+        # Validate required fields
+        if not group_id:
+            return JsonResponse({'error': 'No group id provided'}, status=400)
+        if not amount:
+            return JsonResponse({'error': 'No amount provided'}, status=400)
+        if not borrowers:
+            return JsonResponse({'error': 'No borrowers provided'}, status=400)
+        if not payer:
+            return JsonResponse({'error': 'No payer provided'}, status=400)
+
+        try:
+            group = Group.objects.get(id=group_id)
+            payer_user = User.objects.get(id=payer)
+            group_members = set(group.members.all())
+
+            # Check if payer is a member of the group
+            if payer_user not in group_members:
+                return JsonResponse({'error': 'Payer is not a member of the group'}, status=400)
+
+            # Generate a UUID for the transaction
+            transaction_id = uuid.uuid4()
+
+            for borrower in borrowers:
+                borrower_user = User.objects.get(id=borrower)
+                if borrower_user not in group_members:
+                    return JsonResponse({'error': f'User {borrower_user.username} is not a member of the group'},
+                                        status=400)
+
+                Cost.objects.create(
+                    name=name,
+                    category=category,
+                    date=date,
+                    time=time,
+                    amount=(Decimal(amount) / Decimal(len(borrowers))).quantize(Decimal('0.01'),
+                                                                                rounding=ROUND_HALF_UP),
+                    group=group,
+                    payer=payer_user,
+                    borrower=borrower_user,
+                    transaction_id=transaction_id
+                )
+
+            return JsonResponse({'message': 'Cost created successfully'}, status=201)
+        except ValidationError as e:
+            return JsonResponse({'error': str(e)}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': 'Failed to create cost: ' + str(e)}, status=500)
