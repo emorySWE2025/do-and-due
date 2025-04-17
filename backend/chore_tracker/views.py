@@ -77,7 +77,6 @@ class CreateGroup(APIView):
 
     def post(self, request):
 
-
         name = request.data.get('groupName')
         status = request.data.get('groupStatus')
         expiration_raw = request.data.get('groupExpiration')
@@ -87,7 +86,6 @@ class CreateGroup(APIView):
         user = User.objects.get(id=creator)
         # creator = request.user
         print(creator)
-
 
         try:
             group = Group(
@@ -102,7 +100,7 @@ class CreateGroup(APIView):
 
             group.members.add(user)
             group.save()
-            
+
             return JsonResponse({'message': 'Group created successfully'}, status=201)
         except Exception as e:
             print(e)
@@ -233,12 +231,12 @@ class CreateEvent(APIView):
                         return JsonResponse(
                             {"success": False, "message": f"User {username} not in group"}, status=400
                         )
-                    
+
                 except User.DoesNotExist:
                     return JsonResponse(
                         {"success": False, "message": f"User {username} not found"}, status=400
                     )
-                
+
             # TODO: Add an occurrence of the Event 
             #       For recurring Events, we need to add multiple. 
             #       Maybe we can make a new one when the date/time for previous one has passed?
@@ -249,7 +247,7 @@ class CreateEvent(APIView):
             return JsonResponse(
                 {"success": False, "message": "Invalid JSON in request"}, status=400
             )
-        
+
 
 class ChangeEventMembers(APIView):
     """ Change who is assigned to an event """
@@ -278,7 +276,7 @@ class ChangeEventMembers(APIView):
             # Check that members to assign exist and are in the group. Then, assign them
             group_members = group.members.all()
             memberNames = data.get("memberNames", [])
-            
+
             for username in memberNames:
                 try:
                     user = User.objects.get(username=username)
@@ -287,12 +285,12 @@ class ChangeEventMembers(APIView):
                         return JsonResponse(
                             {"success": False, "message": f"User {username} not in group"}, status=400
                         )
-                    
+
                 except User.DoesNotExist:
                     return JsonResponse(
                         {"success": False, "message": f"User {username} not found"}, status=400
                     )
-                
+
             event.members.set(memberNames)
 
             return JsonResponse({"success": True, "message": ""}, status=200)
@@ -315,7 +313,7 @@ class CurrentUserView(APIView):
 
             group_data = []
             for group in groups:
-                events = group.events.all().values('id', 'name', 'first_date', 'repeat_every', 'is_complete') # type: ignore
+                events = group.events.all().values('id', 'name', 'first_date', 'repeat_every', 'is_complete')  # type: ignore
                 group_data.append({
                     'id': group.id,
                     'name': group.name,
@@ -329,7 +327,8 @@ class CurrentUserView(APIView):
                 'email': user.email,
                 'groups': group_data
             })
-        
+
+
 class MarkEventComplete(APIView):
     def post(self, request):
         try:
@@ -343,7 +342,7 @@ class MarkEventComplete(APIView):
                     {"success": False, "message": "No such Event"}, status=400
                 )
 
-            #Toggle event completion status
+            # Toggle event completion status
             if event.is_complete:
                 event.is_complete = False
             else:
@@ -358,3 +357,20 @@ class MarkEventComplete(APIView):
             )
 
 
+class UserExists(APIView):
+    """ Check if a User exists using username """
+
+    def get(self, request):
+        username = request.query_params.get('username')
+
+        try:
+            user = User.objects.values('id', 'username').get(username=username)
+            return JsonResponse({
+                'exists': True,
+                'user': user
+            }, status=200)
+        except User.DoesNotExist:
+            return JsonResponse({
+                'exists': False,
+                'message': 'User not found'
+            }, status=404)
