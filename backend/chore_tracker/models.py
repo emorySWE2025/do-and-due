@@ -107,3 +107,57 @@ class Cost(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class RecurringCost(models.Model):
+    name = models.CharField(max_length=100)
+    category = models.CharField(max_length=50, null=True, blank=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    start_date = models.DateField()
+    end_date = models.DateField(null=True, blank=True)  # Optional end date
+    frequency = models.CharField(
+        max_length=20,
+        choices=[
+            ('daily', 'Daily'),
+            ('weekly', 'Weekly'),
+            ('monthly', 'Monthly'),
+        ]
+    )
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="recurring_costs")
+    payer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="recurring_costs")
+    borrowers = models.ManyToManyField(User, related_name="recurring_cost_borrowers")
+
+    def __str__(self):
+        return f"{self.name} ({self.frequency})"
+
+    def generate_costs(self):
+        """Generate individual Cost entries based on the recurrence pattern."""
+        from datetime import timedelta, date
+        import uuid
+
+        interval = {
+            'daily': timedelta(days=1),
+            'weekly': timedelta(weeks=1),
+            'monthly': timedelta(days=30),  # Approximation for simplicity
+        }.get(self.frequency)
+
+        if not interval:
+            raise ValueError("Invalid frequency")
+
+        current_date = self.start_date
+        while current_date <= (self.end_date or date.today()):
+            # Generate a unique transaction_id for this recurrence cycle
+            transaction_id = uuid.uuid4()
+
+            for borrower in self.borrowers.all():
+                Cost.objects.create(
+                    name=self.name,
+                    category=self.category,
+                    date=current_date,
+                    amount=(self.amount / self.borrowers.count()),
+                    group=self.group,
+                    payer=self.payer,
+                    borrower=borrower,
+                    transaction_id=transaction_id
+                )
+            current_date += interval
