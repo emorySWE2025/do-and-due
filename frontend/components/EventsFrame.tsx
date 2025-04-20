@@ -69,17 +69,27 @@ function AddEventForm({
 		register,
 		handleSubmit,
 		setError,
+		watch,
 		formState: { errors, isSubmitting },
-	} = useForm({ resolver: zodResolver(createEventSchema) });
+	} = useForm({
+		resolver: zodResolver(createEventSchema),
+		defaultValues: {
+			repeats: "None"
+		}
+	});
 	const router = useRouter();
+	const repeatValue = watch("repeats");
 
 	const onSubmit = async (data: any) => {
+		console.log("Submitting event with data:", data);
 		const res = await createEventAction(data, groupData);
-		// toggleAddEventState()
-		console.log("AddEventForm", res);
+		console.log("AddEventForm response:", res);
 		if (res.ok) {
 			toggleAddEventState();
-			router.push("/");
+			// Use router.refresh() instead of push to refresh the page data without a full navigation
+			router.refresh();
+		} else {
+			console.error("Failed to create event:", res.message);
 		}
 	};
 
@@ -143,7 +153,7 @@ function AddEventForm({
 
 				<div>
 					<label className="mb-1 block text-sm font-medium text-gray-700">
-						Repeats (not implemented yet)
+						Repeats
 					</label>
 					<div className="flex space-x-2 overflow-x-auto pb-2">
 						{["None", "Daily", "Weekly", "Monthly", "Yearly"].map(
@@ -155,8 +165,7 @@ function AddEventForm({
 									<input
 										type="radio"
 										value={option}
-										checked={index === 0 ? true : false}
-										disabled // TODO: implement backend logic to allow repeat events
+										checked={repeatValue === option}
 										{...register("repeats")}
 										className="peer hidden"
 									/>
@@ -336,9 +345,48 @@ function EventItem({ event }: { event: EventDisplayData }) {
 }
 
 function filterEventsByDate(events: EventDisplayData[], targetDate: Dayjs) {
-	return events.filter((event) =>
-		dayjs(event.first_date).isSame(targetDate, "day"),
-	);
+	return events.filter((event) => {
+		// Use startOf('day') to ignore time component for comparisons
+		const eventDate = dayjs(event.first_date).startOf('day');
+		const targetDateStart = targetDate.startOf('day');
+
+		// Check if it's the same day (for non-repeating or first occurrence)
+		if (eventDate.isSame(targetDateStart, "day")) {
+			return true;
+		}
+
+		// Handle repeating events: Ensure repeat_every is valid and not "None"
+		if (event.repeat_every && event.repeat_every !== "None") {
+			// Only check events that started on or before the target date
+			if (eventDate.isAfter(targetDateStart)) {
+				return false;
+			}
+
+			// No need for daysDiff for weekly/monthly/yearly checks here, compare date parts directly
+
+			switch (event.repeat_every) {
+				case "Daily":
+					// Event occurs daily on or after its start date
+					return !eventDate.isAfter(targetDateStart);
+				case "Weekly":
+					// Event occurs on the same day of the week, on or after its start date
+					return eventDate.day() === targetDateStart.day() && !eventDate.isAfter(targetDateStart);
+				case "Monthly":
+					// Same day of month, on or after its start date
+					return eventDate.date() === targetDateStart.date() && !eventDate.isAfter(targetDateStart);
+				case "Yearly":
+					// Same day and month, on or after its start date
+					return eventDate.date() === targetDateStart.date() &&
+						eventDate.month() === targetDateStart.month() && !eventDate.isAfter(targetDateStart);
+				default:
+					// Handle unexpected repeat_every values gracefully
+					console.warn(`Unexpected repeat_every value in filterEventsByDate: ${event.repeat_every}`);
+					return false;
+			}
+		}
+
+		return false;
+	});
 }
 
 function AddEventButton({

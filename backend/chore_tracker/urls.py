@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import (RegisterUser, LoginView, CreateGroup, IndexView, AddUsersToGroup, ViewGroup,
-                    CreateEvent, CurrentUserView, ChangeEventMembers, MarkEventComplete)
+                    CreateEvent, CurrentUserView, ChangeEventMembers, MarkEventComplete, UserExists, CreateCost)
 
 urlpatterns = [
     path('', IndexView.as_view(), name='index'),
@@ -13,5 +13,7 @@ urlpatterns = [
     path('event/create/', CreateEvent.as_view(), name='create_event'),
     path('event/change_members/', ChangeEventMembers.as_view(), name='change_event_members'),
     path('event/complete/', MarkEventComplete.as_view(), name='mark_event_complete'),
+    path('user/exists/', UserExists.as_view(), name='user_exists'),
+    path('cost/create/', CreateCost.as_view(), name='create_cost'),
 
 ]
