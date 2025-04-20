@@ -187,6 +187,46 @@ class AddUsersToGroup(APIView):
             return JsonResponse({'error': 'Group not found'}, status=404)
         except Exception as e:
             return JsonResponse({'error': f'Failed to invite users: {str(e)}'}, status=500)
+        
+
+class UpdateEvent(APIView):
+    """ Update an event's details """
+
+    def put(self, request):
+        try:
+            data = json.loads(request.body)
+
+            event_id = data.get("id")
+            if not event_id:
+                return JsonResponse(
+                    {"success": False, "message": "Missing event ID"}, status=400
+                )
+
+            try:
+                event = Event.objects.get(id=event_id)
+            except Event.DoesNotExist:
+                return JsonResponse(
+                    {"success": False, "message": "Event not found"}, status=404
+                )
+
+            # Update fields
+            if "name" in data:
+                event.name = data["name"]
+            if "first_date" in data:
+                event.first_date = data["first_date"]
+            if "repeat_every" in data:
+                event.repeat_every = data["repeat_every"]
+            if "is_complete" in data:
+                event.is_complete = data["is_complete"]
+
+            event.save()
+
+            return JsonResponse({"success": True, "message": "Event updated"}, status=200)
+
+        except JSONDecodeError:
+            return JsonResponse(
+                {"success": False, "message": "Invalid JSON"}, status=400
+            )
 
 
 class CreateEvent(APIView):
@@ -248,6 +288,20 @@ class CreateEvent(APIView):
         except JSONDecodeError:
             return JsonResponse(
                 {"success": False, "message": "Invalid JSON in request"}, status=400
+            )
+        
+
+class DeleteEvent(APIView):
+    """ Delete an event """
+
+    def delete(self, request, event_id):
+        try:
+            event = Event.objects.get(id=event_id)
+            event.delete()
+            return JsonResponse({"success": True, "message": "Event deleted"}, status=200)
+        except Event.DoesNotExist:
+            return JsonResponse(
+                {"success": False, "message": "Event not found"}, status=404
             )
 
 
