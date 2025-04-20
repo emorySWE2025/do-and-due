@@ -1,7 +1,7 @@
 "use client";
 
 import CalendarFrame from "@/components/CalendarFrame";
-import EventsFrame from "@/components/EventsFrame";
+import EventsFrame from "@/components/HomeEventsFrame";
 import GroupSelector from "@/components/GroupSelector";
 import CreateGroupFrame from "@/components/CreateGroupFrame";
 import {
