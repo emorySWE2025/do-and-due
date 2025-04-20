@@ -21,7 +21,7 @@ import { MarkEventCompleteResponse } from "@/schemas/transaction.schema";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-export default function EventsFrame({
+export default function HomeEventsFrame({
 	groupData,
 	dateState,
 	dateCallback,
