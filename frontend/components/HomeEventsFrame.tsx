@@ -19,6 +19,7 @@ import { createEventSchema } from "@/actions/zod";
 import Button from "@/components/Button";
 import { MarkEventCompleteResponse } from "@/schemas/transaction.schema";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function EventsFrame({
 	groupData,
@@ -74,8 +75,8 @@ function AddEventForm({
 	} = useForm({
 		resolver: zodResolver(createEventSchema),
 		defaultValues: {
-			repeats: "None"
-		}
+			repeats: "None",
+		},
 	});
 	const router = useRouter();
 	const repeatValue = watch("repeats");
@@ -299,11 +300,6 @@ function EventsDisplay({
 	);
 }
 
-interface Event {
-	label: string;
-	completed: boolean;
-}
-
 function EventItem({ event }: { event: EventDisplayData }) {
 	const [eventState, setEventState] = useState<boolean>(event.is_complete);
 
@@ -322,8 +318,28 @@ function EventItem({ event }: { event: EventDisplayData }) {
 		}
 	};
 
+	const editSymbol = (
+		<Link href={`/events/${event.id}`}>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="24"
+				height="24"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				strokeWidth="2"
+				strokeLinecap="round"
+				strokeLinejoin="round"
+				className="event-item-edit ml-2 h-4 w-4 cursor-pointer stroke-gray-400"
+			>
+				<path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+				<path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z" />
+			</svg>
+		</Link>
+	);
+
 	return (
-		<div className="flex w-full flex-row flex-nowrap items-start gap-2 p-1 text-base hover:bg-gray-50">
+		<div className="event-item flex w-full flex-row flex-nowrap items-start gap-2 p-1 text-base hover:bg-gray-50">
 			<input
 				type="checkbox"
 				checked={eventState}
@@ -339,6 +355,7 @@ function EventItem({ event }: { event: EventDisplayData }) {
 				}
 			>
 				{event.name}
+				{editSymbol}
 			</div>
 		</div>
 	);
@@ -347,8 +364,8 @@ function EventItem({ event }: { event: EventDisplayData }) {
 function filterEventsByDate(events: EventDisplayData[], targetDate: Dayjs) {
 	return events.filter((event) => {
 		// Use startOf('day') to ignore time component for comparisons
-		const eventDate = dayjs(event.first_date).startOf('day');
-		const targetDateStart = targetDate.startOf('day');
+		const eventDate = dayjs(event.first_date).startOf("day");
+		const targetDateStart = targetDate.startOf("day");
 
 		// Check if it's the same day (for non-repeating or first occurrence)
 		if (eventDate.isSame(targetDateStart, "day")) {
@@ -370,17 +387,28 @@ function filterEventsByDate(events: EventDisplayData[], targetDate: Dayjs) {
 					return !eventDate.isAfter(targetDateStart);
 				case "Weekly":
 					// Event occurs on the same day of the week, on or after its start date
-					return eventDate.day() === targetDateStart.day() && !eventDate.isAfter(targetDateStart);
+					return (
+						eventDate.day() === targetDateStart.day() &&
+						!eventDate.isAfter(targetDateStart)
+					);
 				case "Monthly":
 					// Same day of month, on or after its start date
-					return eventDate.date() === targetDateStart.date() && !eventDate.isAfter(targetDateStart);
+					return (
+						eventDate.date() === targetDateStart.date() &&
+						!eventDate.isAfter(targetDateStart)
+					);
 				case "Yearly":
 					// Same day and month, on or after its start date
-					return eventDate.date() === targetDateStart.date() &&
-						eventDate.month() === targetDateStart.month() && !eventDate.isAfter(targetDateStart);
+					return (
+						eventDate.date() === targetDateStart.date() &&
+						eventDate.month() === targetDateStart.month() &&
+						!eventDate.isAfter(targetDateStart)
+					);
 				default:
 					// Handle unexpected repeat_every values gracefully
-					console.warn(`Unexpected repeat_every value in filterEventsByDate: ${event.repeat_every}`);
+					console.warn(
+						`Unexpected repeat_every value in filterEventsByDate: ${event.repeat_every}`,
+					);
 					return false;
 			}
 		}
