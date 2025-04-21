@@ -78,18 +78,18 @@ class CreateGroup(APIView):
     """ Create a Group """
 
     def post(self, request):
-
-        name = request.data.get('groupName')
-        status = request.data.get('groupStatus')
-        expiration_raw = request.data.get('groupExpiration')
-        expiration = parse_datetime(expiration_raw) if expiration_raw else None
-        timezone = request.data.get('groupTimezone')
-        creator = request.data.get('groupCreatorId')
-        user = User.objects.get(id=creator)
-        # creator = request.user
-        print(creator)
-
         try:
+            name = request.data.get('groupName')
+            status = request.data.get('groupStatus')
+            expiration_raw = request.data.get('groupExpiration')
+            expiration = parse_datetime(expiration_raw) if expiration_raw else None
+            timezone = request.data.get('groupTimezone')
+            creator = request.data.get('groupCreatorId')
+            user = User.objects.get(id=creator)
+            # creator = request.user
+            print(creator)
+
+
             group = Group(
                 name=name,
                 status=status,

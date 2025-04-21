@@ -1,7 +1,10 @@
 from django.test import TestCase
-from chore_tracker.models import User, Group, Event, Cost
+from chore_tracker.models import User, Group, Event, Cost, RecurringCost
 from django.utils import timezone
+from freezegun import freeze_time
 
+
+@freeze_time("2023-01-01 12:34:56")
 class ModelTestCase(TestCase):
     def setUp(self):
         self.user1 = User.objects.create(
@@ -30,7 +33,6 @@ class ModelTestCase(TestCase):
         self.event = Event.objects.create(
             name="Test Event",
             first_date=timezone.now().date(),
-            first_time=timezone.now().time(),
             group=self.group
         )
         self.event.members.add(self.user1, self.user2)
@@ -41,8 +43,23 @@ class ModelTestCase(TestCase):
             amount=50.0,
             group=self.group,
             borrower=self.user2,
-            payer=self.user1
+            payer=self.user1,
+            date=timezone.now().date(),
+            time=timezone.now().time(),
         )
+
+        self.recurring_cost = RecurringCost.objects.create(
+            name="Test Recurring Cost",
+            category="Food",
+            amount="100.0",
+            start_date=timezone.now().date(),
+            end_date=timezone.now().date(),
+            frequency="daily",
+            group=self.group,
+            payer=self.user2,
+        )
+
+        self.recurring_cost.borrowers.add(self.user1)
 
     def test_user_creation(self):
         user = User.objects.get(username="alice123")
@@ -58,7 +75,6 @@ class ModelTestCase(TestCase):
 
     def test_event_creation(self):
         event = Event.objects.get(name="Test Event")
-        self.assertEqual(event.first_time.replace(microsecond=0), timezone.now().time().replace(microsecond=0))
         self.assertEqual(event.group, self.group)
         self.assertIn(self.user1, event.members.all())
         self.assertIn(self.user2, event.members.all())
@@ -70,6 +86,8 @@ class ModelTestCase(TestCase):
         self.assertEqual(cost.group, self.group)
         self.assertEqual(cost.borrower, self.user2)
         self.assertEqual(cost.payer, self.user1)
+        self.assertEqual(cost.date, timezone.now().date())
+        self.assertEqual(cost.time, timezone.now().time())
 
     def test_str_method_user(self):
         self.assertEqual(str(self.user1), "alice123")
@@ -82,3 +100,6 @@ class ModelTestCase(TestCase):
 
     def test_str_method_cost(self):
         self.assertEqual(str(self.cost), "Test Cost")
+
+    def test_str_method_recurring_cost(self):
+        self.assertEqual(str(self.recurring_cost), "Test Recurring Cost (daily)")

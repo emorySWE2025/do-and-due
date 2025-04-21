@@ -1,13 +1,14 @@
 from unittest.mock import patch
 
 import pytest
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.test import Client
 from django.utils import timezone
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 
+User = get_user_model()
 
 @pytest.mark.django_db
 def test_index_view(client):
@@ -95,7 +96,7 @@ def test_register_user_create_exception(mock_create_user):
 @pytest.mark.django_db
 def test_login_user_success(client):
     url = reverse('login')
-    User.objects.create_user(username='test_username', password='test_password')
+    User.objects.create_user(username='test_username', password='test_password', email='test@example.com')
 
     response = client.post(url, {'username': 'test_username', 'password': 'test_password'})
     assert response.status_code == status.HTTP_200_OK
@@ -104,14 +105,14 @@ def test_login_user_success(client):
 @pytest.mark.django_db
 def test_login_error(client):
     url = reverse('login')
-    User.objects.create_user(username='test_username', password='testpassword')
+    User.objects.create_user(username='test_username', password='testpassword', email='test@example.com')
     response = client.post(url, {'username': 'test_username', 'password': 'test_password'})
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 @pytest.mark.django_db
 def test_current_user_view_success(client):
-    user = User.objects.create_user(username='test_username', password='testpassword')
+    user = User.objects.create_user(username='test_username', password='testpassword', email='test@example.com')
 
     refresh = RefreshToken.for_user(user)
     access_token = str(refresh.access_token)
@@ -131,14 +132,15 @@ def test_current_user_view_success(client):
 
 @pytest.mark.django_db
 def test_create_group_exception(client):
-    user = User.objects.create_user(username="creator", password="pass")
+    user = User.objects.create_user(username="creator", password="pass", email="test@example.com")
     client.force_login(user)
 
     data = {
-        'name': 'Test Group',
-        'status': 'active',
-        'expiration': timezone.now().isoformat(),
-        'timezone': 'UTC'
+        'groupName': 'Test Group',
+        'groupStatus': 'active',
+        'groupExpiration': timezone.now().isoformat(),
+        'groupTimezone': 'UTC',
+        'groupCreatorId': 999
     }
     response = client.post(reverse('create_group'), data)
     assert response.status_code == 500
