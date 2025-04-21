@@ -15,6 +15,7 @@ from chore_tracker.models import Group, Event, EventOccurrence, Cost
 from datetime import datetime
 import json
 from json import JSONDecodeError
+from chore_tracker.utils import update_recurring_events
 
 User = get_user_model()
 
@@ -121,6 +122,7 @@ class ViewGroup(APIView):
 
         try:
             group = Group.objects.get(id=group_id)
+            update_recurring_events(group)
             members = group.members.all()
             # events = group.events.all()
             # costs = group.costs.all()
