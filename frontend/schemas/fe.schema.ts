@@ -76,8 +76,13 @@ export interface CreateEventFormData {
 	repeats: string;
 }
 
+export interface AddUsersToGroupFormData {
+	groupId: number;
+	members: string[];
+}
+
 export interface AddUserToGroupFormData {
 	groupId: number;
-	usernames: string[];
+	members: string;
 }
 // --------------------------------------------------------------------------------------

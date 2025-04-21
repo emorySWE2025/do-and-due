@@ -61,12 +61,6 @@ function CreateGroupForm({ userId }: { userId: number }) {
 				)}
 			</div>
 
-			<div>
-				<Input type="text" {...register("members")} label="Members" />
-				{errors.members && (
-					<ErrorText message={errors.members.message} />
-				)}
-			</div>
 
 			<Button className="w-full" type="submit" disabled={isSubmitting}>
 				Submit

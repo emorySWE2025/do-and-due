@@ -1,12 +1,15 @@
 "use server";
 
-import { CreateGroupFormData, AddUserToGroupFormData } from "@/schemas/fe.schema";
+import { CreateGroupFormData, AddUserToGroupFormData, AddUsersToGroupFormData } from "@/schemas/fe.schema";
 import {
 	CreateGroupRequest,
 	CreateGroupClientResponse,
 	AddUsersToGroupRequest,
-	AddUsersToGroupResponse
+	AddUsersToGroupResponse,
+	AddUserToGroupRequest,
+	AddUserToGroupResponse
 } from "@/schemas/transaction.schema";
+import { form } from "motion/react-client";
 
 export async function createGroupAction(
 	formData: CreateGroupFormData,
@@ -54,17 +57,20 @@ export async function createGroupAction(
 // function to add user to a group
 
 export async function addUsersToGroupAction(
-	formData: AddUserToGroupFormData,
+	formData: AddUsersToGroupFormData,
 	groupId: number,
 ): Promise<AddUsersToGroupResponse> {
+
+	// console.log(formData);
 	// convert the form data to the format expected by the backend
 	const postData: AddUsersToGroupRequest = {
 		groupId: groupId,
-		usernames: formData.usernames,
+		usernames: formData.members,
 	};
 
+
 	try {
-		const res = await fetch("http://127.0.0.1:8000/api/group/add-users/", {
+		const res = await fetch("http://127.0.0.1:8000/api/group/add_users/", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(postData),
@@ -92,6 +98,52 @@ export async function addUsersToGroupAction(
 			ok: false,
 			message: "A frontend error occurred during registration!",
 			result: {success: [], failure: []},
+			status: 500
+		};
+	}
+}
+
+export async function addUserToGroupAction(
+	formData: AddUserToGroupFormData,
+	groupId: number,
+): Promise<AddUserToGroupResponse> {
+
+	// console.log(formData);
+	// convert the form data to the format expected by the backend
+	const postData: AddUserToGroupRequest = {
+		groupId: groupId,
+		username: formData.members,
+	};
+
+
+	try {
+		const res = await fetch("http://127.0.0.1:8000/api/group/add_user/", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(postData),
+			credentials: "include",
+		});
+
+		if (res.ok) {
+			return {  message: "member added", success: true , status: res.status };
+		} else {
+
+			const data = await res.json();
+			console.log("sign up backend error");
+			// if an error occurred on the backend
+			return {
+				success: false,
+				message: data.message,
+				status: res.status
+			};
+		}
+		// if an error occurred on the frontend
+	} catch (error) {
+		// if an error occurred on the backend
+		console.log("createGroupAction", error);
+		return {
+			success: false,
+			message: "A frontend error occurred during registration!",
 			status: 500
 		};
 	}

@@ -10,6 +10,7 @@ import {
 	LoginUserClientResponse,
 	RegisterUserRequest,
 	LoginUserRequest,
+	UserSearchResponse,
 } from "@/schemas/transaction.schema";
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { cookies } from "next/headers";
@@ -189,4 +190,31 @@ export async function deleteSessionTokenCookie(): Promise<void> {
 		maxAge: 0,
 		path: "/",
 	});
+}
+
+export async function searchUsersAction(searchTerm: string): Promise<UserSearchResponse> {
+	"use server";
+
+	try {
+		const response = await fetch(`http://127.0.0.1:8000/api/get-users/?search=${searchTerm}`);
+		if (!response.ok) {
+			const res = await response.json();
+			console.log(res.message);
+			// if the response wasn't ok, the error message will be stored at response.message
+			return res.error;
+		}
+		const data = await response.json();
+		return data;
+	} catch (error) {
+
+         console.log(error);
+
+		return {
+			success: false,
+			status: 400,
+			users: [],
+		};
+		
+	}
+
 }
