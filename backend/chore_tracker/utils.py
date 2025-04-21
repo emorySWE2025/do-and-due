@@ -36,3 +36,13 @@ def update_recurring_events(group):
                     is_complete=False,
                 )
             cur_time += t_delta
+
+def delete_recurrences(event):
+    if event.repeat_every is None or event.repeat_every=='':
+        return
+    future_events = Event.objects.filter(group=event.group, 
+                                         name=event.name, 
+                                         repeat_every=event.repeat_every,
+                                         event_date__gt=event.first_date)
+    for fe in future_events:
+        fe.delete()

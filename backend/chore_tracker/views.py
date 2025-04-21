@@ -15,7 +15,7 @@ from chore_tracker.models import Group, Event, EventOccurrence, Cost
 from datetime import datetime
 import json
 from json import JSONDecodeError
-from chore_tracker.utils import update_recurring_events
+from chore_tracker.utils import update_recurring_events, delete_recurrences
 
 User = get_user_model()
 
@@ -299,6 +299,7 @@ class DeleteEvent(APIView):
     def delete(self, request, event_id):
         try:
             event = Event.objects.get(id=event_id)
+            delete_recurrences(event)
             event.delete()
             return JsonResponse({"success": True, "message": "Event deleted"}, status=200)
         except Event.DoesNotExist:
