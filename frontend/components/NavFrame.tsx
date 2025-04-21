@@ -150,7 +150,7 @@ export default function NavFrame() {
 				<div className="flex flex-row flex-nowrap gap-4">
 					<NavButton label={"Home"} href={"/"} />
 					<NavButton label={"Groups"} href={"/groups"} />
-					<NavButton label={"People"} href={"/people"} />
+					<NavButton label={"Events"} href={"/events"} />
 				</div>
 			</div>
 			<div className="flex flex-row flex-nowrap items-center gap-4">
