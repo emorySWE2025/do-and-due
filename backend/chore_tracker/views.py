@@ -1,4 +1,6 @@
 # from django.contrib.auth.models import User
+import uuid
+from _decimal import Decimal, ROUND_HALF_UP
 from django.contrib.auth import get_user_model
 from django.contrib.auth import login
 from django.http import JsonResponse
@@ -9,7 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
-from chore_tracker.models import Group, Event, EventOccurrence
+from chore_tracker.models import Group, Event, EventOccurrence, Cost
 from datetime import datetime
 import json
 from json import JSONDecodeError
@@ -77,7 +79,6 @@ class CreateGroup(APIView):
 
     def post(self, request):
 
-
         name = request.data.get('groupName')
         status = request.data.get('groupStatus')
         expiration_raw = request.data.get('groupExpiration')
@@ -87,7 +88,6 @@ class CreateGroup(APIView):
         user = User.objects.get(id=creator)
         # creator = request.user
         print(creator)
-
 
         try:
             group = Group(
@@ -102,7 +102,7 @@ class CreateGroup(APIView):
 
             group.members.add(user)
             group.save()
-            
+
             return JsonResponse({'message': 'Group created successfully'}, status=201)
         except Exception as e:
             print(e)
@@ -274,12 +274,12 @@ class CreateEvent(APIView):
                         return JsonResponse(
                             {"success": False, "message": f"User {username} not in group"}, status=400
                         )
-                    
+
                 except User.DoesNotExist:
                     return JsonResponse(
                         {"success": False, "message": f"User {username} not found"}, status=400
                     )
-                
+
             # TODO: Add an occurrence of the Event 
             #       For recurring Events, we need to add multiple. 
             #       Maybe we can make a new one when the date/time for previous one has passed?
@@ -290,7 +290,7 @@ class CreateEvent(APIView):
             return JsonResponse(
                 {"success": False, "message": "Invalid JSON in request"}, status=400
             )
-        
+
 
 class ChangeEventMembers(APIView):
     """ Change who is assigned to an event """
@@ -319,7 +319,7 @@ class ChangeEventMembers(APIView):
             # Check that members to assign exist and are in the group. Then, assign them
             group_members = group.members.all()
             memberNames = data.get("memberNames", [])
-            
+
             for username in memberNames:
                 try:
                     user = User.objects.get(username=username)
@@ -328,12 +328,12 @@ class ChangeEventMembers(APIView):
                         return JsonResponse(
                             {"success": False, "message": f"User {username} not in group"}, status=400
                         )
-                    
+
                 except User.DoesNotExist:
                     return JsonResponse(
                         {"success": False, "message": f"User {username} not found"}, status=400
                     )
-                
+
             event.members.set(memberNames)
 
             return JsonResponse({"success": True, "message": ""}, status=200)
@@ -356,7 +356,7 @@ class CurrentUserView(APIView):
 
             group_data = []
             for group in groups:
-                events = group.events.all().values('id', 'name', 'first_date', 'repeat_every', 'is_complete') # type: ignore
+                events = group.events.all().values('id', 'name', 'first_date', 'repeat_every', 'is_complete')  # type: ignore
                 group_data.append({
                     'id': group.id,
                     'name': group.name,
@@ -397,7 +397,7 @@ class MarkEventComplete(APIView):
                     {"success": False, "message": "No such Event"}, status=400
                 )
 
-            #Toggle event completion status
+            # Toggle event completion status
             if event.is_complete:
                 event.is_complete = False
             else:
@@ -410,4 +410,83 @@ class MarkEventComplete(APIView):
             return JsonResponse(
                 {"success": False, "message": "Invalid JSON in request", "eventStatus": event.is_complete}, status=400
             )
+
+class UserExists(APIView):
+    """ Check if a User exists using username """
+
+    def get(self, request):
+        username = request.query_params.get('username')
+
+        try:
+            user = User.objects.values('id', 'username').get(username=username)
+            return JsonResponse({
+                'exists': True,
+                'user': user
+            }, status=200)
+        except User.DoesNotExist:
+            return JsonResponse({
+                'exists': False,
+                'message': 'User not found'
+            }, status=404)
+
+
+class CreateCost(APIView):
+    """ Create a Cost entry """
+
+    def post(self, request):
+        group_id = request.data.get('group_id')
+        name = request.data.get('name')
+        category = request.data.get('category')
+        date = request.data.get('date')
+        time = request.data.get('time')
+        amount = request.data.get('amount')
+        payer = request.data.get('payer')
+        borrowers = request.data.get('borrower', [])
+
+        # Validate required fields
+        if not group_id:
+            return JsonResponse({'error': 'No group id provided'}, status=400)
+        if not amount:
+            return JsonResponse({'error': 'No amount provided'}, status=400)
+        if not borrowers:
+            return JsonResponse({'error': 'No borrowers provided'}, status=400)
+        if not payer:
+            return JsonResponse({'error': 'No payer provided'}, status=400)
+
+        try:
+            group = Group.objects.get(id=group_id)
+            payer_user = User.objects.get(id=payer)
+            group_members = set(group.members.all())
+
+            # Check if payer is a member of the group
+            if payer_user not in group_members:
+                return JsonResponse({'error': 'Payer is not a member of the group'}, status=400)
+
+            # Generate a UUID for the transaction
+            transaction_id = uuid.uuid4()
+
+            for borrower in borrowers:
+                borrower_user = User.objects.get(id=borrower)
+                if borrower_user not in group_members:
+                    return JsonResponse({'error': f'User {borrower_user.username} is not a member of the group'},
+                                        status=400)
+
+                Cost.objects.create(
+                    name=name,
+                    category=category,
+                    date=date,
+                    time=time,
+                    amount=(Decimal(amount) / Decimal(len(borrowers))).quantize(Decimal('0.01'),
+                                                                                rounding=ROUND_HALF_UP),
+                    group=group,
+                    payer=payer_user,
+                    borrower=borrower_user,
+                    transaction_id=transaction_id
+                )
+
+            return JsonResponse({'message': 'Cost created successfully'}, status=201)
+        except ValidationError as e:
+            return JsonResponse({'error': str(e)}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': 'Failed to create cost: ' + str(e)}, status=500)
 

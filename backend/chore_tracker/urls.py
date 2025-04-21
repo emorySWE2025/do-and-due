@@ -2,6 +2,7 @@ from django.urls import path
 from .views import (AddUsertoGroup, GetUsers, RegisterUser, LoginView, CreateGroup, IndexView, AddUsersToGroup, ViewGroup,
                     CreateEvent, CurrentUserView, ChangeEventMembers, MarkEventComplete)
 
+
 urlpatterns = [
     path('', IndexView.as_view(), name='index'),
     path('register/', RegisterUser.as_view(), name='register'),
@@ -15,5 +16,7 @@ urlpatterns = [
     path('event/complete/', MarkEventComplete.as_view(), name='mark_event_complete'),
     path('get-users/', GetUsers.as_view(), name='get-users'),
     path('group/add_user/', AddUsertoGroup.as_view(), name='add_user'),
+    path('user/exists/', UserExists.as_view(), name='user_exists'),
+    path('cost/create/', CreateCost.as_view(), name='create_cost'),
 
 ]
