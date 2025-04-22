@@ -43,6 +43,6 @@ def delete_recurrences(event):
     future_events = Event.objects.filter(group=event.group, 
                                          name=event.name, 
                                          repeat_every=event.repeat_every,
-                                         event_date__gt=event.first_date)
+                                         first_date__gt=event.first_date)
     for fe in future_events:
         fe.delete()
