@@ -12,10 +12,18 @@ import { ErrorText } from "@/components/Errors";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { AddUserToGroupFormData } from "@/schemas/fe.schema";
+import { div } from "motion/react-client";
+import Image from "next/image"
 
 export default function AddMemberFrame({ groupId }: { groupId: number }) {
 	return (
-		<div className="m-auto h-max max-w-md space-y-8">
+		<div className="flex flex-row">
+			<div className="basis-1/3">
+				<ViewGroupMembersFrame groupId={groupId} />
+			</div>
+			
+
+			<div className="basis-2/3 m-auto h-max max-w-md space-y-8">
 			<div className="text-center">
 				<h2 className="mt-6 text-3xl font-extrabold text-gray-900">
 					Add a new member
@@ -25,6 +33,42 @@ export default function AddMemberFrame({ groupId }: { groupId: number }) {
 				</p>
 			</div>
 			<AddMemberForm groupId={groupId}  />
+		</div>
+		</div>
+		
+	);
+}
+
+function ViewGroupMembersFrame({ groupId }: { groupId: number }) {
+	return (
+		<div className="m-auto h-max max-w-md space-y-8">
+			<div className="text-center">
+				<h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+					 Group Members
+				</h2>
+			</div>
+			
+			
+            <div className="m-auto items-center">
+			<div className="mx-auto flex items-center gap-x-4 rounded-l bg-white p-3  outline outline-black/10 ">
+			<Image src="/profile-placeholder.png" className="rounded-full" width={48} height={48} alt="avatar" ></Image>
+			<div>
+				<div className="text-xl font-medium text-black ">test01</div>
+			</div>
+			</div>
+			<div className="mx-auto flex items-center gap-x-4 rounded-l bg-white p-3  outline outline-black/10 ">
+			<Image src="/profile-placeholder.png" className="rounded-full" width={48} height={48} alt="avatar" ></Image>
+			<div>
+				<div className="text-xl font-medium text-black ">test02</div>
+			</div>
+			</div>
+			
+
+			</div>
+			
+
+			
+			
 		</div>
 	);
 }
