@@ -13,7 +13,7 @@ export default async function GroupsPage() {
 
 	return (
 		<PageLayout>
-			<GroupsFrame GroupsData={userData.groups} />
+			<GroupsFrame groupsData={userData.groups} />
 		</PageLayout>
 	);
 }
