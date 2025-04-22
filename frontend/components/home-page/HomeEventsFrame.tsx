@@ -12,11 +12,11 @@ import {
 import dayjs, { Dayjs } from "dayjs";
 import { JSX, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { ErrorPopup, ErrorText } from "@/components/Errors";
-import Input from "@/components/Input";
+import { ErrorPopup, ErrorText } from "@/components/shared/Errors";
+import Input from "@/components/shared/Input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createEventSchema } from "@/actions/zod";
-import Button from "@/components/Button";
+import Button from "@/components/shared/Button";
 import { MarkEventCompleteResponse } from "@/schemas/transaction.schema";
 import { useRouter } from "next/navigation";
 import Link from "next/link";

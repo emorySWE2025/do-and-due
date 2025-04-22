@@ -64,7 +64,7 @@ class Event(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=60)
     first_date = models.DateField()
-    time = models.TimeField(null=True, blank=True)
+    # time = models.TimeField(null=True, blank=True)
     repeat_every = models.CharField(max_length=40, null=True, blank=True)
     # repeat_every = models.IntegerField(null=True)
 
@@ -80,7 +80,7 @@ class Event(models.Model):
 class EventOccurrence(models.Model):
     id = models.AutoField(primary_key=True)
     date = models.DateField(default=None)
-    time = models.TimeField(default=None)
+    # time = models.TimeField(default=None)
 
     # Relationships
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="occurrences", default=None)

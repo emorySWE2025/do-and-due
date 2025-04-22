@@ -6,9 +6,9 @@ import {
 	GroupStateData,
 	UserDisplayData,
 } from "@/schemas/fe.schema";
-import Button from "@/components/Button";
+import Button from "@/components/shared/Button";
 import Link from "next/link";
-import GroupSelector from "./GroupSelector";
+import GroupSelector from "@/components/shared/GroupSelector";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { group } from "console";

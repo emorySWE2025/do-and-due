@@ -1,12 +1,12 @@
 import { createGroupAction } from "@/actions/groups.server";
-import Input from "@/components/Input";
-import Button from "@/components/Button";
+import Input from "@/components/shared/Input";
+import Button from "@/components/shared/Button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { CreateGroupClientResponse } from "@/schemas/transaction.schema";
 import { createGroupSchema } from "@/actions/zod";
-import { ErrorText, ErrorPopup } from "@/components/Errors";
+import { ErrorText, ErrorPopup } from "@/components/shared/Errors";
 
 export default function CreateGroupFrame({ userId }: { userId: number }) {
 	return (
@@ -31,6 +31,7 @@ function CreateGroupForm({ userId }: { userId: number }) {
 		setError,
 		formState: { errors, isSubmitting },
 	} = useForm({ resolver: zodResolver(createGroupSchema) });
+	const router = useRouter();
 
 	const onSubmit = async (data: any) => {
 		console.log("Form submitted:", data);
@@ -43,8 +44,8 @@ function CreateGroupForm({ userId }: { userId: number }) {
 			// if the response wasn't ok, the error message will be stored at response.message
 			setError("root", { message: response.message });
 		} else {
-			// if response was ok, redirect to login
-			redirect("/user/login");
+			// if response was ok, refresh page
+			router.refresh();
 		}
 	};
 
@@ -61,10 +62,10 @@ function CreateGroupForm({ userId }: { userId: number }) {
 				)}
 			</div>
 
-
 			<Button className="w-full" type="submit" disabled={isSubmitting}>
 				Submit
 			</Button>
+
 			{errors.root && <ErrorText message={errors.root.message} />}
 		</form>
 	);
