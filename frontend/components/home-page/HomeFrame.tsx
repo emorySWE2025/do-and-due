@@ -70,6 +70,7 @@ function HomeFrameContents({
 					groupData={groupData}
 					dateState={dateState}
 					dateCallback={dateCallback}
+					username={userData.username}
 				/>
 			</div>
 		);
