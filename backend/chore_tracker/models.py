@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractBaseUser
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import BaseUserManager
+from django.utils import timezone
 
 
 class UserManager(BaseUserManager):
@@ -153,6 +154,7 @@ class RecurringCost(models.Model):
                 Cost.objects.create(
                     name=self.name,
                     category=self.category,
+                    time=timezone.now().time(),
                     date=current_date,
                     amount=(self.amount / self.borrowers.count()),
                     group=self.group,
