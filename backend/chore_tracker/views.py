@@ -264,6 +264,7 @@ class CreateEvent(APIView):
             # Get assigned members and add them. This is required due to the ManyToManyField
             group_members = group.members.all()
             memberNames = data.get("memberNames", [])
+            print(memberNames)
 
             for username in memberNames:
                 try:
@@ -280,10 +281,6 @@ class CreateEvent(APIView):
                     return JsonResponse(
                         {"success": False, "message": f"User {username} not found"}, status=400
                     )
-
-            # TODO: Add an occurrence of the Event 
-            #       For recurring Events, we need to add multiple. 
-            #       Maybe we can make a new one when the date/time for previous one has passed?
 
             return JsonResponse({"success": True, "message": ""}, status=200)
 
@@ -441,12 +438,24 @@ class CurrentUserView(APIView):
 
             group_data = []
             for group in groups:
-                events = group.events.all().values('id', 'name', 'members', 'first_date', 'repeat_every', 'is_complete')  # type: ignore
+                events = group.events.all().prefetch_related('members') # type: ignore
+                
+                event_data = []
+                for event in events:
+                    event_data.append({
+                        'id': event.id,
+                        'name': event.name,
+                        'members': list(event.members.all().values('username')),
+                        'first_date': event.first_date,
+                        'repeat_every': event.repeat_every,
+                        'is_complete': event.is_complete,
+                    })
+
                 group_data.append({
                     'id': group.id,
                     'name': group.name,
                     'members': list(group.members.all().values('username', 'photo_url')),
-                    'events': list(events)
+                    'events': event_data
                 })
 
             return JsonResponse({
@@ -455,9 +464,9 @@ class CurrentUserView(APIView):
                 'email': user.email,
                 'groups': group_data
             })
-        
-class GetUsers(APIView):
 
+
+class GetUsers(APIView):
     # get all users that match a particular string 
     def get(self, request):
         try:
@@ -468,7 +477,6 @@ class GetUsers(APIView):
             return JsonResponse({"success": False, 'error': str(e)}, status=400)
 
 
-        
 class MarkEventComplete(APIView):
     def post(self, request):
         try:
