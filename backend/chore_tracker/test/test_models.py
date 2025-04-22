@@ -1,7 +1,14 @@
+from datetime import date
+from decimal import Decimal
+
+import pytest
+from django.contrib.auth import get_user_model
 from django.test import TestCase
-from chore_tracker.models import User, Group, Event, Cost, RecurringCost
+from chore_tracker.models import User, Group, Event, Cost, RecurringCost, EventOccurrence
 from django.utils import timezone
 from freezegun import freeze_time
+
+User = get_user_model()
 
 
 @freeze_time("2023-01-01 12:34:56")
@@ -37,6 +44,12 @@ class ModelTestCase(TestCase):
         )
         self.event.members.add(self.user1, self.user2)
 
+        self.event_occurrence = EventOccurrence.objects.create(
+            date=timezone.now().date(),
+            time=timezone.now().time(),
+            event=self.event,
+        )
+
         self.cost = Cost.objects.create(
             name="Test Cost",
             category="Food",
@@ -51,15 +64,28 @@ class ModelTestCase(TestCase):
         self.recurring_cost = RecurringCost.objects.create(
             name="Test Recurring Cost",
             category="Food",
-            amount="100.0",
+            amount=Decimal("100.0"),
             start_date=timezone.now().date(),
-            end_date=timezone.now().date(),
+            end_date=date(2025, 1, 2),
             frequency="daily",
             group=self.group,
             payer=self.user2,
         )
 
         self.recurring_cost.borrowers.add(self.user1)
+
+        self.recurring_cost1 = RecurringCost.objects.create(
+            name="Test Recurring Cost",
+            category="Food",
+            amount="100.0",
+            start_date=timezone.now().date(),
+            end_date=timezone.now().date(),
+            frequency='',
+            group=self.group,
+            payer=self.user2,
+        )
+
+        self.recurring_cost1.borrowers.add(self.user1)
 
     def test_user_creation(self):
         user = User.objects.get(username="alice123")
@@ -103,3 +129,17 @@ class ModelTestCase(TestCase):
 
     def test_str_method_recurring_cost(self):
         self.assertEqual(str(self.recurring_cost), "Test Recurring Cost (daily)")
+
+    def test_str_method_event_occurrence(self):
+        self.assertEqual(str(self.event_occurrence), "Test Event")
+
+    def test_generate_recurring_cost_value_error(self):
+        with pytest.raises(ValueError):
+            self.recurring_cost1.generate_costs()
+
+    def test_generate_recurring_cost_success(self):
+        self.recurring_cost.generate_costs()
+
+    def test_create_user_without_email_raises_value_error(self):
+        with pytest.raises(ValueError):
+            User.objects.create_user(email=None, password=None)
