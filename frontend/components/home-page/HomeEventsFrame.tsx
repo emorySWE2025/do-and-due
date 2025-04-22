@@ -55,8 +55,6 @@ export default function HomeEventsFrame({
 	);
 }
 
-// function AddEventForm() {}
-
 function AddEventForm({
 	groupData,
 	dateState,
@@ -362,59 +360,9 @@ function EventItem({ event }: { event: EventDisplayData }) {
 }
 
 function filterEventsByDate(events: EventDisplayData[], targetDate: Dayjs) {
-	return events.filter((event) => {
-		// Use startOf('day') to ignore time component for comparisons
-		const eventDate = dayjs(event.first_date).startOf("day");
-		const targetDateStart = targetDate.startOf("day");
-
-		// Check if it's the same day (for non-repeating or first occurrence)
-		if (eventDate.isSame(targetDateStart, "day")) {
-			return true;
-		}
-
-		// Handle repeating events: Ensure repeat_every is valid and not "None"
-		if (event.repeat_every && event.repeat_every !== "None") {
-			// Only check events that started on or before the target date
-			if (eventDate.isAfter(targetDateStart)) {
-				return false;
-			}
-
-			// No need for daysDiff for weekly/monthly/yearly checks here, compare date parts directly
-
-			switch (event.repeat_every) {
-				case "Daily":
-					// Event occurs daily on or after its start date
-					return !eventDate.isAfter(targetDateStart);
-				case "Weekly":
-					// Event occurs on the same day of the week, on or after its start date
-					return (
-						eventDate.day() === targetDateStart.day() &&
-						!eventDate.isAfter(targetDateStart)
-					);
-				case "Monthly":
-					// Same day of month, on or after its start date
-					return (
-						eventDate.date() === targetDateStart.date() &&
-						!eventDate.isAfter(targetDateStart)
-					);
-				case "Yearly":
-					// Same day and month, on or after its start date
-					return (
-						eventDate.date() === targetDateStart.date() &&
-						eventDate.month() === targetDateStart.month() &&
-						!eventDate.isAfter(targetDateStart)
-					);
-				default:
-					// Handle unexpected repeat_every values gracefully
-					console.warn(
-						`Unexpected repeat_every value in filterEventsByDate: ${event.repeat_every}`,
-					);
-					return false;
-			}
-		}
-
-		return false;
-	});
+	return events.filter((event) =>
+		dayjs(event.first_date).isSame(targetDate, "day"),
+	);
 }
 
 function AddEventButton({
