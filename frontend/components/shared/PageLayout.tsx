@@ -1,4 +1,4 @@
-import NavFrame from "@/components/NavFrame";
+import NavFrame from "@/components/shared/NavFrame";
 import { JSX } from "react";
 
 export default function PageLayout({

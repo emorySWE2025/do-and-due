@@ -1,12 +1,12 @@
 import { createGroupAction } from "@/actions/groups.server";
-import Input from "@/components/Input";
-import Button from "@/components/Button";
+import Input from "@/components/shared/Input";
+import Button from "@/components/shared/Button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { redirect, useRouter } from "next/navigation";
 import { CreateGroupClientResponse } from "@/schemas/transaction.schema";
 import { createGroupSchema } from "@/actions/zod";
-import { ErrorText, ErrorPopup } from "@/components/Errors";
+import { ErrorText, ErrorPopup } from "@/components/shared/Errors";
 
 export default function CreateGroupFrame({ userId }: { userId: number }) {
 	return (

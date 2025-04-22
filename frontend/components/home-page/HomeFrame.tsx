@@ -1,9 +1,9 @@
 "use client";
 
-import CalendarFrame from "@/components/CalendarFrame";
-import HomeEventsFrame from "@/components/HomeEventsFrame";
-import GroupSelector from "@/components/GroupSelector";
-import CreateGroupFrame from "@/components/CreateGroupFrame";
+import CalendarFrame from "@/components/home-page/CalendarFrame";
+import HomeEventsFrame from "@/components/home-page/HomeEventsFrame";
+import GroupSelector from "@/components/shared/GroupSelector";
+import CreateGroupFrame from "@/components/home-page/CreateGroupFrame";
 import {
 	DateStateData,
 	GroupDisplayData,

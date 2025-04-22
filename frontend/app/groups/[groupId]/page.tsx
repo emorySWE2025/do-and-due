@@ -1,8 +1,8 @@
 import { getCurrentSession } from "@/actions/users.server";
-import PageLayout from "@/components/PageLayout";
+import PageLayout from "@/components/shared/PageLayout";
 import { UserDisplayData } from "@/schemas/fe.schema";
 import { redirect } from "next/navigation";
-import AddMemberFrame from "@/components/AddMemberFrame";
+import AddMemberFrame from "@/components/groups-page/AddMemberFrame";
 
 export default async function GroupsPage() {
 	// if user is not authenticated, redirect them to login
@@ -13,7 +13,7 @@ export default async function GroupsPage() {
 
 	return (
 		<PageLayout>
-			 <AddMemberFrame groupId={1}/>
+			<AddMemberFrame groupId={1} />
 		</PageLayout>
 	);
 }

@@ -2,7 +2,7 @@
 
 import { deleteEventAction } from "@/actions/events.server";
 import { useRouter } from "next/navigation";
-import Button from "./Button";
+import Button from "../shared/Button";
 
 export default function DeleteEventButton({ eventId }: { eventId: number }) {
 	const router = useRouter();

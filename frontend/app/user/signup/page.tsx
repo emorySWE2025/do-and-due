@@ -1,4 +1,4 @@
-import SignupFrame from "@/components/SignupFrame";
+import SignupFrame from "@/components/users/SignupFrame";
 import { UserDisplayData } from "@/schemas/fe.schema";
 import { getCurrentSession } from "@/actions/users.server";
 import { redirect } from "next/navigation";

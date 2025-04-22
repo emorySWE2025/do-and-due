@@ -2,13 +2,13 @@
 
 import { addUserToGroupAction } from "@/actions/groups.server";
 import { searchUsersAction } from "@/actions/users.server";
-import Input from "@/components/Input";
-import Button from "@/components/Button";
+import Input from "@/components/shared/Input";
+import Button from "@/components/shared/Button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { redirect } from "next/navigation";
 import { AddUserToGroupResponse } from "@/schemas/transaction.schema";
 import { addMemberSchema } from "@/actions/zod";
-import { ErrorText } from "@/components/Errors";
+import { ErrorText } from "@/components/shared/Errors";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { AddUserToGroupFormData } from "@/schemas/fe.schema";
