@@ -77,16 +77,16 @@ class Event(models.Model):
         return self.name
 
 
-class EventOccurrence(models.Model):
-    id = models.AutoField(primary_key=True)
-    date = models.DateField(default=None)
-    # time = models.TimeField(default=None)
+# class EventOccurrence(models.Model):
+#     id = models.AutoField(primary_key=True)
+#     date = models.DateField(default=None)
+#     # time = models.TimeField(default=None)
 
-    # Relationships
-    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="occurrences", default=None)
+#     # Relationships
+#     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="occurrences", default=None)
 
-    def __str__(self):
-        return self.event.name
+#     def __str__(self):
+#         return self.event.name
 
 
 class Cost(models.Model):
