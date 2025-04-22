@@ -62,6 +62,6 @@ export const createEventSchema = z.object({
 });
 
 export const addMemberSchema = z.object({
-	groupName: z.string({ required_error: "Group name is required" }),
+	groupId: z.number(),
 	members: z.string(),
 });

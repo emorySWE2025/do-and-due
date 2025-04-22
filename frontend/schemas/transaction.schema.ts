@@ -1,4 +1,4 @@
-import { User, Group, Event } from "./db.schema";
+import { User, Event } from "./db.schema";
 
 // register user ------------------------------------------------------------------------
 export interface RegisterUserRequest {
@@ -103,6 +103,13 @@ export interface AddUsersToGroupRequest {
 	usernames: string[]; // [Array of usernames]
 }
 
+export interface AddUserToGroupRequest {
+	// fe > be
+	// params necessary to add users to a group in the backend
+	groupId: number;
+	username: string; // [Array of usernames]
+}
+
 export interface AddUsersToGroupResponse {
 	// be > fe
 	// params we can expect to receive from the backend when trying to add users to a group
@@ -113,6 +120,18 @@ export interface AddUsersToGroupResponse {
 	// bea: we can define it like this and pass usernames as arrays of strings
 	status: number;
 }
+
+export interface AddUserToGroupResponse {
+	// be > fe
+	// params we can expect to receive from the backend when trying to add users to a group
+	success: boolean;
+	message: string;
+	status: number;
+}
+
+
+
+
 // --------------------------------------------------------------------------------------
 
 // create event -------------------------------------------------------------------------
@@ -165,3 +184,10 @@ export interface MarkEventCompleteResponse {
 }
 
 // --------------------------------------------------------------------------------------
+
+export interface UserSearchResponse{
+	users: [];
+	status: number;
+	success: boolean;
+	
+}

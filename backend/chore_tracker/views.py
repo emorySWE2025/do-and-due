@@ -187,7 +187,46 @@ class AddUsersToGroup(APIView):
             return JsonResponse({'error': 'Group not found'}, status=404)
         except Exception as e:
             return JsonResponse({'error': f'Failed to invite users: {str(e)}'}, status=500)
-        
+
+class AddUsertoGroup(APIView):
+    """ Add User to a Group """
+
+    def post(self, request):
+        group_id = request.data.get('groupId')
+        username = request.data.get('username')
+
+        try:
+            group = Group.objects.get(id=group_id)
+            user = User.objects.get(username=username)
+            
+            # Check if user is already in the group
+            if group.members.filter(id=user.id).exists():
+                return JsonResponse({
+                    'success': False,
+                    'message': 'User is already a member of the group'
+                }, status=409)
+            
+            group.members.add(user)
+            return JsonResponse({
+                'success': True,
+                'message': 'User added to group successfully'
+            }, status=201)
+            
+        except Group.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'message': 'Group not found'
+            }, status=404)
+        except User.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'message': 'User not found'
+            }, status=404)
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': 'Failed to add user to group: ' + str(e)
+            }, status=500)
 
 
 class CreateEvent(APIView):
@@ -413,8 +452,20 @@ class CurrentUserView(APIView):
                 'email': user.email,
                 'groups': group_data
             })
+        
+class GetUsers(APIView):
+
+    # get all users that match a particular string 
+    def get(self, request):
+        try:
+            query = request.GET.get('search', '')
+            users = User.objects.filter(username__icontains=query).values('id', 'username')
+            return JsonResponse({"success": True, 'users': list(users)}, status=200,) # JsonResponse({"success": True, 'users': users}, status=200,)
+        except Exception as e:
+            return JsonResponse({"success": False, 'error': str(e)}, status=400)
 
 
+        
 class MarkEventComplete(APIView):
     def post(self, request):
         try:
@@ -441,7 +492,6 @@ class MarkEventComplete(APIView):
             return JsonResponse(
                 {"success": False, "message": "Invalid JSON in request", "eventStatus": event.is_complete}, status=400
             )
-
 
 class UserExists(APIView):
     """ Check if a User exists using username """
@@ -521,3 +571,4 @@ class CreateCost(APIView):
             return JsonResponse({'error': str(e)}, status=400)
         except Exception as e:
             return JsonResponse({'error': 'Failed to create cost: ' + str(e)}, status=500)
+
