@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (AddUsertoGroup, GetUsers, RegisterUser, LoginView, CreateGroup, IndexView, AddUsersToGroup, ViewGroup,
                     CreateEvent, UpdateEvent, DeleteEvent, ViewEvent, CurrentUserView, ChangeEventMembers, 
-                    MarkEventComplete, UserExists, CreateCost)
+                    MarkEventComplete, UserExists, CreateCost, GetUsers)
 
 urlpatterns = [
     path('', IndexView.as_view(), name='index'),
