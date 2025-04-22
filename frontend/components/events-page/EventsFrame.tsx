@@ -159,7 +159,7 @@ function EventItem({ event }: { event: EventDisplayData }) {
 	);
 
 	return (
-		<div className="event-item flex w-full flex-col flex-nowrap items-end gap-2 p-1 text-base hover:bg-gray-50">
+		<div className="event-item flex w-full flex-col flex-nowrap items-start gap-2 p-1 text-base hover:bg-gray-50">
 			<div className="text-sm text-gray-500">
 				{dayjs(event.first_date).format("MMMM D, YYYY")}
 			</div>
