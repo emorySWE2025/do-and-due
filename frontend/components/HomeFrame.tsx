@@ -1,7 +1,7 @@
 "use client";
 
 import CalendarFrame from "@/components/CalendarFrame";
-import EventsFrame from "@/components/EventsFrame";
+import HomeEventsFrame from "@/components/HomeEventsFrame";
 import GroupSelector from "@/components/GroupSelector";
 import CreateGroupFrame from "@/components/CreateGroupFrame";
 import {
@@ -61,7 +61,7 @@ function HomeFrameContents({
 	} else {
 		return (
 			<div className="flex h-max w-full flex-row flex-nowrap gap-8">
-				<EventsFrame
+				<HomeEventsFrame
 					groupData={groupData}
 					dateState={dateState}
 					dateCallback={dateCallback}
