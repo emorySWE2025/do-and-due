@@ -2,15 +2,20 @@
 
 ### Rayvant Sahni, Israel Anjorin, Lance Kennedy, Suzanne Alexander, Beatrice Brown-Mulry
 
-## Sprint 4 Tasks to Complete
+[//]: # (## Sprint 4 Tasks to Complete)
 
-1. Make events repeatable with different time frequencies (daily, weekly, monthly etc.)
-2. Add the UI and backend routes necessary so users can edit details and members in their groups
-3. Implement a model or modify the existing Events model to allow users to divide costs between members of a household
-4. Add the UI and backend routes necessary so users can edit details on their profile (like their profile photo)
-5. Make the UI update properly when an event is added/its completion state is toggled
+[//]: # ()
+[//]: # (1. Make events repeatable with different time frequencies &#40;daily, weekly, monthly etc.&#41;)
 
-## Testing Deployment Instructions
+[//]: # (2. Add the UI and backend routes necessary so users can edit details and members in their groups)
+
+[//]: # (3. Implement a model or modify the existing Events model to allow users to divide costs between members of a household)
+
+[//]: # (4. Add the UI and backend routes necessary so users can edit details on their profile &#40;like their profile photo&#41;)
+
+[//]: # (5. Make the UI update properly when an event is added/its completion state is toggled)
+
+## Deployment Instructions
 
 Clone the repository and `cd` into it.
 

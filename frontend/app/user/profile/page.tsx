@@ -1,5 +1,5 @@
-import PageLayout from "@/components/PageLayout";
-import ProfileFrame from "@/components/ProfileFrame";
+import PageLayout from "@/components/shared/PageLayout";
+import ProfileFrame from "@/components/users/ProfileFrame";
 import { UserDisplayData } from "@/schemas/fe.schema";
 import { getCurrentSession } from "@/actions/users.server";
 import { redirect } from "next/navigation";

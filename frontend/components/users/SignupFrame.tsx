@@ -1,14 +1,14 @@
 "use client";
 
-import Input from "@/components/Input";
-import Button from "@/components/Button";
+import Input from "@/components/shared/Input";
+import Button from "@/components/shared/Button";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { registerUserAction } from "@/actions/users.server";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerUserSchema } from "@/actions/zod";
-import { ErrorText, ErrorPopup } from "@/components/Errors";
+import { ErrorText, ErrorPopup } from "@/components/shared/Errors";
 import { RegisterUserClientResponse } from "@/schemas/transaction.schema";
 
 export default function SignupFrame() {

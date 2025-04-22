@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import (AddUsertoGroup, GetUsers, RegisterUser, LoginView, CreateGroup, IndexView, AddUsersToGroup, ViewGroup,
+from .views import (RegisterUser, LoginView, CreateGroup, IndexView, AddUsertoGroup, ViewGroup,
                     CreateEvent, UpdateEvent, DeleteEvent, ViewEvent, CurrentUserView, ChangeEventMembers, 
                     MarkEventComplete, UserExists, CreateCost, GetUsers)
 
@@ -9,7 +9,7 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('get-current-user/', CurrentUserView.as_view(), name='get-current-user'),
     path('group/create/', CreateGroup.as_view(), name='create_group'),
-    path('group/add_users/', AddUsersToGroup.as_view(), name='add_group'),
+    path('group/add_users/', AddUsertoGroup.as_view(), name='add_group'),
     path('group/view/', ViewGroup.as_view(), name='view_group'),
     path('event/create/', CreateEvent.as_view(), name='create_event'),
     path('event/update/<int:event_id>/', UpdateEvent.as_view(), name='update_event'),

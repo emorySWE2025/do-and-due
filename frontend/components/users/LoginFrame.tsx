@@ -1,17 +1,15 @@
 "use client";
 
-import Input from "@/components/Input";
-import Button from "@/components/Button";
+import Input from "@/components/shared/Input";
+import Button from "@/components/shared/Button";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ErrorText, ErrorPopup } from "@/components/Errors";
-import { getCurrentSession, loginUserAction } from "@/actions/users.server";
+import { ErrorText, ErrorPopup } from "@/components/shared/Errors";
+import { loginUserAction } from "@/actions/users.server";
 import { loginUserSchema } from "@/actions/zod";
 import { LoginUserClientResponse } from "@/schemas/transaction.schema";
 import { useRouter } from "next/navigation";
-import { UserDisplayData } from "@/schemas/fe.schema";
 
 export default function LoginFrame() {
 	return (

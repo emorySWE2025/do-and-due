@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractBaseUser
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import BaseUserManager
+from django.utils import timezone
 
 
 class UserManager(BaseUserManager):
@@ -63,7 +64,7 @@ class Event(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=60)
     first_date = models.DateField()
-    time = models.TimeField(null=True, blank=True)
+    # time = models.TimeField(null=True, blank=True)
     repeat_every = models.CharField(max_length=40, null=True, blank=True)
     # repeat_every = models.IntegerField(null=True)
 
@@ -76,16 +77,16 @@ class Event(models.Model):
         return self.name
 
 
-class EventOccurrence(models.Model):
-    id = models.AutoField(primary_key=True)
-    date = models.DateField(default=None)
-    time = models.TimeField(default=None)
+# class EventOccurrence(models.Model):
+#     id = models.AutoField(primary_key=True)
+#     date = models.DateField(default=None)
+#     # time = models.TimeField(default=None)
 
-    # Relationships
-    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="occurrences", default=None)
+#     # Relationships
+#     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="occurrences", default=None)
 
-    def __str__(self):
-        return self.event.name
+#     def __str__(self):
+#         return self.event.name
 
 
 class Cost(models.Model):
@@ -153,6 +154,7 @@ class RecurringCost(models.Model):
                 Cost.objects.create(
                     name=self.name,
                     category=self.category,
+                    time=timezone.now().time(),
                     date=current_date,
                     amount=(self.amount / self.borrowers.count()),
                     group=self.group,

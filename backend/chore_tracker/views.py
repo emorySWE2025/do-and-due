@@ -11,10 +11,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
-from chore_tracker.models import Group, Event, EventOccurrence, Cost
+from chore_tracker.models import Group, Event, Cost
 from datetime import datetime
 import json
 from json import JSONDecodeError
+from chore_tracker.utils import update_recurring_events, delete_recurrences
 
 User = get_user_model()
 
@@ -78,18 +79,18 @@ class CreateGroup(APIView):
     """ Create a Group """
 
     def post(self, request):
-
-        name = request.data.get('groupName')
-        status = request.data.get('groupStatus')
-        expiration_raw = request.data.get('groupExpiration')
-        expiration = parse_datetime(expiration_raw) if expiration_raw else None
-        timezone = request.data.get('groupTimezone')
-        creator = request.data.get('groupCreatorId')
-        user = User.objects.get(id=creator)
-        # creator = request.user
-        print(creator)
-
         try:
+            name = request.data.get('groupName')
+            status = request.data.get('groupStatus')
+            expiration_raw = request.data.get('groupExpiration')
+            expiration = parse_datetime(expiration_raw) if expiration_raw else None
+            timezone = request.data.get('groupTimezone')
+            creator = request.data.get('groupCreatorId')
+            user = User.objects.get(id=creator)
+            # creator = request.user
+            print(creator)
+
+
             group = Group(
                 name=name,
                 status=status,
@@ -121,6 +122,7 @@ class ViewGroup(APIView):
 
         try:
             group = Group.objects.get(id=group_id)
+            update_recurring_events(group)
             members = group.members.all()
             # events = group.events.all()
             # costs = group.costs.all()
@@ -144,49 +146,49 @@ class ViewGroup(APIView):
             return JsonResponse({'error': 'Failed to view group: ' + str(e)}, status=500)
 
 
-class AddUsersToGroup(APIView):
-    """ Add Users to a Group """
+# class AddUsersToGroup(APIView):
+#     """ Add Users to a Group """
 
-    def post(self, request):
-        group_id = request.data.get('group_id')
-        usernames = request.data.get('usernames', [])
+#     def post(self, request):
+#         group_id = request.data.get('group_id')
+#         usernames = request.data.get('usernames', [])
 
-        if not usernames:
-            return JsonResponse({'error': 'No usernames provided'}, status=400)
+#         if not usernames:
+#             return JsonResponse({'error': 'No usernames provided'}, status=400)
 
-        try:
-            group = Group.objects.get(id=group_id)
+#         try:
+#             group = Group.objects.get(id=group_id)
 
-            # Track status for each username
-            result = {
-                'success': [],
-                'not_found': []
-            }
+#             # Track status for each username
+#             result = {
+#                 'success': [],
+#                 'not_found': []
+#             }
 
-            # Get existing members usernames for efficient lookup
-            existing_members = set(group.members.values_list('username', flat=True))
+#             # Get existing members usernames for efficient lookup
+#             existing_members = set(group.members.values_list('username', flat=True))
 
-            # Process each username individually
-            for username in usernames:
-                try:
-                    user = User.objects.get(username=username)
-                    if username in existing_members:
-                        continue  # Skip if user is already a member
-                    else:
-                        group.members.add(user)
-                        result['success'].append(username)
-                except User.DoesNotExist:
-                    result['not_found'].append(username)
+#             # Process each username individually
+#             for username in usernames:
+#                 try:
+#                     user = User.objects.get(username=username)
+#                     if username in existing_members:
+#                         continue  # Skip if user is already a member
+#                     else:
+#                         group.members.add(user)
+#                         result['success'].append(username)
+#                 except User.DoesNotExist:
+#                     result['not_found'].append(username)
 
-            return JsonResponse({
-                'message': 'Operation completed',
-                'results': result
-            }, status=200 if result['success'] else 404)
+#             return JsonResponse({
+#                 'message': 'Operation completed',
+#                 'results': result
+#             }, status=200 if result['success'] else 404)
 
-        except Group.DoesNotExist:
-            return JsonResponse({'error': 'Group not found'}, status=404)
-        except Exception as e:
-            return JsonResponse({'error': f'Failed to invite users: {str(e)}'}, status=500)
+#         except Group.DoesNotExist:
+#             return JsonResponse({'error': 'Group not found'}, status=404)
+#         except Exception as e:
+#             return JsonResponse({'error': f'Failed to invite users: {str(e)}'}, status=500)
 
 class AddUsertoGroup(APIView):
     """ Add User to a Group """
@@ -336,6 +338,7 @@ class DeleteEvent(APIView):
     def delete(self, request, event_id):
         try:
             event = Event.objects.get(id=event_id)
+            delete_recurrences(event)
             event.delete()
             return JsonResponse({"success": True, "message": "Event deleted"}, status=200)
         except Event.DoesNotExist:
@@ -438,7 +441,7 @@ class CurrentUserView(APIView):
 
             group_data = []
             for group in groups:
-                events = group.events.all().values('id', 'name', 'first_date', 'repeat_every', 'is_complete')  # type: ignore
+                events = group.events.all().values('id', 'name', 'members', 'first_date', 'repeat_every', 'is_complete')  # type: ignore
                 group_data.append({
                     'id': group.id,
                     'name': group.name,
@@ -474,6 +477,8 @@ class MarkEventComplete(APIView):
             # Check that the event exists
             try:
                 event = Event.objects.get(id=data.get("eventId"))
+                # which occurrence?
+
             except Event.DoesNotExist:
                 return JsonResponse(
                     {"success": False, "message": "No such Event"}, status=400

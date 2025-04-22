@@ -1,7 +1,17 @@
-from django.test import TestCase
-from chore_tracker.models import User, Group, Event, Cost
-from django.utils import timezone
+from datetime import date
+from decimal import Decimal
 
+import pytest
+from django.contrib.auth import get_user_model
+from django.test import TestCase
+from chore_tracker.models import User, Group, Event, Cost, RecurringCost, EventOccurrence
+from django.utils import timezone
+from freezegun import freeze_time
+
+User = get_user_model()
+
+
+@freeze_time("2023-01-01 12:34:56")
 class ModelTestCase(TestCase):
     def setUp(self):
         self.user1 = User.objects.create(
@@ -30,10 +40,15 @@ class ModelTestCase(TestCase):
         self.event = Event.objects.create(
             name="Test Event",
             first_date=timezone.now().date(),
-            first_time=timezone.now().time(),
             group=self.group
         )
         self.event.members.add(self.user1, self.user2)
+
+        self.event_occurrence = EventOccurrence.objects.create(
+            date=timezone.now().date(),
+            time=timezone.now().time(),
+            event=self.event,
+        )
 
         self.cost = Cost.objects.create(
             name="Test Cost",
@@ -41,8 +56,36 @@ class ModelTestCase(TestCase):
             amount=50.0,
             group=self.group,
             borrower=self.user2,
-            payer=self.user1
+            payer=self.user1,
+            date=timezone.now().date(),
+            time=timezone.now().time(),
         )
+
+        self.recurring_cost = RecurringCost.objects.create(
+            name="Test Recurring Cost",
+            category="Food",
+            amount=Decimal("100.0"),
+            start_date=timezone.now().date(),
+            end_date=date(2025, 1, 2),
+            frequency="daily",
+            group=self.group,
+            payer=self.user2,
+        )
+
+        self.recurring_cost.borrowers.add(self.user1)
+
+        self.recurring_cost1 = RecurringCost.objects.create(
+            name="Test Recurring Cost",
+            category="Food",
+            amount="100.0",
+            start_date=timezone.now().date(),
+            end_date=timezone.now().date(),
+            frequency='',
+            group=self.group,
+            payer=self.user2,
+        )
+
+        self.recurring_cost1.borrowers.add(self.user1)
 
     def test_user_creation(self):
         user = User.objects.get(username="alice123")
@@ -58,7 +101,6 @@ class ModelTestCase(TestCase):
 
     def test_event_creation(self):
         event = Event.objects.get(name="Test Event")
-        self.assertEqual(event.first_time.replace(microsecond=0), timezone.now().time().replace(microsecond=0))
         self.assertEqual(event.group, self.group)
         self.assertIn(self.user1, event.members.all())
         self.assertIn(self.user2, event.members.all())
@@ -70,6 +112,8 @@ class ModelTestCase(TestCase):
         self.assertEqual(cost.group, self.group)
         self.assertEqual(cost.borrower, self.user2)
         self.assertEqual(cost.payer, self.user1)
+        self.assertEqual(cost.date, timezone.now().date())
+        self.assertEqual(cost.time, timezone.now().time())
 
     def test_str_method_user(self):
         self.assertEqual(str(self.user1), "alice123")
@@ -82,3 +126,20 @@ class ModelTestCase(TestCase):
 
     def test_str_method_cost(self):
         self.assertEqual(str(self.cost), "Test Cost")
+
+    def test_str_method_recurring_cost(self):
+        self.assertEqual(str(self.recurring_cost), "Test Recurring Cost (daily)")
+
+    def test_str_method_event_occurrence(self):
+        self.assertEqual(str(self.event_occurrence), "Test Event")
+
+    def test_generate_recurring_cost_value_error(self):
+        with pytest.raises(ValueError):
+            self.recurring_cost1.generate_costs()
+
+    def test_generate_recurring_cost_success(self):
+        self.recurring_cost.generate_costs()
+
+    def test_create_user_without_email_raises_value_error(self):
+        with pytest.raises(ValueError):
+            User.objects.create_user(email=None, password=None)
