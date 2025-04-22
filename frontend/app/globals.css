@@ -37,3 +37,11 @@ body {
 	color: var(--foreground);
 	font-family: Arial, Helvetica, sans-serif;
 }
+
+.event-item-edit {
+    display: none;
+}
+
+.event-item:hover .event-item-edit {
+    display: inline;
+}

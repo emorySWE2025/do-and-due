@@ -26,6 +26,7 @@ class UserManager(BaseUserManager):
 
         return self.create_user(email, password, **extra_fields)
 
+
 class User(AbstractBaseUser):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=40)
@@ -36,9 +37,9 @@ class User(AbstractBaseUser):
 
     def __str__(self):
         return self.username
-    
-    objects = UserManager() 
-    
+
+    objects = UserManager()
+
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
 
@@ -64,7 +65,7 @@ class Event(models.Model):
     first_date = models.DateField()
     time = models.TimeField(null=True, blank=True)
     repeat_every = models.CharField(max_length=40, null=True, blank=True)
-    #repeat_every = models.IntegerField(null=True)
+    # repeat_every = models.IntegerField(null=True)
 
     # Relationships
     group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="events")
@@ -73,7 +74,7 @@ class Event(models.Model):
 
     def __str__(self):
         return self.name
-    
+
 
 class EventOccurrence(models.Model):
     id = models.AutoField(primary_key=True)
@@ -81,7 +82,7 @@ class EventOccurrence(models.Model):
     time = models.TimeField(default=None)
 
     # Relationships
-    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="occurrences",default=None)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="occurrences", default=None)
 
     def __str__(self):
         return self.event.name
@@ -89,9 +90,15 @@ class EventOccurrence(models.Model):
 
 class Cost(models.Model):
     id = models.AutoField(primary_key=True)
+    transaction_id = models.UUIDField(null=True, blank=True)  # to group Costs that are part of the same transaction
     name = models.CharField(max_length=60)
     category = models.CharField(max_length=40, null=True, blank=True)
+    date = models.DateField()
+    time = models.TimeField()
     amount = models.FloatField()
+    settled = models.BooleanField(default=False)
+    settled_date = models.DateField(null=True, blank=True)
+    settled_time = models.TimeField(null=True, blank=True)
 
     # Relationships
     group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="costs")
@@ -100,3 +107,57 @@ class Cost(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class RecurringCost(models.Model):
+    name = models.CharField(max_length=100)
+    category = models.CharField(max_length=50, null=True, blank=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    start_date = models.DateField()
+    end_date = models.DateField(null=True, blank=True)  # Optional end date
+    frequency = models.CharField(
+        max_length=20,
+        choices=[
+            ('daily', 'Daily'),
+            ('weekly', 'Weekly'),
+            ('monthly', 'Monthly'),
+        ]
+    )
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="recurring_costs")
+    payer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="recurring_costs")
+    borrowers = models.ManyToManyField(User, related_name="recurring_cost_borrowers")
+
+    def __str__(self):
+        return f"{self.name} ({self.frequency})"
+
+    def generate_costs(self):
+        """Generate individual Cost entries based on the recurrence pattern."""
+        from datetime import timedelta, date
+        import uuid
+
+        interval = {
+            'daily': timedelta(days=1),
+            'weekly': timedelta(weeks=1),
+            'monthly': timedelta(days=30),  # Approximation for simplicity
+        }.get(self.frequency)
+
+        if not interval:
+            raise ValueError("Invalid frequency")
+
+        current_date = self.start_date
+        while current_date <= (self.end_date or date.today()):
+            # Generate a unique transaction_id for this recurrence cycle
+            transaction_id = uuid.uuid4()
+
+            for borrower in self.borrowers.all():
+                Cost.objects.create(
+                    name=self.name,
+                    category=self.category,
+                    date=current_date,
+                    amount=(self.amount / self.borrowers.count()),
+                    group=self.group,
+                    payer=self.payer,
+                    borrower=borrower,
+                    transaction_id=transaction_id
+                )
+            current_date += interval
