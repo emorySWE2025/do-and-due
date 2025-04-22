@@ -41,10 +41,12 @@ export default function GroupSelector({
 	groups,
 	groupState,
 	groupCallback,
+	firstIndex,
 }: {
 	groups: GroupDisplayData[];
 	groupState: GroupStateData;
 	groupCallback: CallableFunction;
+	firstIndex: number;
 }) {
 	const snapList = useRef<HTMLDivElement>(null);
 	const lastSnapItem = useRef<HTMLDivElement>(null);
@@ -65,12 +67,7 @@ export default function GroupSelector({
 	};
 
 	useLayoutEffect(() => {
-		const container = snapList.current;
-		if (container) {
-			// center the scroll position initially
-			container.scrollLeft =
-				(container.scrollWidth - container.clientWidth) / 2;
-		}
+		goToSnapItem(firstIndex, { animationEnabled: false });
 	}, []);
 
 	return (

@@ -101,6 +101,7 @@ export default function HomeFrame({ userData }: { userData: UserDisplayData }) {
 				groups={groups}
 				groupState={groupState}
 				groupCallback={updateGroupState}
+				firstIndex={groups.length > 0 ? 1 : 0}
 			/>
 			<AnimatePresence
 				initial={false}
