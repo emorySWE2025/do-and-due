@@ -1,7 +1,7 @@
 import { getCurrentSession } from "@/actions/users.server";
 import HomeFrame from "@/components/home-page/HomeFrame";
 import PageLayout from "@/components/shared/PageLayout";
-import { UserDisplayData } from "@/schemas/fe.schema";
+import { GroupDisplayData, UserDisplayData } from "@/schemas/fe.schema";
 import { redirect } from "next/navigation";
 
 export default async function Home() {
@@ -11,12 +11,6 @@ export default async function Home() {
 		redirect("/user/login");
 	}
 
-	// Safely log groups and events if they exist
-	if (userData.groups && userData.groups.length > 0) {
-		console.log("User has groups:", userData.groups);
-	} else {
-		console.log("User has no groups yet");
-	}
 	return (
 		<PageLayout>
 			<HomeFrame userData={userData} />

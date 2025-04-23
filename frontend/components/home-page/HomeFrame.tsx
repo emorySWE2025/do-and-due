@@ -65,11 +65,13 @@ function HomeFrameContents({
 					groupData={groupData}
 					dateState={dateState}
 					dateCallback={dateCallback}
+					username={userData.username}
 				/>
 				<CalendarFrame
 					groupData={groupData}
 					dateState={dateState}
 					dateCallback={dateCallback}
+					username={userData.username}
 				/>
 			</div>
 		);

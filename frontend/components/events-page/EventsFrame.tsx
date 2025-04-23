@@ -42,7 +42,14 @@ export default function EventsPageFrame({
 	userData: UserDisplayData;
 }) {
 	if (userData.groups.length == 0) {
-		return <div className="">No groups found!</div>;
+		return (
+			<div className="m-auto mt-16 h-max w-max max-w-xl space-y-8 rounded-lg border-[1px] border-gray-300 p-16 shadow-sm">
+				<div className="text-xl font-semibold">No Groups Found</div>
+				<div className="">
+					Please join a group or create a new one to manage events!
+				</div>
+			</div>
+		);
 	}
 
 	// define state objects

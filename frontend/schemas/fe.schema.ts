@@ -24,6 +24,7 @@ export interface EventDisplayData {
 	first_date: string;
 	repeat_every: string | null;
 	is_complete: boolean;
+	members: { username: string }[];
 }
 
 // expected format for general group display data passed to frontend pages
