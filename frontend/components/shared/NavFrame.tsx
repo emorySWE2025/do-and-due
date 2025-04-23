@@ -154,9 +154,9 @@ export default function NavFrame() {
 				</div>
 			</div>
 			<div className="flex flex-row flex-nowrap items-center gap-4">
-				<NavSearchFrame />
+				{/*<NavSearchFrame />*/}
 				<NavSettingsFrame />
-				<NavNotificationsFrame unreadNotifications={false} />
+				{/*<NavNotificationsFrame unreadNotifications={false} />*/}
 				<NavProfileFrame />
 			</div>
 		</div>
