@@ -1,12 +1,13 @@
 from django.urls import path
 from .views import (RegisterUser, LoginView, CreateGroup, IndexView, AddUsersToGroup, ViewGroup,
-                    CreateEvent, UpdateEvent, DeleteEvent, ViewEvent, CurrentUserView, ChangeEventMembers, 
-                    MarkEventComplete, UserExists, CreateCost)
+                    CreateEvent, UpdateEvent, DeleteEvent, ViewEvent, CurrentUserView, ChangeEventMembers,
+                    MarkEventComplete, UserExists, CreateCost, UpdateUsername)
 
 urlpatterns = [
     path('', IndexView.as_view(), name='index'),
     path('register/', RegisterUser.as_view(), name='register'),
     path('login/', LoginView.as_view(), name='login'),
+    path('update_username/', UpdateUsername.as_view(), name='update_username'),
     path('get-current-user/', CurrentUserView.as_view(), name='get-current-user'),
     path('group/create/', CreateGroup.as_view(), name='create_group'),
     path('group/add_users/', AddUsersToGroup.as_view(), name='add_group'),

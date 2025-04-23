@@ -4,7 +4,7 @@ from decimal import Decimal
 import pytest
 from django.contrib.auth import get_user_model
 from django.test import TestCase
-from chore_tracker.models import User, Group, Event, Cost, RecurringCost, EventOccurrence
+from chore_tracker.models import User, Group, Event, Cost, RecurringCost
 from django.utils import timezone
 from freezegun import freeze_time
 
@@ -43,12 +43,6 @@ class ModelTestCase(TestCase):
             group=self.group
         )
         self.event.members.add(self.user1, self.user2)
-
-        self.event_occurrence = EventOccurrence.objects.create(
-            date=timezone.now().date(),
-            time=timezone.now().time(),
-            event=self.event,
-        )
 
         self.cost = Cost.objects.create(
             name="Test Cost",
@@ -129,9 +123,6 @@ class ModelTestCase(TestCase):
 
     def test_str_method_recurring_cost(self):
         self.assertEqual(str(self.recurring_cost), "Test Recurring Cost (daily)")
-
-    def test_str_method_event_occurrence(self):
-        self.assertEqual(str(self.event_occurrence), "Test Event")
 
     def test_generate_recurring_cost_value_error(self):
         with pytest.raises(ValueError):

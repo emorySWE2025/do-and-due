@@ -89,7 +89,6 @@ class CreateGroup(APIView):
             # creator = request.user
             print(creator)
 
-
             group = Group(
                 name=name,
                 status=status,
@@ -177,7 +176,6 @@ class AddUsersToGroup(APIView):
                         result['success'].append(username)
                 except User.DoesNotExist:
                     result['not_found'].append(username)
-
             return JsonResponse({
                 'message': 'Operation completed',
                 'results': result
@@ -187,7 +185,7 @@ class AddUsersToGroup(APIView):
             return JsonResponse({'error': 'Group not found'}, status=404)
         except Exception as e:
             return JsonResponse({'error': f'Failed to invite users: {str(e)}'}, status=500)
-        
+
 
 
 class CreateEvent(APIView):
@@ -334,7 +332,6 @@ class ViewEvent(APIView):
             )
 
 
-
 class ChangeEventMembers(APIView):
     """ Change who is assigned to an event """
 
@@ -399,7 +396,8 @@ class CurrentUserView(APIView):
 
             group_data = []
             for group in groups:
-                events = group.events.all().values('id', 'name', 'first_date', 'repeat_every', 'is_complete')  # type: ignore
+                events = group.events.all().values('id', 'name', 'first_date', 'repeat_every',
+                                                   'is_complete')  # type: ignore
                 group_data.append({
                     'id': group.id,
                     'name': group.name,
@@ -413,6 +411,19 @@ class CurrentUserView(APIView):
                 'email': user.email,
                 'groups': group_data
             })
+
+
+class GetUsers(APIView):
+
+    # get all users that match a particular string 
+    def get(self, request):
+        try:
+            query = request.GET.get('search', '')
+            users = User.objects.filter(username__icontains=query).values('id', 'username')
+            return JsonResponse({"success": True, 'users': list(users)},
+                                status=200, )  # JsonResponse({"success": True, 'users': users}, status=200,)
+        except Exception as e:
+            return JsonResponse({"success": False, 'error': str(e)}, status=400)
 
 
 class MarkEventComplete(APIView):
@@ -435,8 +446,9 @@ class MarkEventComplete(APIView):
                 event.is_complete = True
             event.save()
 
-            return JsonResponse({"success": True, "message": "event status updated", "eventStatus": event.is_complete}, status=200)
-        
+            return JsonResponse({"success": True, "message": "event status updated", "eventStatus": event.is_complete},
+                                status=200)
+
         except JSONDecodeError:
             return JsonResponse(
                 {"success": False, "message": "Invalid JSON in request", "eventStatus": event.is_complete}, status=400
@@ -521,3 +533,27 @@ class CreateCost(APIView):
             return JsonResponse({'error': str(e)}, status=400)
         except Exception as e:
             return JsonResponse({'error': 'Failed to create cost: ' + str(e)}, status=500)
+
+
+class UpdateUsername(APIView):
+    permission_classes = [IsAuthenticated]
+
+    """" Update a username """
+
+    def post(self, request):
+        if request.user.is_authenticated:
+            new_username = request.data.get('username')
+            print(new_username)
+            print(request.user.username)
+            if new_username == request.user.username:
+                return JsonResponse({'error': f"Cannot update with your current username"}, status=400)
+
+            if User.objects.filter(username=new_username).exists():
+                return JsonResponse({'error': 'Username already exists'}, status=400)
+
+            user = request.user
+            user.username = new_username
+            user.save()
+            return JsonResponse({'message': 'Username updated successfully'}, status=200)
+
+        return JsonResponse({'error': 'There was an error updating the username'}, status=500)
