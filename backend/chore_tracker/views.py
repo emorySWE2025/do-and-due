@@ -216,6 +216,7 @@ class CreateEvent(APIView):
             member_names = data.get("memberNames", [])
             logger.info(f"{group} members: {member_names}")
 
+            
             for username in member_names:
                 if username == '' and len(member_names) == 1:
                     event.members.set(group_members)
