@@ -267,6 +267,9 @@ class CreateEvent(APIView):
             print(memberNames)
 
             for username in memberNames:
+                if username == '' and len(memberNames) == 1:
+                    event.members.set(group_members)
+                    break
                 try:
                     user = User.objects.get(username=username)
 
