@@ -12,11 +12,11 @@ import {
 import dayjs, { Dayjs } from "dayjs";
 import { JSX, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { ErrorPopup, ErrorText } from "@/components/Errors";
-import Input from "@/components/Input";
+import { ErrorPopup, ErrorText } from "@/components/shared/Errors";
+import Input from "@/components/shared/Input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createEventSchema } from "@/actions/zod";
-import Button from "@/components/Button";
+import Button from "@/components/shared/Button";
 import { MarkEventCompleteResponse } from "@/schemas/transaction.schema";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -25,10 +25,12 @@ export default function HomeEventsFrame({
 	groupData,
 	dateState,
 	dateCallback,
+	username,
 }: {
 	groupData: GroupDisplayData;
 	dateState: DateStateData;
 	dateCallback: CallableFunction;
+	username: string;
 }) {
 	const [showAddEventForm, setAddEventState] = useState<boolean>(false);
 	const toggleAddEventState = () => {
@@ -49,13 +51,12 @@ export default function HomeEventsFrame({
 					dateState={dateState}
 					dateCallback={dateCallback}
 					toggleAddEventState={toggleAddEventState}
+					username={username}
 				/>
 			)}
 		</div>
 	);
 }
-
-// function AddEventForm() {}
 
 function AddEventForm({
 	groupData,
@@ -196,11 +197,13 @@ function AddEventForm({
 
 function EventsDisplay({
 	groupData,
+	username,
 	dateState,
 	dateCallback,
 	toggleAddEventState,
 }: {
 	groupData: GroupDisplayData;
+	username: string;
 	dateState: DateStateData;
 	dateCallback: CallableFunction;
 	toggleAddEventState: CallableFunction;
@@ -221,19 +224,26 @@ function EventsDisplay({
 		});
 	};
 
+	const [eventData, setEventData] = useState<EventDisplayData[]>(
+		groupData.events,
+	);
+	const updateEventStatus = (eventId: number, isComplete: boolean) => {
+		setEventData((prev) =>
+			prev.map((event) =>
+				event.id === eventId
+					? { ...event, is_complete: isComplete }
+					: event,
+			),
+		);
+	};
+
 	const [relevantEvents, setRelevantEvents] = useState<EventDisplayData[]>(
-		filterEventsByDate(groupData.events, dateState.target),
+		filterEventsByDate(eventData, dateState.target),
 	);
 
 	useEffect(() => {
-		setRelevantEvents(
-			filterEventsByDate(groupData.events, dateState.target),
-		);
+		setRelevantEvents(filterEventsByDate(eventData, dateState.target));
 	}, [groupData, dateState]);
-	// const relevantEvents: EventDisplayData[] = filterEventsByDate(
-	// 	groupData.events,
-	// 	dateState.target,
-	// );
 
 	const eventItemsDisplay: JSX.Element | JSX.Element[] =
 		relevantEvents.length === 0 ? (
@@ -241,9 +251,20 @@ function EventsDisplay({
 				nothing scheduled!
 			</div>
 		) : (
-			relevantEvents.map((event: EventDisplayData) => (
-				<EventItem key={event.id} event={event} />
-			))
+			relevantEvents.map((event: EventDisplayData) => {
+				const memberNames: string[] = event.members.flatMap(
+					(member) => member.username,
+				);
+				if (memberNames.includes(username))
+					return (
+						<AssignedEventItem
+							key={event.id}
+							event={event}
+							onStatusChange={updateEventStatus}
+						/>
+					);
+				else return <EventItem key={event.id} event={event} />;
+			})
 		);
 
 	return (
@@ -301,20 +322,71 @@ function EventsDisplay({
 }
 
 function EventItem({ event }: { event: EventDisplayData }) {
+	const editSymbol = (
+		<Link href={`/events/${event.id}`}>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="24"
+				height="24"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				strokeWidth="2"
+				strokeLinecap="round"
+				strokeLinejoin="round"
+				className="event-item-edit ml-2 h-4 w-4 cursor-pointer stroke-gray-400"
+			>
+				<path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+				<path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z" />
+			</svg>
+		</Link>
+	);
+
+	return (
+		<div className="event-item flex w-full cursor-not-allowed flex-row flex-nowrap items-start gap-2 p-1 text-base hover:bg-gray-50">
+			<input
+				type="checkbox"
+				checked={event.is_complete}
+				readOnly
+				className="h-6 w-6 flex-shrink-0 cursor-not-allowed rounded-lg accent-gray-500"
+			/>
+			<div
+				className={
+					event.is_complete
+						? "w-full flex-shrink-0 text-gray-300 line-through"
+						: "w-full flex-shrink-0 text-gray-500"
+				}
+			>
+				{event.name}
+				{editSymbol}
+			</div>
+		</div>
+	);
+}
+
+function AssignedEventItem({
+	event,
+	onStatusChange,
+}: {
+	event: EventDisplayData;
+	onStatusChange: (eventId: number, isComplete: boolean) => void;
+}) {
 	const [eventState, setEventState] = useState<boolean>(event.is_complete);
 
+	useEffect(() => {
+		setEventState(event.is_complete);
+	}, [event.is_complete]);
+
 	const handleClick = async () => {
+		const newStatus = !eventState;
 		const res: MarkEventCompleteResponse = await setEventStatusAction(
 			event.id,
-			!event.is_complete,
+			newStatus,
 		);
 		if (res.success) {
-			console.log(res);
-			setEventState(
-				res.eventStatus !== undefined
-					? res.eventStatus
-					: event.is_complete,
-			);
+			const updatedStatus = res.eventStatus ?? newStatus;
+			setEventState(updatedStatus);
+			onStatusChange(event.id, updatedStatus); // notify parent
 		}
 	};
 
@@ -362,59 +434,9 @@ function EventItem({ event }: { event: EventDisplayData }) {
 }
 
 function filterEventsByDate(events: EventDisplayData[], targetDate: Dayjs) {
-	return events.filter((event) => {
-		// Use startOf('day') to ignore time component for comparisons
-		const eventDate = dayjs(event.first_date).startOf("day");
-		const targetDateStart = targetDate.startOf("day");
-
-		// Check if it's the same day (for non-repeating or first occurrence)
-		if (eventDate.isSame(targetDateStart, "day")) {
-			return true;
-		}
-
-		// Handle repeating events: Ensure repeat_every is valid and not "None"
-		if (event.repeat_every && event.repeat_every !== "None") {
-			// Only check events that started on or before the target date
-			if (eventDate.isAfter(targetDateStart)) {
-				return false;
-			}
-
-			// No need for daysDiff for weekly/monthly/yearly checks here, compare date parts directly
-
-			switch (event.repeat_every) {
-				case "Daily":
-					// Event occurs daily on or after its start date
-					return !eventDate.isAfter(targetDateStart);
-				case "Weekly":
-					// Event occurs on the same day of the week, on or after its start date
-					return (
-						eventDate.day() === targetDateStart.day() &&
-						!eventDate.isAfter(targetDateStart)
-					);
-				case "Monthly":
-					// Same day of month, on or after its start date
-					return (
-						eventDate.date() === targetDateStart.date() &&
-						!eventDate.isAfter(targetDateStart)
-					);
-				case "Yearly":
-					// Same day and month, on or after its start date
-					return (
-						eventDate.date() === targetDateStart.date() &&
-						eventDate.month() === targetDateStart.month() &&
-						!eventDate.isAfter(targetDateStart)
-					);
-				default:
-					// Handle unexpected repeat_every values gracefully
-					console.warn(
-						`Unexpected repeat_every value in filterEventsByDate: ${event.repeat_every}`,
-					);
-					return false;
-			}
-		}
-
-		return false;
-	});
+	return events.filter((event) =>
+		dayjs(event.first_date).isSame(targetDate, "day"),
+	);
 }
 
 function AddEventButton({

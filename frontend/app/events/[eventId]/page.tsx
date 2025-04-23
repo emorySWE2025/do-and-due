@@ -1,15 +1,11 @@
 import { redirect } from "next/navigation";
 import { getCurrentSession } from "@/actions/users.server";
 
-import PageLayout from "@/components/PageLayout";
+import PageLayout from "@/components/shared/PageLayout";
 import { notFound } from "next/navigation";
-import {
-	deleteEventAction,
-	updateEventAction,
-	viewEventAction,
-} from "@/actions/events.server";
-import Button from "@/components/Button";
-import DeleteEventButton from "@/components/DeleteEventButton";
+import { updateEventAction, viewEventAction } from "@/actions/events.server";
+import Button from "@/components/shared/Button";
+import DeleteEventButton from "@/components/events-page/DeleteEventButton";
 
 export default async function EventPage({
 	params,

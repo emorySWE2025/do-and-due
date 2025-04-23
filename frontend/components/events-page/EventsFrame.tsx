@@ -6,12 +6,10 @@ import {
 	GroupStateData,
 	UserDisplayData,
 } from "@/schemas/fe.schema";
-import Button from "@/components/Button";
 import Link from "next/link";
-import GroupSelector from "./GroupSelector";
+import GroupSelector from "@/components/shared/GroupSelector";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
-import { group } from "console";
 import dayjs from "dayjs";
 import { setEventStatusAction } from "@/actions/events.server";
 import { MarkEventCompleteResponse } from "@/schemas/transaction.schema";
@@ -43,14 +41,22 @@ export default function EventsPageFrame({
 }: {
 	userData: UserDisplayData;
 }) {
+	if (userData.groups.length == 0) {
+		return (
+			<div className="m-auto mt-16 h-max w-max max-w-xl space-y-8 rounded-lg border-[1px] border-gray-300 p-16 shadow-sm">
+				<div className="text-xl font-semibold">No Groups Found</div>
+				<div className="">
+					Please join a group or create a new one to manage events!
+				</div>
+			</div>
+		);
+	}
+
 	// define state objects
 	const [groupState, updateGroupState] = useState<GroupStateData>({
 		direction: 1,
 		index: 0,
-		group:
-			userData.groups.length > 1
-				? userData.groups[1]
-				: userData.groups[0],
+		group: userData.groups[0],
 	});
 
 	return (
@@ -59,6 +65,7 @@ export default function EventsPageFrame({
 				groups={userData.groups}
 				groupState={groupState}
 				groupCallback={updateGroupState}
+				firstIndex={0}
 			/>
 			<AnimatePresence
 				initial={false}
@@ -159,7 +166,7 @@ function EventItem({ event }: { event: EventDisplayData }) {
 	);
 
 	return (
-		<div className="event-item flex w-full flex-col flex-nowrap items-end gap-2 p-1 text-base hover:bg-gray-50">
+		<div className="event-item flex w-full flex-col flex-nowrap items-start gap-2 p-1 text-base hover:bg-gray-50">
 			<div className="text-sm text-gray-500">
 				{dayjs(event.first_date).format("MMMM D, YYYY")}
 			</div>

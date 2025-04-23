@@ -1,9 +1,9 @@
 "use client";
 
-import CalendarFrame from "@/components/CalendarFrame";
-import HomeEventsFrame from "@/components/HomeEventsFrame";
-import GroupSelector from "@/components/GroupSelector";
-import CreateGroupFrame from "@/components/CreateGroupFrame";
+import CalendarFrame from "@/components/home-page/CalendarFrame";
+import HomeEventsFrame from "@/components/home-page/HomeEventsFrame";
+import GroupSelector from "@/components/shared/GroupSelector";
+import CreateGroupFrame from "@/components/home-page/CreateGroupFrame";
 import {
 	DateStateData,
 	GroupDisplayData,
@@ -65,11 +65,13 @@ function HomeFrameContents({
 					groupData={groupData}
 					dateState={dateState}
 					dateCallback={dateCallback}
+					username={userData.username}
 				/>
 				<CalendarFrame
 					groupData={groupData}
 					dateState={dateState}
 					dateCallback={dateCallback}
+					username={userData.username}
 				/>
 			</div>
 		);
@@ -101,6 +103,7 @@ export default function HomeFrame({ userData }: { userData: UserDisplayData }) {
 				groups={groups}
 				groupState={groupState}
 				groupCallback={updateGroupState}
+				firstIndex={groups.length > 0 ? 1 : 0}
 			/>
 			<AnimatePresence
 				initial={false}

@@ -24,6 +24,7 @@ export interface EventDisplayData {
 	first_date: string;
 	repeat_every: string | null;
 	is_complete: boolean;
+	members: { username: string }[];
 }
 
 // expected format for general group display data passed to frontend pages
@@ -76,8 +77,13 @@ export interface CreateEventFormData {
 	repeats: string;
 }
 
+export interface AddUsersToGroupFormData {
+	groupId: number;
+	members: string[];
+}
+
 export interface AddUserToGroupFormData {
 	groupId: number;
-	usernames: string[];
+	members: string;
 }
 // --------------------------------------------------------------------------------------

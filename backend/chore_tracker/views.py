@@ -11,10 +11,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
-from chore_tracker.models import Group, Event, EventOccurrence, Cost
+from chore_tracker.models import Group, Event, Cost
 from datetime import datetime
 import json
 from json import JSONDecodeError
+from chore_tracker.utils import update_recurring_events, delete_recurrences
 
 User = get_user_model()
 
@@ -120,6 +121,7 @@ class ViewGroup(APIView):
 
         try:
             group = Group.objects.get(id=group_id)
+            update_recurring_events(group)
             members = group.members.all()
             # events = group.events.all()
             # costs = group.costs.all()
@@ -143,48 +145,89 @@ class ViewGroup(APIView):
             return JsonResponse({'error': 'Failed to view group: ' + str(e)}, status=500)
 
 
-class AddUsersToGroup(APIView):
-    """ Add Users to a Group """
+# class AddUsersToGroup(APIView):
+#     """ Add Users to a Group """
+
+#     def post(self, request):
+#         group_id = request.data.get('group_id')
+#         usernames = request.data.get('usernames', [])
+
+#         if not usernames:
+#             return JsonResponse({'error': 'No usernames provided'}, status=400)
+
+#         try:
+#             group = Group.objects.get(id=group_id)
+
+#             # Track status for each username
+#             result = {
+#                 'success': [],
+#                 'not_found': []
+#             }
+
+#             # Get existing members usernames for efficient lookup
+#             existing_members = set(group.members.values_list('username', flat=True))
+
+#             # Process each username individually
+#             for username in usernames:
+#                 try:
+#                     user = User.objects.get(username=username)
+#                     if username in existing_members:
+#                         continue  # Skip if user is already a member
+#                     else:
+#                         group.members.add(user)
+#                         result['success'].append(username)
+#                 except User.DoesNotExist:
+#                     result['not_found'].append(username)
+
+#             return JsonResponse({
+#                 'message': 'Operation completed',
+#                 'results': result
+#             }, status=200 if result['success'] else 404)
+
+#         except Group.DoesNotExist:
+#             return JsonResponse({'error': 'Group not found'}, status=404)
+#         except Exception as e:
+#             return JsonResponse({'error': f'Failed to invite users: {str(e)}'}, status=500)
+
+class AddUsertoGroup(APIView):
+    """ Add User to a Group """
 
     def post(self, request):
-        group_id = request.data.get('group_id')
-        usernames = request.data.get('usernames', [])
-
-        if not usernames:
-            return JsonResponse({'error': 'No usernames provided'}, status=400)
+        group_id = request.data.get('groupId')
+        username = request.data.get('username')
 
         try:
             group = Group.objects.get(id=group_id)
-
-            # Track status for each username
-            result = {
-                'success': [],
-                'not_found': []
-            }
-
-            # Get existing members usernames for efficient lookup
-            existing_members = set(group.members.values_list('username', flat=True))
-
-            # Process each username individually
-            for username in usernames:
-                try:
-                    user = User.objects.get(username=username)
-                    if username in existing_members:
-                        continue  # Skip if user is already a member
-                    else:
-                        group.members.add(user)
-                        result['success'].append(username)
-                except User.DoesNotExist:
-                    result['not_found'].append(username)
+            user = User.objects.get(username=username)
+            
+            # Check if user is already in the group
+            if group.members.filter(id=user.id).exists():
+                return JsonResponse({
+                    'success': False,
+                    'message': 'User is already a member of the group'
+                }, status=409)
+            
+            group.members.add(user)
             return JsonResponse({
-                'message': 'Operation completed',
-                'results': result
-            }, status=200 if result['success'] else 404)
-
+                'success': True,
+                'message': 'User added to group successfully'
+            }, status=201)
+            
         except Group.DoesNotExist:
-            return JsonResponse({'error': 'Group not found'}, status=404)
+            return JsonResponse({
+                'success': False,
+                'message': 'Group not found'
+            }, status=404)
+        except User.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'message': 'User not found'
+            }, status=404)
         except Exception as e:
-            return JsonResponse({'error': f'Failed to invite users: {str(e)}'}, status=500)
+            return JsonResponse({
+                'success': False,
+                'message': 'Failed to add user to group: ' + str(e)
+            }, status=500)
 
 
 
@@ -221,6 +264,7 @@ class CreateEvent(APIView):
             # Get assigned members and add them. This is required due to the ManyToManyField
             group_members = group.members.all()
             memberNames = data.get("memberNames", [])
+            print(memberNames)
 
             for username in memberNames:
                 try:
@@ -238,9 +282,8 @@ class CreateEvent(APIView):
                         {"success": False, "message": f"User {username} not found"}, status=400
                     )
 
-            # TODO: Add an occurrence of the Event 
-            #       For recurring Events, we need to add multiple. 
-            #       Maybe we can make a new one when the date/time for previous one has passed?
+            # Add other occurrence of the Event 
+            update_recurring_events(group)
 
             return JsonResponse({"success": True, "message": ""}, status=200)
 
@@ -295,6 +338,7 @@ class DeleteEvent(APIView):
     def delete(self, request, event_id):
         try:
             event = Event.objects.get(id=event_id)
+            delete_recurrences(event)
             event.delete()
             return JsonResponse({"success": True, "message": "Event deleted"}, status=200)
         except Event.DoesNotExist:
@@ -396,13 +440,24 @@ class CurrentUserView(APIView):
 
             group_data = []
             for group in groups:
-                events = group.events.all().values('id', 'name', 'first_date', 'repeat_every',
-                                                   'is_complete')  # type: ignore
+                events = group.events.all().prefetch_related('members') # type: ignore
+                
+                event_data = []
+                for event in events:
+                    event_data.append({
+                        'id': event.id,
+                        'name': event.name,
+                        'members': list(event.members.all().values('username')),
+                        'first_date': event.first_date,
+                        'repeat_every': event.repeat_every,
+                        'is_complete': event.is_complete,
+                    })
+
                 group_data.append({
                     'id': group.id,
                     'name': group.name,
                     'members': list(group.members.all().values('username', 'photo_url')),
-                    'events': list(events)
+                    'events': event_data
                 })
 
             return JsonResponse({
@@ -414,14 +469,14 @@ class CurrentUserView(APIView):
 
 
 class GetUsers(APIView):
-
     # get all users that match a particular string 
     def get(self, request):
         try:
             query = request.GET.get('search', '')
             users = User.objects.filter(username__icontains=query).values('id', 'username')
-            return JsonResponse({"success": True, 'users': list(users)},
-                                status=200, )  # JsonResponse({"success": True, 'users': users}, status=200,)
+            return JsonResponse({"success": True, 'users': list(users)}, status=200,) 
+          # JsonResponse({"success": True, 'users': users}, status=200,)
+
         except Exception as e:
             return JsonResponse({"success": False, 'error': str(e)}, status=400)
 
@@ -434,6 +489,8 @@ class MarkEventComplete(APIView):
             # Check that the event exists
             try:
                 event = Event.objects.get(id=data.get("eventId"))
+                # which occurrence?
+
             except Event.DoesNotExist:
                 return JsonResponse(
                     {"success": False, "message": "No such Event"}, status=400
@@ -453,7 +510,6 @@ class MarkEventComplete(APIView):
             return JsonResponse(
                 {"success": False, "message": "Invalid JSON in request", "eventStatus": event.is_complete}, status=400
             )
-
 
 class UserExists(APIView):
     """ Check if a User exists using username """
@@ -534,7 +590,7 @@ class CreateCost(APIView):
         except Exception as e:
             return JsonResponse({'error': 'Failed to create cost: ' + str(e)}, status=500)
 
-
+          
 class UpdateUsername(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -557,3 +613,4 @@ class UpdateUsername(APIView):
             return JsonResponse({'message': 'Username updated successfully'}, status=200)
 
         return JsonResponse({'error': 'There was an error updating the username'}, status=500)
+      

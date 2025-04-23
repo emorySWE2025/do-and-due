@@ -1,19 +1,25 @@
+
+
 import { getCurrentSession } from "@/actions/users.server";
-import PageLayout from "@/components/PageLayout";
+import PageLayout from "@/components/shared/PageLayout";
 import { UserDisplayData } from "@/schemas/fe.schema";
-import { redirect } from "next/navigation";
-import AddMemberFrame from "@/components/AddMemberFrame";
+import { redirect,useParams} from "next/navigation";
+import AddMemberFrame from "@/components/groups-page/AddMemberFrame";
 
-export default async function GroupsPage() {
-	// if user is not authenticated, redirect them to login
+// Add params type for dynamic route
+export default async function GroupsPage({
+	params,
+  }: {
+	params: { groupId: string };
+  }) {
+	// Authentication check
 	const userData: UserDisplayData | null = await getCurrentSession();
-	if (userData === null) {
-		redirect("/user/login");
-	}
-
+	if (!userData) redirect("/user/login");
+  
 	return (
-		<PageLayout>
-			 <AddMemberFrame groupId={1}/>
-		</PageLayout>
+	  <PageLayout>
+		{/* Use actual groupId from URL params */}
+		<AddMemberFrame groupId={Number(params.groupId)} groupMembers={userData.groups.find(group => group.id === Number(params.groupId))?.members}/>
+	  </PageLayout>
 	);
-}
+  }

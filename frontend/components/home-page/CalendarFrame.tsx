@@ -3,26 +3,25 @@
 import dayjs, { Dayjs } from "dayjs";
 import weekday from "dayjs/plugin/weekday";
 import localeData from "dayjs/plugin/localeData";
-// import customParseFormat from "dayjs/plugin/customParseFormat";
 import {
 	EventDisplayData,
 	GroupDisplayData,
 	DateStateData,
 } from "@/schemas/fe.schema";
-import { useEffect, useState } from "react";
 
 dayjs.extend(weekday);
 dayjs.extend(localeData);
-// dayjs.extend(customParseFormat);
 
 export default function CalendarFrame({
 	groupData,
 	dateState,
 	dateCallback,
+	username,
 }: {
 	groupData: GroupDisplayData;
 	dateState: DateStateData;
 	dateCallback: CallableFunction;
+	username: string;
 }) {
 	const handlePrevMonth = () => {
 		dateCallback({
@@ -56,6 +55,15 @@ export default function CalendarFrame({
 		dateState.display,
 	);
 
+	const assignedDates: Set<number> = getAssignedEventDatesInMonth(
+		groupData.events,
+		dateState.display,
+		username,
+	);
+
+	console.log("events", eventDates);
+	console.log("assigned", assignedDates);
+
 	return (
 		<div className="h-max w-full rounded-lg border-[1px] border-gray-300 p-4 shadow-sm">
 			<CalendarHeader
@@ -65,6 +73,7 @@ export default function CalendarFrame({
 			/>
 			<CalendarGrid
 				eventDates={eventDates}
+				assignedDates={assignedDates}
 				dateState={dateState}
 				dateCallback={dateCallback}
 			/>
@@ -120,78 +129,52 @@ function CalendarHeader({ currentDate, onPrev, onNext }: CalendarHeaderProps) {
 	);
 }
 
-type CalendarGridProps = {
-	eventDates: Set<number>;
-	dateState: DateStateData;
-	dateCallback: CallableFunction;
-};
-
 function getEventDatesInMonth(
 	events: EventDisplayData[],
 	displayDate: Dayjs,
 ): Set<number> {
 	const eventDates = new Set<number>();
-	const daysInMonth = displayDate.daysInMonth();
-	const displayMonthStart = displayDate.startOf('month'); // For month comparison
-
 	events.forEach((event) => {
-		// Use startOf('day') to ignore time component for comparisons
-		const eventDate = dayjs(event.first_date).startOf('day');
-
-		// Add the original event date if it's in this month
-		if (eventDate.isSame(displayMonthStart, "month")) {
+		const eventDate = dayjs(event.first_date);
+		if (eventDate.isSame(displayDate, "month")) {
 			eventDates.add(eventDate.date());
-		}
-
-		// Handle repeating events
-		if (event.repeat_every) {
-			// Check each day in the month
-			for (let day = 1; day <= daysInMonth; day++) {
-				const currentDate = displayDate.date(day);
-
-				// Skip dates before the event starts
-				if (currentDate.isBefore(eventDate)) {
-					continue;
-				}
-
-				const daysDiff = currentDate.diff(eventDate, "day");
-
-				switch (event.repeat_every) {
-					case "Daily":
-						eventDates.add(day);
-						break;
-					case "Weekly":
-						// Occurs on the same day of the week, on or after start date
-						if (eventDate.day() === currentDate.day()) {
-							eventDates.add(day);
-						}
-						break;
-					case "Monthly":
-						// Same day of month, on or after start date
-						if (eventDate.date() === day) {
-							eventDates.add(day);
-						}
-						break;
-					case "Yearly":
-						// Same day and month, on or after start date
-						if (eventDate.date() === day &&
-							eventDate.month() === displayMonthStart.month()) {
-							eventDates.add(day);
-						}
-						break;
-					default:
-						// Handle unexpected repeat_every values gracefully
-						console.warn(`Unexpected repeat_every value in getEventDatesInMonth: ${event.repeat_every}`);
-						break; // Do nothing for unknown types
-				}
-			}
 		}
 	});
 	return eventDates;
 }
 
+function getAssignedEventDatesInMonth(
+	events: EventDisplayData[],
+	displayDate: Dayjs,
+	currentUserName: string,
+): Set<number> {
+	const eventDates = new Set<number>();
+	events.forEach((event) => {
+		const eventDate = dayjs(event.first_date);
+		const usernames: string[] = event.members.flatMap(
+			(member) => member.username,
+		);
+		console.log(usernames, currentUserName);
+		if (
+			eventDate.isSame(displayDate, "month") &&
+			usernames.includes(currentUserName)
+		) {
+			eventDates.add(eventDate.date());
+		}
+	});
+	return eventDates;
+}
+
+type CalendarGridProps = {
+	eventDates: Set<number>;
+	assignedDates: Set<number>;
+	dateState: DateStateData;
+	dateCallback: CallableFunction;
+};
+
 function CalendarGrid({
 	eventDates,
+	assignedDates,
 	dateState,
 	dateCallback,
 }: CalendarGridProps) {
@@ -232,6 +215,7 @@ function CalendarGrid({
 							key={`${i}-${j}`}
 							day={day}
 							isEventDay={day ? eventDates.has(day) : false}
+							isAssigned={day ? assignedDates.has(day) : false}
 							dateState={dateState}
 							dateCallback={dateCallback}
 						/>
@@ -245,6 +229,7 @@ function CalendarGrid({
 type CalendarDayProps = {
 	day: number | null;
 	isEventDay: boolean;
+	isAssigned: boolean;
 	dateState: DateStateData;
 	dateCallback: CallableFunction;
 };
@@ -252,6 +237,7 @@ type CalendarDayProps = {
 function CalendarDay({
 	day,
 	isEventDay,
+	isAssigned,
 	dateState,
 	dateCallback,
 }: CalendarDayProps) {
@@ -305,7 +291,9 @@ function CalendarDay({
 				<span
 					className={
 						isEventDay === true
-							? "h-6 w-6 rounded-[50%] bg-purple-600 p-0.5 text-center text-white"
+							? isAssigned === true
+								? "h-6 w-6 rounded-[50%] bg-purple-600 p-0.5 text-center text-white"
+								: "h-6 w-6 rounded-[50%] bg-gray-600 p-0.5 text-center text-white"
 							: "h-6 w-6 rounded-[50%] p-0.5 text-center"
 					}
 				>
