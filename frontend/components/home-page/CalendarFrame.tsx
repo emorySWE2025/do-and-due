@@ -8,7 +8,6 @@ import {
 	GroupDisplayData,
 	DateStateData,
 } from "@/schemas/fe.schema";
-import { useEffect, useState } from "react";
 
 dayjs.extend(weekday);
 dayjs.extend(localeData);
