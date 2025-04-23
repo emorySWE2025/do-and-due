@@ -282,6 +282,9 @@ class CreateEvent(APIView):
                         {"success": False, "message": f"User {username} not found"}, status=400
                     )
 
+            # Add other occurrence of the Event 
+            update_recurring_events(group)
+
             return JsonResponse({"success": True, "message": ""}, status=200)
 
         except JSONDecodeError:

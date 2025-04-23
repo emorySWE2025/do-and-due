@@ -13,7 +13,7 @@ const GroupCard = ({
 	onView: () => void;
 }) => {
 	return (
-		<div className="w-max rounded-md border-1 border-gray-300 p-6">
+		<div className="min-w-80 rounded-md border-1 border-gray-300 p-6">
 			<div className="flex items-center justify-between">
 				<h2 className="text-xl font-semibold text-gray-900">
 					{groupData.name}
@@ -45,7 +45,7 @@ const GroupCard = ({
 			</div>
 			<div className="mt-4 flex justify-end">
 				<Link href={`/groups/${groupData.id}`} passHref>
-					<Button onClick={onView}>Add member</Button>
+					<Button onClick={onView}>View</Button>
 				</Link>
 			</div>
 		</div>
