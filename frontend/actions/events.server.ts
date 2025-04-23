@@ -53,7 +53,7 @@ export async function createEventAction(
 		name: formData.name,
 		date: formData.date,
 		repeatEvery: formData.repeats !== "None" ? formData.repeats : undefined,
-		memberNames: groupData.members.flatMap((member) => member.username),
+		memberNames: formData.members.split(" "),
 		groupId: groupData.id,
 	};
 	console.log(postData);

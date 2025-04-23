@@ -23,16 +23,17 @@ export default function GroupsFrame({
 	return (
 		// map through group data to card component
 
-			<div className="text-center p-4 mx-auto">
-			<h1 className="text-3xl font-bold mb-8">Groups</h1>
-			<div className="flex flex-row flex-nowrap  gap-8 overflow-x-auto">
-				{GroupsData.map((group) => (
+		<div className="mx-auto p-4 text-center">
+			<h1 className="mb-8 text-3xl font-bold">Groups</h1>
+			<div className="flex flex-row flex-nowrap gap-8 overflow-x-auto">
+				{groupsData.map((group) => (
 					<GroupCard
 						key={group.id}
 						groupData={group}
-						onView={() => { } } />
+						onView={() => {}}
+					/>
 				))}
 			</div>
-			</div>
+		</div>
 	);
 }
