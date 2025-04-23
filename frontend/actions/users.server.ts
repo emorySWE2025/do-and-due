@@ -259,8 +259,4 @@ export async function updateUsernameAction(
     return { ok: false, message: "A server error occurred while updating the username." };
   }
 }
-		
-	}
-
-}
 

@@ -1,4 +1,4 @@
-import PageLayout from "@/components/PageLayout";
+import PageLayout from "@/components/shared/PageLayout";
 import { UserDisplayData } from "@/schemas/fe.schema";
 import { getCurrentSession } from "@/actions/users.server";
 import { redirect } from "next/navigation";

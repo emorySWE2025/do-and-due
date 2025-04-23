@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import (RegisterUser, LoginView, CreateGroup, IndexView, AddUserToGroup, ViewGroup,
+from .views import (RegisterUser, LoginView, CreateGroup, IndexView, AddUsertoGroup, ViewGroup,
                     CreateEvent, UpdateEvent, DeleteEvent, ViewEvent, CurrentUserView, ChangeEventMembers,
                     MarkEventComplete, UserExists, CreateCost, GetUsers, UpdateUsername)
 
