@@ -89,7 +89,7 @@ function AddEventForm({
 		if (res.ok) {
 			toggleAddEventState();
 			// Use router.refresh() instead of push to refresh the page data without a full navigation
-			router.refresh();
+			window.location.href = "/";
 		} else {
 			console.error("Failed to create event:", res.message);
 		}
