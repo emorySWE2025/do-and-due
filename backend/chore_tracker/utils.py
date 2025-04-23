@@ -1,7 +1,8 @@
 from chore_tracker.models import Group, Event
-from datetime import datetime, timedelta
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
-TIME_THRESHOLD = timedelta(days=90)
+TIME_THRESHOLD = relativedelta(days=90)
 
 def update_recurring_events(group):
     events = Event.objects.filter(group=group)
@@ -9,17 +10,17 @@ def update_recurring_events(group):
     for event in events:
         if event.repeat_every is None or event.repeat_every=='':
             continue
-
+        
         if event.repeat_every=="Daily":
-            t_delta = timedelta(days=1)
-        if event.repeat_every=="Weekly":
-            t_delta = timedelta(weeks=1)
-        if event.repeat_every=="Monthly":
-            t_delta = timedelta(months=1)
+            t_delta = relativedelta(days=1)
+        elif event.repeat_every=="Weekly":
+            t_delta = relativedelta(weeks=1)
+        elif event.repeat_every=="Monthly":
+            t_delta = relativedelta(months=1)
         else: # Malformed value
             continue
 
-        end_time = datetime.today() + TIME_THRESHOLD
+        end_time = datetime.date(datetime.today() + TIME_THRESHOLD)
         start_time = event.first_date
         cur_time = start_time + t_delta
         while cur_time <= end_time:
@@ -32,9 +33,10 @@ def update_recurring_events(group):
                     first_date=cur_time, # This should be the only difference
                     repeat_every=event.repeat_every,
                     group=group,
-                    members=event.members,
+                    #members=event.members,
                     is_complete=False,
                 )
+                new_event.members.set(event.members.all())
             cur_time += t_delta
 
 def delete_recurrences(event):

@@ -281,9 +281,8 @@ class CreateEvent(APIView):
                         {"success": False, "message": f"User {username} not found"}, status=400
                     )
 
-            # TODO: Add an occurrence of the Event 
-            #       For recurring Events, we need to add multiple. 
-            #       Maybe we can make a new one when the date/time for previous one has passed?
+            # Add other occurrence of the Event 
+            update_recurring_events(group)
 
             return JsonResponse({"success": True, "message": ""}, status=200)
 
