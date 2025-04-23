@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import BaseUserManager
 from django.utils import timezone
@@ -64,9 +63,7 @@ class Event(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=60)
     first_date = models.DateField()
-    # time = models.TimeField(null=True, blank=True)
     repeat_every = models.CharField(max_length=40, null=True, blank=True)
-    # repeat_every = models.IntegerField(null=True)
 
     # Relationships
     group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="events")
@@ -75,18 +72,6 @@ class Event(models.Model):
 
     def __str__(self):
         return self.name
-
-
-# class EventOccurrence(models.Model):
-#     id = models.AutoField(primary_key=True)
-#     date = models.DateField(default=None)
-#     # time = models.TimeField(default=None)
-
-#     # Relationships
-#     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="occurrences", default=None)
-
-#     def __str__(self):
-#         return self.event.name
 
 
 class Cost(models.Model):

@@ -185,78 +185,6 @@ def test_view_group_not_found(client):
     assert response.json()['error'] == 'Group not found'
 
 
-# @pytest.mark.django_db
-# def test_add_users_to_group_success(client):
-#     creator = User.objects.create_user(username="creator", email="creator@test.com", password="pass")
-#     user1 = User.objects.create_user(username="user1", email="user1@test.com", password="pass")
-#     user2 = User.objects.create_user(username="user2", email="user2@test.com", password="pass")
-#     group = Group.objects.create(
-#         name="Test Group",
-#         status="active",
-#         expiration=timezone.now(),
-#         timezone="UTC",
-#         creator=creator,
-#     )
-#
-#     client.force_login(creator)
-#     data = {
-#         "group_id": group.id,
-#         "usernames": ["user1", "user2"]
-#     }
-#     response = client.post(reverse('add_group'), data, content_type="application/json")
-#     json_data = response.json()
-#
-#     assert response.status_code == 200
-#     assert "success" in json_data["results"]
-#     assert set(json_data["results"]["success"]) == {"user1", "user2"}
-
-
-# @pytest.mark.django_db
-# def test_add_users_to_group_some_not_found(client):
-#     creator = User.objects.create_user(username="creator", email="creator@test.com", password="pass")
-#     user1 = User.objects.create_user(username="user1", email="user1@test.com", password="pass")
-#     group = Group.objects.create(name="Test Group", status="active", expiration=timezone.now(), timezone="UTC",
-#                                  creator=creator)
-#
-#     client.force_login(creator)
-#     data = {
-#         "group_id": group.id,
-#         "usernames": ["user1", "ghostuser"]
-#     }
-#     response = client.post(reverse('add_group'), data, content_type="application/json")
-#     json_data = response.json()
-#
-#     assert response.status_code == 200
-#     assert json_data["results"]["success"] == ["user1"]
-#     assert json_data["results"]["not_found"] == ["ghostuser"]
-
-
-# @pytest.mark.django_db
-# def test_add_users_to_nonexistent_group(client):
-#     user = User.objects.create_user(username="user", email="user@test.com", password="pass")
-#     client.force_login(user)
-#
-#     data = {
-#         "group_id": 9999,
-#         "usernames": ["user"]
-#     }
-#     response = client.post(reverse('add_group'), data, content_type="application/json")
-#
-#     assert response.status_code == 404
-#     assert response.json()["error"] == "Group not found"
-
-
-# @pytest.mark.django_db
-# def test_add_users_to_group_no_usernames(client):
-#     user = User.objects.create_user(username="user", email="user@test.com", password="pass")
-#     group = Group.objects.create(name="Test Group", status="active", expiration=timezone.now(), timezone="UTC",
-#                                  creator=user)
-#     client.force_login(user)
-#
-#     response = client.post(reverse('add_group'), {"group_id": group.id}, content_type="application/json")
-#     assert response.status_code == 400
-#     assert response.json()["error"] == "No usernames provided"
-
 @pytest.mark.django_db
 def test_create_event_success(client):
     creator = User.objects.create_user(username="creator", email="creator@test.com", password="pass")
@@ -495,41 +423,6 @@ def test_user_exists(client):
     assert response_data["message"] == "User not found"
 
 
-# @pytest.mark.django_db
-# def test_create_cost_success(client):
-#     user1 = User.objects.create_user(username="user1", password="password", email="user1@test.com")
-#     user2 = User.objects.create_user(username="user2", password="password", email="user2@test.com")
-#
-#     group = Group.objects.create(name="Test Group", status="active", expiration=timezone.now(), timezone="UTC",
-#                                  creator=user1)
-#     group.members.add(user1, user2)
-#
-#     cost_data = {
-#         'group_id': group.id,
-#         'name': 'Test Cost',
-#         'category': 'Food',
-#         'date': timezone.now().date().isoformat(),
-#         'time': timezone.now().time().isoformat(),
-#         'amount': '100.00',
-#         'payer': user1.id,
-#         'borrower': [user2.id]
-#     }
-#
-#     client.force_login(user1)
-#     response = client.post(reverse('create_cost'), data=cost_data, content_type="application/json")
-#
-#     assert response.status_code == 201
-#     assert response.json()['message'] == 'Cost created successfully'
-#
-#     cost = Cost.objects.first()
-#     assert cost.name == 'Test Cost'
-#     assert cost.category == 'Food'
-#     assert cost.amount == Decimal('100.00')
-#     assert cost.group == group
-#     assert cost.payer == user1
-#     assert cost.borrower == user2
-
-
 @pytest.mark.django_db
 def test_create_cost_missing_group_id(client):
     user = User.objects.create_user(username="user", password="password", email="user@test.com")
@@ -646,3 +539,26 @@ def test_update_username_success():
     assert response.json()['message'] == 'Username updated successfully'
     user.refresh_from_db()
     assert user.username == 'newuser'
+
+@pytest.mark.django_db
+def test_leave_group_success():
+    creator = User.objects.create_user(username='creator', email="test@email.com", password='pass')
+    member = User.objects.create_user(username='member', email="user@email.com", password='pass')
+
+    group = Group.objects.create(name='Group', status='active', creator=creator)
+    group.members.add(creator, member)
+
+    client = APIClient()
+    client.force_authenticate(user=member)
+
+    response = client.post(
+        reverse('leave_group'),
+        {'groupId': group.id},
+        format='json'
+    )
+
+    assert response.status_code == 200
+    assert response.json()['message'] == 'User removed from group successfully'
+    group.refresh_from_db()
+    assert member not in group.members.all()
+
