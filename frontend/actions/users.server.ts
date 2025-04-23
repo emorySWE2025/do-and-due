@@ -11,6 +11,8 @@ import {
 	RegisterUserRequest,
 	LoginUserRequest,
 	UserSearchResponse,
+	UpdateUsernameFormData,
+	UpdateUsernameClientResponse,
 } from "@/schemas/transaction.schema";
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { cookies } from "next/headers";
@@ -214,7 +216,47 @@ export async function searchUsersAction(searchTerm: string): Promise<UserSearchR
 			status: 400,
 			users: [],
 		};
-		
+
 	}
 
 }
+
+
+export async function updateUsernameAction(
+	formData: UpdateUsernameFormData,
+): Promise<UpdateUsernameClientResponse> {
+	try {
+		const cookieStore: ReadonlyRequestCookies = await cookies();
+		const token: string | null =
+			cookieStore.get("access_token")?.value ?? null;
+
+		const res: Response = await fetch("http://127.0.0.1:8000/api/update_username/", {
+			method: "POST",
+			headers: {
+				Authorization: `Bearer ${token}`,
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({ username: formData.username }),
+			credentials: "include",
+
+		});
+		const text = await res.text();
+		console.log("Response body:", text);
+		try {
+      const data = JSON.parse(text);
+
+      if (res.ok) {
+        return { ok: true, message: data.message || "Username updated successfully" };
+      } else {
+        return { ok: false, message: data.error || "Failed to update username" };
+      }
+    } catch (e) {
+      console.error("Failed to parse response:", e);
+      return { ok: false, message: "Unexpected error occurred" };
+    }
+  } catch (error) {
+    console.error("Error in updateUsernameAction:", error);
+    return { ok: false, message: "A server error occurred while updating the username." };
+  }
+}
+

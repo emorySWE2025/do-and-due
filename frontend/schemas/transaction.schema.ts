@@ -14,6 +14,18 @@ export interface RegisterUserClientResponse {
 }
 // --------------------------------------------------------------------------------------
 
+// update username ---------------------------------------------------------------------------
+export interface UpdateUsernameFormData {
+	username: string;
+}
+
+export interface UpdateUsernameClientResponse {
+	ok: boolean;
+	message: string;
+}
+// --------------------------------------------------------------------------------------
+
+
 // login user ---------------------------------------------------------------------------
 export interface LoginUserRequest {
 	username: string;
@@ -189,5 +201,4 @@ export interface UserSearchResponse{
 	users: [];
 	status: number;
 	success: boolean;
-	
 }

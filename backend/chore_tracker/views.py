@@ -90,7 +90,6 @@ class CreateGroup(APIView):
             # creator = request.user
             print(creator)
 
-
             group = Group(
                 name=name,
                 status=status,
@@ -229,6 +228,7 @@ class AddUsertoGroup(APIView):
                 'success': False,
                 'message': 'Failed to add user to group: ' + str(e)
             }, status=500)
+
 
 
 class CreateEvent(APIView):
@@ -376,7 +376,6 @@ class ViewEvent(APIView):
             )
 
 
-
 class ChangeEventMembers(APIView):
     """ Change who is assigned to an event """
 
@@ -475,7 +474,9 @@ class GetUsers(APIView):
         try:
             query = request.GET.get('search', '')
             users = User.objects.filter(username__icontains=query).values('id', 'username')
-            return JsonResponse({"success": True, 'users': list(users)}, status=200,) # JsonResponse({"success": True, 'users': users}, status=200,)
+            return JsonResponse({"success": True, 'users': list(users)}, status=200,) 
+          # JsonResponse({"success": True, 'users': users}, status=200,)
+
         except Exception as e:
             return JsonResponse({"success": False, 'error': str(e)}, status=400)
 
@@ -502,8 +503,9 @@ class MarkEventComplete(APIView):
                 event.is_complete = True
             event.save()
 
-            return JsonResponse({"success": True, "message": "event status updated", "eventStatus": event.is_complete}, status=200)
-        
+            return JsonResponse({"success": True, "message": "event status updated", "eventStatus": event.is_complete},
+                                status=200)
+
         except JSONDecodeError:
             return JsonResponse(
                 {"success": False, "message": "Invalid JSON in request", "eventStatus": event.is_complete}, status=400
@@ -588,3 +590,27 @@ class CreateCost(APIView):
         except Exception as e:
             return JsonResponse({'error': 'Failed to create cost: ' + str(e)}, status=500)
 
+          
+class UpdateUsername(APIView):
+    permission_classes = [IsAuthenticated]
+
+    """" Update a username """
+
+    def post(self, request):
+        if request.user.is_authenticated:
+            new_username = request.data.get('username')
+            print(new_username)
+            print(request.user.username)
+            if new_username == request.user.username:
+                return JsonResponse({'error': f"Cannot update with your current username"}, status=400)
+
+            if User.objects.filter(username=new_username).exists():
+                return JsonResponse({'error': 'Username already exists'}, status=400)
+
+            user = request.user
+            user.username = new_username
+            user.save()
+            return JsonResponse({'message': 'Username updated successfully'}, status=200)
+
+        return JsonResponse({'error': 'There was an error updating the username'}, status=500)
+      
