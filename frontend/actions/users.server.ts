@@ -13,6 +13,7 @@ import {
 	UserSearchResponse,
 	UpdateUsernameFormData,
 	UpdateUsernameClientResponse,
+	LeaveGroupClientResponse,
 } from "@/schemas/transaction.schema";
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { cookies } from "next/headers";
@@ -260,3 +261,38 @@ export async function updateUsernameAction(
   }
 }
 
+
+export async function leaveGroupAction(groupId: number): Promise<LeaveGroupClientResponse> {
+	try {
+		const cookieStore: ReadonlyRequestCookies = await cookies();
+		const token: string | null =
+			cookieStore.get("access_token")?.value ?? null;
+
+		const res: Response = await fetch(`http://127.0.0.1:8000/api/group/leave_group/`, { 
+			method: "POST",
+			headers: {
+				Authorization: `Bearer ${token}`,
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({ groupId: groupId }),
+			credentials: "include",
+		});
+		const text = await res.text();
+		console.log("Response body:", text);
+		try {
+	  const data = JSON.parse(text);
+
+	  if (res.ok) {
+		return { ok: true, message: data.message || "Group left successfully" };
+	  } else {
+		return { ok: false, message: data.error || "Failed to leave group" };
+	  }
+	} catch (e) {
+	  console.error("Failed to parse response:", e);
+	  return { ok: false, message: "Unexpected error occurred" };
+	}
+  } catch (error) {
+	console.error("Error in leaveGroupAction:", error);
+	return { ok: false, message: "A server error occurred while leaving the group." };
+  }
+}

@@ -202,3 +202,9 @@ export interface UserSearchResponse{
 	status: number;
 	success: boolean;
 }
+
+export interface LeaveGroupClientResponse{
+	ok: boolean;
+	message: string;
+
+}

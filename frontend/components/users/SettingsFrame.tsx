@@ -8,7 +8,7 @@ import Link from "next/link";
 import Input from "@/components/shared/Input";
 import { FiEdit, FiSave} from "react-icons/fi";
 import React, {useState} from "react";
-import {updateUsernameAction} from "@/actions/users.server";
+import {leaveGroupAction, updateUsernameAction} from "@/actions/users.server";
 import GroupCard from "@/components/groups-page/GroupCard";
 
 
@@ -38,6 +38,7 @@ export default function SettingsFrame({
 		toast.error((`Error: ${result.message}`))
 	}
 };
+
 
 
 
@@ -97,6 +98,8 @@ export default function SettingsFrame({
 							key={group.id}
 							groupData={group}
 							onView={() => {}}
+							showDeleteButton={true}
+							onDelete={() => {leaveGroupAction(group.id)}}
 						/>
 					))
 				) : (
