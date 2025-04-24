@@ -270,6 +270,8 @@ class UpdateEvent(APIView):
                 return JsonResponse(
                     {"success": False, "message": "Event not found"}, status=404
                 )
+            
+            delete_recurrences(event)
 
             # Update fields
             if "name" in data:
@@ -283,6 +285,7 @@ class UpdateEvent(APIView):
 
             event.save()
             logger.info("Event updated")
+            update_recurring_events(event.group)
             return JsonResponse({"success": True, "message": "Event updated"}, status=200)
 
         except JSONDecodeError:
