@@ -2,7 +2,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { JSX } from "react";
-// import LogoutComponent from "@/app/user/logout/page";
 function NavButton({ label, href }: { label: string; href: string }) {
 	return (
 		<Link
@@ -14,6 +13,7 @@ function NavButton({ label, href }: { label: string; href: string }) {
 	);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function NavSearchFrame() {
 	// TODO: add functionality to expand icon into searchbar
 	return (
@@ -57,6 +57,7 @@ function NavSettingsFrame() {
 	);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function NavNotificationsFrame({
 	unreadNotifications,
 }: {
@@ -154,9 +155,7 @@ export default function NavFrame() {
 				</div>
 			</div>
 			<div className="flex flex-row flex-nowrap items-center gap-4">
-				{/*<NavSearchFrame />*/}
 				<NavSettingsFrame />
-				{/*<NavNotificationsFrame unreadNotifications={false} />*/}
 				<NavProfileFrame />
 			</div>
 		</div>

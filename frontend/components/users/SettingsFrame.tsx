@@ -7,8 +7,9 @@ import Button from "@/components/shared/Button";
 import Link from "next/link";
 import Input from "@/components/shared/Input";
 import { FiEdit, FiSave} from "react-icons/fi";
-import {useState} from "react";
+import React, {useState} from "react";
 import {updateUsernameAction} from "@/actions/users.server";
+import GroupCard from "@/components/groups-page/GroupCard";
 
 
 export default function SettingsFrame({
@@ -46,19 +47,20 @@ export default function SettingsFrame({
 
 
 	return (
-		<div className="m-auto mt-16 h-max w-full max-w-xl space-y-4 rounded-lg border-[1px] border-gray-300 p-16 shadow-sm">
+		<div
+			className="m-auto mt-16 h-max w-full max-w-xl space-y-4 rounded-lg border-[1px] border-gray-300 p-16 shadow-sm">
 			<h2 className="text-3xl font-bold">Settings</h2>
 			<div className="flex flex-row flex-nowrap items-center justify-between">
 				<div className="flex flex-col flex-nowrap gap-4">
 					<div className="flex flex-row flex-nowrap items-center gap-2">
-						<ToastContainer aria-label={undefined} />
-						<div className="font-semibold">Username: </div>
+						<ToastContainer aria-label={undefined}/>
+						<div className="font-semibold">Username:</div>
 						{isEditable ? (
 							<div className="flex flex-row items-center gap-2">
 								<Input type="text"
 									   placeholder={userData.username}
-										value={inputValue}
-										onChange={handleInputChange}
+									   value={inputValue}
+									   onChange={handleInputChange}
 								/>
 								<FiSave
 									className="cursor-pointer text-xl text-purple-600 hover:text-purple-800"
@@ -70,10 +72,10 @@ export default function SettingsFrame({
 						)}
 
 						<FiEdit className="cursor-pointer text-xl text-purple-600 hover:text-purple-800"
- 						onClick={handleEditClick}/>
+								onClick={handleEditClick}/>
 					</div>
 					<div className="flex flex-row flex-nowrap items-center gap-2">
-						<div className="font-semibold">Email: </div>
+						<div className="font-semibold">Email:</div>
 						<div className="text-gray-600">{userData.email}</div>
 					</div>
 				</div>
@@ -88,17 +90,20 @@ export default function SettingsFrame({
 				</div>
 			</div>
 			<div className="font-semibold">Groups:</div>
-			<ul>
+			<div className="grid grid-cols-1 gap-4 md:grid-cols-1">
 				{userData.groups.length > 0 ? (
-					userData.groups.map((group, index) => (
-						<li key={index} className="text-lg">
-							{group.name}
-						</li>
+					userData.groups.map((group) => (
+						<GroupCard
+							key={group.id}
+							groupData={group}
+							onView={() => {}}
+						/>
 					))
 				) : (
 					<div className="text-gray-600">No groups found</div>
 				)}
-			</ul>
+			</div>
+
 			<Link href={"/user/logout"} className="mt-12 block">
 				<Button className="w-full">Log Out</Button>
 			</Link>
