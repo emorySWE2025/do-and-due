@@ -90,24 +90,25 @@ WSGI_APPLICATION = "config.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 
-# Uncomment this to configure the SQLite database
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
-
+# Uncomment this to configure the SQLite database for local development
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'chore_tracker_database',
-        'USER': os.getenv('GOOGLE_CLOUD_SQL_USERNAME'),
-        'PASSWORD': os.getenv('GOOGLE_CLOUD_SQL_PASSWORD'),
-        'HOST': os.getenv('GOOGLE_CLOUD_SQL_CONNECTION'),
-        'PORT': '5432',
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+
+# Uncomment this to configure the PostgreSQL database on a Google Cloud instance
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'chore_tracker_database',
+#         'USER': os.getenv('GOOGLE_CLOUD_SQL_USERNAME'),
+#         'PASSWORD': os.getenv('GOOGLE_CLOUD_SQL_PASSWORD'),
+#         'HOST': os.getenv('GOOGLE_CLOUD_SQL_CONNECTION'),
+#         'PORT': '5432',
+#     }
+# }
 
 AUTH_USER_MODEL = 'chore_tracker.User'
 

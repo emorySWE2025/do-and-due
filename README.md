@@ -39,7 +39,8 @@ Clone the repository and `cd` into it.
 
 ### To Change Databases
 - In the `backend/config/settings.py` file, change the database settings to your desired database.
-- Currently it is set to use PostgreSQL on an instance of Google Cloud SQL, but in case of local development, you can use SQLite by simply commenting out the PostgreSQL settings and uncommenting the SQLite settings.
+- Currently, the application is configured to use SQLite for local development. To use PostgreSQL on a Google Cloud SQL instance instead, simply uncomment the relevant PostgreSQL settings and comment out the SQLite configuration. (You will need to reach out the team devs for the correct configs to use PostgreSQL)
+
 
 ## Demo
 
