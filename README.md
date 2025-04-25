@@ -33,8 +33,9 @@ Clone the repository and `cd` into it.
 3. Finally, run the frontend server with `npm run dev`
 
 ### Running the Unit Tests
-- run the command `python -m pytest --cov=chore_tracker --cov-report=html`
-- navigate to  `/htmlcov/index.html` to see the coverage
+1.`cd` into `backend/chore_tracker/test`
+2. run the command `python -m pytest --cov=chore_tracker --cov-report=html`
+3. navigate to  `test/htmlcov/index.html` to see the coverage
 
 ### To Change Databases
 - In the `backend/config/settings.py` file, change the database settings to your desired database.
