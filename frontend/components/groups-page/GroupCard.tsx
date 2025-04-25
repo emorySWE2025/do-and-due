@@ -41,6 +41,7 @@ const GroupCard = ({
           setError(result.message);
         }
       } catch (err) {
+		console.error(err);
         toast.error((`Error: Failed to leave this group`))
         setError("Failed to leave group");
       } finally {
