@@ -36,6 +36,10 @@ Clone the repository and `cd` into it.
 - run the command `python -m pytest --cov=chore_tracker --cov-report=html`
 - navigate to  `/htmlcov/index.html` to see the coverage
 
+### To Change Databases
+- In the `backend/config/settings.py` file, change the database settings to your desired database.
+- Currently it is set to use PostgreSQL on an instance of Google Cloud SQL, but in case of local development, you can use SQLite by simply commenting out the PostgreSQL settings and uncommenting the SQLite settings.
+
 ## Demo
 
 ![demo](./demo.gif)

@@ -89,6 +89,8 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+
+# Uncomment this to configure the SQLite database
 # DATABASES = {
 #     "default": {
 #         "ENGINE": "django.db.backends.sqlite3",
@@ -99,7 +101,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'chore_tracker_database',  # The database name you created
+        'NAME': 'chore_tracker_database',
         'USER': os.getenv('GOOGLE_CLOUD_SQL_USERNAME'),
         'PASSWORD': os.getenv('GOOGLE_CLOUD_SQL_PASSWORD'),
         'HOST': os.getenv('GOOGLE_CLOUD_SQL_CONNECTION'),
