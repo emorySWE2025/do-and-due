@@ -242,15 +242,16 @@ function CalendarDay({
 	dateCallback,
 }: CalendarDayProps) {
 	const handleClick = () => {
-		day &&
+		if (day) {
 			dateCallback({
-				current: dateState.current,
-				display: dateState.display,
-				target: dayjs()
-					.year(dateState.display.year())
-					.month(dateState.display.month())
-					.date(day),
+			  current: dateState.current,
+			  display: dateState.display,
+			  target: dayjs()
+				.year(dateState.display.year())
+				.month(dateState.display.month())
+				.date(day),
 			});
+		  }
 	};
 
 	const isCurrentDate: boolean =
@@ -263,7 +264,7 @@ function CalendarDay({
 		dateState.target.month() === dateState.display.month() &&
 		dateState.target.year() === dateState.display.year();
 
-	var classElements: string =
+	let classElements: string =
 		"flex h-16 items-start justify-start rounded-md p-1.5 text-left text-sm font-semibold";
 
 	// don't consider anything else if the day is null

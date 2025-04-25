@@ -8,6 +8,7 @@ import {
 	EventDisplayData,
 	GroupDisplayData,
 	DateStateData,
+	CreateEventFormData,
 } from "@/schemas/fe.schema";
 import dayjs, { Dayjs } from "dayjs";
 import { JSX, useEffect, useState } from "react";
@@ -18,7 +19,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { createEventSchema } from "@/actions/zod";
 import Button from "@/components/shared/Button";
 import { MarkEventCompleteResponse } from "@/schemas/transaction.schema";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function HomeEventsFrame({
@@ -70,7 +70,6 @@ function AddEventForm({
 	const {
 		register,
 		handleSubmit,
-		setError,
 		watch,
 		formState: { errors, isSubmitting },
 	} = useForm({
@@ -79,10 +78,9 @@ function AddEventForm({
 			repeats: "None",
 		},
 	});
-	const router = useRouter();
 	const repeatValue = watch("repeats");
 
-	const onSubmit = async (data: any) => {
+	const onSubmit = async (data: CreateEventFormData) => {
 		console.log("Submitting event with data:", data);
 		const res = await createEventAction(data, groupData);
 		console.log("AddEventForm response:", res);
@@ -159,7 +157,7 @@ function AddEventForm({
 					</label>
 					<div className="flex space-x-2 overflow-x-auto pb-2">
 						{["None", "Daily", "Weekly", "Monthly", "Yearly"].map(
-							(option, index) => (
+							(option) => (
 								<label
 									key={option}
 									className="flex-shrink-0 cursor-pointer rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm transition-all duration-200 hover:border-purple-500 hover:shadow"

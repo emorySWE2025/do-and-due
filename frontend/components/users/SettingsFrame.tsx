@@ -42,7 +42,7 @@ export default function SettingsFrame({
 
 
 
-	const handleInputChange = (e) => {
+	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setInputValue(e.target.value);
 	}
 
@@ -99,7 +99,7 @@ export default function SettingsFrame({
 							groupData={group}
 							onView={() => {}}
 							showDeleteButton={true}
-							onDelete={() => {leaveGroupAction(group.id)}}
+							onDelete={async () => await leaveGroupAction(group.id)}
 						/>
 					))
 				) : (

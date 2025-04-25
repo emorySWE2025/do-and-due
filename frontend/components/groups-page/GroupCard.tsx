@@ -2,7 +2,6 @@
 
 import React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { GroupDisplayData } from "@/schemas/fe.schema";
 import Button from "../shared/Button";
 import { LeaveGroupClientResponse } from "@/schemas/transaction.schema";
@@ -18,7 +17,6 @@ const GroupCard = ({
   showDeleteButton?: boolean;
   onDelete: () => Promise<LeaveGroupClientResponse>;
 }) => {
-  const router = useRouter();
   const [error, setError] = React.useState<string | null>(null);
   const [success, setSuccess] = React.useState<string | null>(null);
   const [isDeleting, setIsDeleting] = React.useState(false);
@@ -40,6 +38,7 @@ const GroupCard = ({
           setError(result.message);
         }
       } catch (err) {
+		console.error(err);
         setError("Failed to leave group");
       } finally {
         setIsDeleting(false);
@@ -49,6 +48,7 @@ const GroupCard = ({
 
   return (
     <div className="min-w-80 rounded-md border-1 border-gray-300 p-6">
+		{error && <p className="text-red-500">{error}</p>}
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-gray-900">
           {groupData.name}

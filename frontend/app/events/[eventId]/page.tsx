@@ -17,7 +17,7 @@ export default async function EventPage({
 
 	const { eventId } = await params;
 
-	const { ok, event, message } = await viewEventAction(Number(eventId));
+	const { ok, event } = await viewEventAction(Number(eventId));
 	if (!ok || !event) notFound();
 
 	return (

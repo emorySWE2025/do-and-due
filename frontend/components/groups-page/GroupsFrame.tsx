@@ -31,6 +31,7 @@ export default function GroupsFrame({
 						key={group.id}
 						groupData={group}
 						onView={() => {}}
+						onDelete={() => Promise.resolve({ ok: true, message: 'Group deleted successfully' })}
 					/>
 				))}
 			</div>

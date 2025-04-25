@@ -3,10 +3,11 @@ import Input from "@/components/shared/Input";
 import Button from "@/components/shared/Button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { CreateGroupClientResponse } from "@/schemas/transaction.schema";
 import { createGroupSchema } from "@/actions/zod";
-import { ErrorText, ErrorPopup } from "@/components/shared/Errors";
+import { ErrorText } from "@/components/shared/Errors";
+import { CreateGroupFormData } from "@/schemas/fe.schema";
 
 export default function CreateGroupFrame({ userId }: { userId: number }) {
 	return (
@@ -33,7 +34,7 @@ function CreateGroupForm({ userId }: { userId: number }) {
 	} = useForm({ resolver: zodResolver(createGroupSchema) });
 	const router = useRouter();
 
-	const onSubmit = async (data: any) => {
+	const onSubmit = async (data: CreateGroupFormData) => {
 		console.log("Form submitted:", data);
 		const response: CreateGroupClientResponse = await createGroupAction(
 			data,

@@ -3,7 +3,7 @@
 import { getCurrentSession } from "@/actions/users.server";
 import PageLayout from "@/components/shared/PageLayout";
 import { UserDisplayData } from "@/schemas/fe.schema";
-import { redirect,useParams} from "next/navigation";
+import { redirect} from "next/navigation";
 import AddMemberFrame from "@/components/groups-page/AddMemberFrame";
 
 // Add params type for dynamic route

@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { registerUserSchema } from "@/actions/zod";
 import { ErrorText, ErrorPopup } from "@/components/shared/Errors";
 import { RegisterUserClientResponse } from "@/schemas/transaction.schema";
+import { RegisterUserFormData } from "@/schemas/fe.schema";
 
 export default function SignupFrame() {
 	return (
@@ -40,7 +41,7 @@ function SignupForm() {
 		formState: { errors, isSubmitting },
 	} = useForm({ resolver: zodResolver(registerUserSchema) });
 
-	const onSubmit = async (data: any) => {
+	const onSubmit = async (data: RegisterUserFormData) => {
 		const response: RegisterUserClientResponse =
 			await registerUserAction(data);
 		if (!response.ok) {
