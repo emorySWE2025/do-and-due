@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { GroupDisplayData } from "@/schemas/fe.schema";
 import Button from "../shared/Button";
+import { toast } from 'react-toastify';
 import { LeaveGroupClientResponse } from "@/schemas/transaction.schema";
 
 const GroupCard = ({
@@ -30,15 +31,17 @@ const GroupCard = ({
 
       try {
         const result = await onDelete();
-        
+
         if (result.ok) {
+          toast.success("You have left the group")
           setSuccess(result.message);
           setTimeout(() => window.location.reload(), 1000);
         } else {
+          toast.error((`Error: ${result.message}`))
           setError(result.message);
         }
       } catch (err) {
-		console.error(err);
+        toast.error((`Error: Failed to leave this group`))
         setError("Failed to leave group");
       } finally {
         setIsDeleting(false);

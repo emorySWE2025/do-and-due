@@ -16,3 +16,5 @@ pytest-django==4.11.1
 pytest-cov==6.1.1
 dj_rest_auth==7.0.1
 python-dateutil==2.9.0.post0
+python-dotenv==1.0.1
+psycopg2==2.9.10

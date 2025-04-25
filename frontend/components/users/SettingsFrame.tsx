@@ -7,7 +7,7 @@ import Button from "@/components/shared/Button";
 import Link from "next/link";
 import Input from "@/components/shared/Input";
 import { FiEdit, FiSave} from "react-icons/fi";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {leaveGroupAction, updateUsernameAction} from "@/actions/users.server";
 import GroupCard from "@/components/groups-page/GroupCard";
 
@@ -27,19 +27,25 @@ export default function SettingsFrame({
 	};
 
 
+  useEffect(() => {
+    const toastContainer = document.getElementById("toast-container");
+    if (!toastContainer) {
+      const container = document.createElement('div');
+      container.id = "toast-container";
+      document.body.appendChild(container);
+    }
+  }, []);
 
-	const handleSaveClick = async () => {
-	const result = await updateUsernameAction({ username: inputValue });
+    const handleSaveClick = async () => {
+    const result = await updateUsernameAction({ username: inputValue });
 
-	if (result.ok) {
-		setIsEditable(false);
-		toast.success("Username updated successfully!");
-	} else {
-		toast.error((`Error: ${result.message}`))
+    if (result.ok) {
+      setIsEditable(false);
+      toast.success("Username updated successfully!");
+    } else {
+		toast.error(`Error: ${result.message}`);
 	}
-};
-
-
+  };
 
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -54,7 +60,6 @@ export default function SettingsFrame({
 			<div className="flex flex-row flex-nowrap items-center justify-between">
 				<div className="flex flex-col flex-nowrap gap-4">
 					<div className="flex flex-row flex-nowrap items-center gap-2">
-						<ToastContainer aria-label={undefined}/>
 						<div className="font-semibold">Username:</div>
 						{isEditable ? (
 							<div className="flex flex-row items-center gap-2">
@@ -97,7 +102,8 @@ export default function SettingsFrame({
 						<GroupCard
 							key={group.id}
 							groupData={group}
-							onView={() => {}}
+							onView={() => {
+							}}
 							showDeleteButton={true}
 							onDelete={async () => await leaveGroupAction(group.id)}
 						/>
@@ -107,9 +113,19 @@ export default function SettingsFrame({
 				)}
 			</div>
 
+
 			<Link href={"/user/logout"} className="mt-12 block">
 				<Button className="w-full">Log Out</Button>
 			</Link>
+			<ToastContainer
+				position="top-right"
+				autoClose={3000}
+				hideProgressBar={false}
+				newestOnTop={false}
+				closeOnClick
+				pauseOnFocusLoss
+				draggable
+				pauseOnHover aria-label={undefined}/>
 		</div>
 	);
 }
